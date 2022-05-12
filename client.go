@@ -2,8 +2,6 @@ package golog
 
 import "gorm.io/gorm"
 
-const Version = "1.0.0"
-
 type Client struct {
 	Gin gin // 框架日志
 	Api api // 接口日志
