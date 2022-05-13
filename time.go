@@ -10,11 +10,50 @@ import (
 	"time"
 )
 
-type TimeString time.Time
+type TimeString struct {
+	Time time.Time
+}
 
-// GormDataType gorm通用数据类型
-func (t TimeString) GormDataType() string {
-	return "string"
+// Value 插入数据，把时间转字符串
+func (t TimeString) Value() (driver.Value, error) {
+	return gotime.SetCurrent(t.Time).Format(), nil
+}
+
+// Scan 查询数据，把字符串转时间
+func (t *TimeString) Scan(value interface{}) error {
+
+	// 如果是空值，直接返回
+	data, ok := value.(string)
+	if !ok {
+		return errors.New(fmt.Sprint("无法解析:", value))
+	}
+
+	// 解析时间
+	result := gotime.SetCurrentParse(data)
+
+	*t = TimeString{
+		Time: result.Time,
+	}
+
+	return nil
+}
+
+// MarshalJSON JSON序列化
+func (t TimeString) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, gotime.SetCurrent(t.Time).Format())), nil
+}
+
+// UnmarshalJSON JSON反序列化
+func (t *TimeString) UnmarshalJSON(data []byte) (err error) {
+	// 删除双引号
+	if data[0] == '"' && data[len(data)-1] == '"' {
+		data = data[1 : len(data)-1]
+	}
+	result := gotime.SetCurrentParse(string(data))
+	*t = TimeString{
+		Time: result.Time,
+	}
+	return
 }
 
 func (t TimeString) GormDBDataType(db *gorm.DB, field *schema.Field) string {
@@ -24,25 +63,9 @@ func (t TimeString) GormDBDataType(db *gorm.DB, field *schema.Field) string {
 	// 根据不同的数据库驱动返回不同的数据类型
 	switch db.Dialector.Name() {
 	case "mysql", "sqlite":
-		return "string"
+		return "varchar"
 	case "postgres":
-		return "string"
+		return "text"
 	}
 	return ""
-}
-
-// Scan 实现 sql.Scanner 接口，Scan 将 value 扫描至 Time
-func (t *TimeString) Scan(value interface{}) error {
-	str, ok := value.(string)
-	if !ok {
-		return errors.New(fmt.Sprint("无法解析:", value))
-	}
-	t1 := gotime.SetCurrentParse(str).Time
-	*t = TimeString(t1)
-	return nil
-}
-
-// Value 实现 driver.Valuer 接口，Value 返回 string value
-func (t TimeString) Value() (driver.Value, error) {
-	return gotime.SetCurrent(time.Time(t)).Format(), nil
 }
