@@ -3,7 +3,6 @@ package golog
 import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"time"
 )
 
 // 框架定义
@@ -16,7 +15,7 @@ type gin struct {
 type GinPostgresqlLog struct {
 	LogId             uint           `gorm:"primaryKey"`      //【记录】编号
 	TraceId           string         `gorm:"type:text"`       //【系统】链编号
-	RequestTime       time.Time      `gorm:"index"`           //【请求】时间
+	RequestTime       TimeString     `gorm:"index"`           //【请求】时间
 	RequestUri        string         `gorm:"type:text"`       //【请求】请求链接 域名+路径+参数
 	RequestUrl        string         `gorm:"type:text"`       //【请求】请求链接 域名+路径
 	RequestApi        string         `gorm:"type:text;index"` //【请求】请求接口 路径
@@ -33,7 +32,7 @@ type GinPostgresqlLog struct {
 	RequestIpCity     string         `gorm:"type:text"`       //【请求】请求客户端城市
 	RequestIpIsp      string         `gorm:"type:text"`       //【请求】请求客户端运营商
 	RequestHeader     datatypes.JSON `gorm:"type:jsonb"`      //【请求】请求头
-	ResponseTime      time.Time      `gorm:"index"`           //【返回】时间
+	ResponseTime      TimeString     `gorm:"index"`           //【返回】时间
 	ResponseCode      int            `gorm:"type:bigint"`     //【返回】状态码
 	ResponseMsg       string         `gorm:"type:text"`       //【返回】描述
 	ResponseData      datatypes.JSON `gorm:"type:jsonb"`      //【返回】数据

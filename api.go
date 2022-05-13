@@ -3,7 +3,6 @@ package golog
 import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"time"
 )
 
 // 接口定义
@@ -15,7 +14,7 @@ type api struct {
 // ApiPostgresqlLog 结构体
 type ApiPostgresqlLog struct {
 	LogId                 uint           `gorm:"primaryKey"`      //【记录】编号
-	RequestTime           time.Time      `gorm:"index"`           //【请求】时间
+	RequestTime           TimeString     `gorm:"index"`           //【请求】时间
 	RequestUri            string         `gorm:"type:text"`       //【请求】链接
 	RequestUrl            string         `gorm:"type:text"`       //【请求】链接
 	RequestApi            string         `gorm:"type:text;index"` //【请求】接口
@@ -26,7 +25,7 @@ type ApiPostgresqlLog struct {
 	ResponseStatusCode    int            `gorm:"type:bigint"`     //【返回】状态码
 	ResponseBody          datatypes.JSON `gorm:"type:jsonb"`      //【返回】内容
 	ResponseContentLength int64          `gorm:"type:bigint"`     //【返回】大小
-	ResponseTime          time.Time      `gorm:"index"`           //【返回】时间
+	ResponseTime          TimeString     `gorm:"index"`           //【返回】时间
 }
 
 // AutoMigrate 自动迁移
