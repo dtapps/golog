@@ -18,8 +18,9 @@ func NewClientGin(db *gorm.DB, tableName string) *Client {
 	if tableName == "" {
 		panic("表名不能为空")
 	}
-	client := &Client{Gin: gin{db: db, tableName: tableName, outsideIp: goip.GetOutsideIp(), insideIp: goip.GetInsideIp()}}
+	client := &Client{Gin: gin{db: db, tableName: tableName, insideIp: goip.GetInsideIp()}}
 	client.Gin.AutoMigrate()
+	client.Gin.configOutsideIp()
 	return client
 }
 
@@ -31,7 +32,8 @@ func NewClientApi(db *gorm.DB, tableName string) *Client {
 	if tableName == "" {
 		panic("表名不能为空")
 	}
-	client := &Client{Api: api{db: db, tableName: tableName, outsideIp: goip.GetOutsideIp(), insideIp: goip.GetInsideIp()}}
+	client := &Client{Api: api{db: db, tableName: tableName, insideIp: goip.GetInsideIp()}}
 	client.Api.AutoMigrate()
+	client.Api.configOutsideIp()
 	return client
 }

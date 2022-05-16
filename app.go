@@ -22,9 +22,9 @@ func (a *App) InitClientApi() {
 	}
 	a.Api.db = a.Pgsql
 	a.Api.tableName = a.TableName
-	a.Api.outsideIp = goip.GetOutsideIp()
 	a.Api.insideIp = goip.GetInsideIp()
 	a.Api.AutoMigrate()
+	a.Api.configOutsideIp()
 }
 
 // InitClientGin 框架实例化
@@ -37,7 +37,7 @@ func (a *App) InitClientGin() {
 	}
 	a.Gin.db = a.Pgsql
 	a.Gin.tableName = a.TableName
-	a.Gin.outsideIp = goip.GetOutsideIp()
 	a.Gin.insideIp = goip.GetInsideIp()
 	a.Gin.AutoMigrate()
+	a.Gin.configOutsideIp()
 }

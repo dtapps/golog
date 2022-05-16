@@ -1,6 +1,7 @@
 package golog
 
 import (
+	"go.dtapp.net/goip"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -54,4 +55,11 @@ func (a *api) Record(content ApiPostgresqlLog) int64 {
 // Query 查询
 func (a *api) Query() *gorm.DB {
 	return a.db.Table(a.tableName)
+}
+
+// 配置
+func (a *api) configOutsideIp() {
+	go func() {
+		a.insideIp = goip.GetOutsideIp()
+	}()
 }
