@@ -9,6 +9,8 @@ import (
 type api struct {
 	db        *gorm.DB // pgsql数据库
 	tableName string   // 日志表名
+	outsideIp string   // 外网ip
+	insideIp  string   // 内网ip
 }
 
 // ApiPostgresqlLog 结构体
@@ -26,6 +28,8 @@ type ApiPostgresqlLog struct {
 	ResponseBody          datatypes.JSON `gorm:"type:jsonb" json:"response_body"`            //【返回】内容
 	ResponseContentLength int64          `gorm:"type:bigint" json:"response_content_length"` //【返回】大小
 	ResponseTime          TimeString     `gorm:"index" json:"response_time"`                 //【返回】时间
+	SystemOutsideIp       string         `gorm:"type:text" json:"system_outside_ip"`         //【系统】外网ip
+	SystemInsideIp        string         `gorm:"type:text" json:"system_inside_ip"`          //【系统】内网ip
 }
 
 // AutoMigrate 自动迁移
@@ -38,6 +42,12 @@ func (a *api) AutoMigrate() {
 
 // Record 记录日志
 func (a *api) Record(content ApiPostgresqlLog) int64 {
+	if content.SystemOutsideIp == "" {
+		content.SystemOutsideIp = a.outsideIp
+	}
+	if content.SystemInsideIp == "" {
+		content.SystemInsideIp = a.insideIp
+	}
 	return a.db.Table(a.tableName).Create(&content).RowsAffected
 }
 

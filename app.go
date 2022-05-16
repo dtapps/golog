@@ -1,6 +1,9 @@
 package golog
 
-import "gorm.io/gorm"
+import (
+	"go.dtapp.net/goip"
+	"gorm.io/gorm"
+)
 
 type App struct {
 	Gin       gin      // 框架日志
@@ -19,6 +22,8 @@ func (a *App) InitClientApi() {
 	}
 	a.Api.db = a.Pgsql
 	a.Api.tableName = a.TableName
+	a.Api.outsideIp = goip.GetOutsideIp()
+	a.Api.insideIp = goip.GetInsideIp()
 	a.Api.AutoMigrate()
 }
 
@@ -32,5 +37,7 @@ func (a *App) InitClientGin() {
 	}
 	a.Gin.db = a.Pgsql
 	a.Gin.tableName = a.TableName
+	a.Gin.outsideIp = goip.GetOutsideIp()
+	a.Gin.insideIp = goip.GetInsideIp()
 	a.Gin.AutoMigrate()
 }

@@ -9,6 +9,8 @@ import (
 type gin struct {
 	db        *gorm.DB // pgsql数据库
 	tableName string   // 日志表名
+	outsideIp string   // 外网ip
+	insideIp  string   // 内网ip
 }
 
 // GinPostgresqlLog 结构体
@@ -37,6 +39,8 @@ type GinPostgresqlLog struct {
 	ResponseMsg       string         `gorm:"type:text" json:"response_msg"`         //【返回】描述
 	ResponseData      datatypes.JSON `gorm:"type:jsonb" json:"response_data"`       //【返回】数据
 	CostTime          int64          `gorm:"type:bigint" json:"cost_time"`          //【系统】花费时间
+	SystemOutsideIp   string         `gorm:"type:text" json:"system_outside_ip"`    //【系统】外网ip
+	SystemInsideIp    string         `gorm:"type:text" json:"system_inside_ip"`     //【系统】内网ip
 }
 
 // AutoMigrate 自动迁移
@@ -49,6 +53,12 @@ func (g *gin) AutoMigrate() {
 
 // Record 记录日志
 func (g *gin) Record(content GinPostgresqlLog) int64 {
+	if content.SystemOutsideIp == "" {
+		content.SystemOutsideIp = g.outsideIp
+	}
+	if content.SystemInsideIp == "" {
+		content.SystemInsideIp = g.insideIp
+	}
 	return g.db.Table(g.tableName).Create(&content).RowsAffected
 }
 

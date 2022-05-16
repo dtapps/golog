@@ -1,6 +1,9 @@
 package golog
 
-import "gorm.io/gorm"
+import (
+	"go.dtapp.net/goip"
+	"gorm.io/gorm"
+)
 
 type Client struct {
 	Gin gin // 框架日志
@@ -15,7 +18,7 @@ func NewClientGin(db *gorm.DB, tableName string) *Client {
 	if tableName == "" {
 		panic("表名不能为空")
 	}
-	client := &Client{Gin: gin{db: db, tableName: tableName}}
+	client := &Client{Gin: gin{db: db, tableName: tableName, outsideIp: goip.GetOutsideIp(), insideIp: goip.GetInsideIp()}}
 	client.Gin.AutoMigrate()
 	return client
 }
@@ -28,7 +31,7 @@ func NewClientApi(db *gorm.DB, tableName string) *Client {
 	if tableName == "" {
 		panic("表名不能为空")
 	}
-	client := &Client{Api: api{db: db, tableName: tableName}}
+	client := &Client{Api: api{db: db, tableName: tableName, outsideIp: goip.GetOutsideIp(), insideIp: goip.GetInsideIp()}}
 	client.Api.AutoMigrate()
 	return client
 }
