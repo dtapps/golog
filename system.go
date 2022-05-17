@@ -2,6 +2,7 @@ package golog
 
 import (
 	"os"
+	"runtime"
 )
 
 type System struct {
@@ -14,6 +15,7 @@ type System struct {
 	EGid     int      // 有效组ID
 	Pid      int      // 进程ID
 	PPid     int      // 父进程ID
+	Version  string   // 版本
 }
 
 func (s *System) Init() *System {
@@ -26,5 +28,6 @@ func (s *System) Init() *System {
 	s.EGid = os.Getegid()
 	s.Pid = os.Getpid()
 	s.PPid = os.Getppid()
+	s.Version = runtime.Version()
 	return s
 }

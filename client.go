@@ -4,6 +4,9 @@ import (
 	"go.dtapp.net/goip"
 	"gorm.io/gorm"
 	"os"
+	"runtime"
+	"strconv"
+	"strings"
 )
 
 type Client struct {
@@ -20,7 +23,8 @@ func NewClientGin(db *gorm.DB, tableName string) *Client {
 		panic("表名不能为空")
 	}
 	hostname, _ := os.Hostname()
-	client := &Client{Gin: gin{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp()}}
+	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
+	client := &Client{Gin: gin{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: goVersion}}
 	client.Gin.AutoMigrate()
 	return client
 }
@@ -34,7 +38,8 @@ func NewClientApi(db *gorm.DB, tableName string) *Client {
 		panic("表名不能为空")
 	}
 	hostname, _ := os.Hostname()
-	client := &Client{Api: api{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp()}}
+	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
+	client := &Client{Api: api{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: goVersion}}
 	client.Api.AutoMigrate()
 	return client
 }
