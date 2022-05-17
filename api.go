@@ -1,7 +1,6 @@
 package golog
 
 import (
-	"go.dtapp.net/goip"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -10,8 +9,8 @@ import (
 type api struct {
 	db        *gorm.DB // pgsql数据库
 	tableName string   // 日志表名
-	outsideIp string   // 外网ip
 	insideIp  string   // 内网ip
+	hostname  string   // 主机名
 }
 
 // ApiPostgresqlLog 结构体
@@ -29,7 +28,7 @@ type ApiPostgresqlLog struct {
 	ResponseBody          datatypes.JSON `gorm:"type:jsonb" json:"response_body"`            //【返回】内容
 	ResponseContentLength int64          `gorm:"type:bigint" json:"response_content_length"` //【返回】大小
 	ResponseTime          TimeString     `gorm:"index" json:"response_time"`                 //【返回】时间
-	SystemOutsideIp       string         `gorm:"type:text" json:"system_outside_ip"`         //【系统】外网ip
+	SystemHostName        string         `gorm:"type:text" json:"system_host_name"`          //【系统】主机名
 	SystemInsideIp        string         `gorm:"type:text" json:"system_inside_ip"`          //【系统】内网ip
 }
 
@@ -43,9 +42,7 @@ func (a *api) AutoMigrate() {
 
 // Record 记录日志
 func (a *api) Record(content ApiPostgresqlLog) int64 {
-	if content.SystemOutsideIp == "" {
-		content.SystemOutsideIp = a.outsideIp
-	}
+	content.SystemHostName = a.hostname
 	if content.SystemInsideIp == "" {
 		content.SystemInsideIp = a.insideIp
 	}
@@ -55,11 +52,4 @@ func (a *api) Record(content ApiPostgresqlLog) int64 {
 // Query 查询
 func (a *api) Query() *gorm.DB {
 	return a.db.Table(a.tableName)
-}
-
-// 配置
-func (a *api) configOutsideIp() {
-	go func() {
-		a.insideIp = goip.GetOutsideIp()
-	}()
 }

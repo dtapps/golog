@@ -27,7 +27,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.dtapp.net/gorequest v1.0.18 // indirect
 	go.dtapp.net/gostring v1.0.3 // indirect
-	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9 // indirect
+	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
 )
