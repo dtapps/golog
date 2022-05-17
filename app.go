@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 )
 
@@ -28,8 +27,7 @@ func (a *App) InitClientApi() {
 	a.Api.tableName = a.TableName
 	a.Api.hostname, _ = os.Hostname()
 	a.Api.insideIp = goip.GetInsideIp()
-	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
-	a.Api.goVersion = goVersion
+	a.Api.goVersion = strings.TrimPrefix(runtime.Version(), "go")
 	a.Api.AutoMigrate()
 }
 
@@ -45,7 +43,6 @@ func (a *App) InitClientGin() {
 	a.Gin.tableName = a.TableName
 	a.Gin.hostname, _ = os.Hostname()
 	a.Gin.insideIp = goip.GetInsideIp()
-	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
-	a.Gin.goVersion = goVersion
+	a.Gin.goVersion = strings.TrimPrefix(runtime.Version(), "go")
 	a.Gin.AutoMigrate()
 }

@@ -5,7 +5,6 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 )
 
@@ -23,8 +22,7 @@ func NewClientGin(db *gorm.DB, tableName string) *Client {
 		panic("表名不能为空")
 	}
 	hostname, _ := os.Hostname()
-	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
-	client := &Client{Gin: gin{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: goVersion}}
+	client := &Client{Gin: gin{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: strings.TrimPrefix(runtime.Version(), "go")}}
 	client.Gin.AutoMigrate()
 	return client
 }
@@ -38,8 +36,7 @@ func NewClientApi(db *gorm.DB, tableName string) *Client {
 		panic("表名不能为空")
 	}
 	hostname, _ := os.Hostname()
-	goVersion, _ := strconv.ParseFloat(strings.TrimPrefix(runtime.Version(), "go"), 64)
-	client := &Client{Api: api{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: goVersion}}
+	client := &Client{Api: api{db: db, tableName: tableName, hostname: hostname, insideIp: goip.GetInsideIp(), goVersion: strings.TrimPrefix(runtime.Version(), "go")}}
 	client.Api.AutoMigrate()
 	return client
 }

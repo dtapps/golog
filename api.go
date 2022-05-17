@@ -11,7 +11,7 @@ type api struct {
 	tableName string   // 日志表名
 	insideIp  string   // 内网ip
 	hostname  string   // 主机名
-	goVersion float64  // go版本
+	goVersion string   // go版本
 }
 
 // ApiPostgresqlLog 结构体
@@ -31,7 +31,7 @@ type ApiPostgresqlLog struct {
 	ResponseTime          TimeString     `gorm:"index" json:"response_time"`                 //【返回】时间
 	SystemHostName        string         `gorm:"type:text" json:"system_host_name"`          //【系统】主机名
 	SystemInsideIp        string         `gorm:"type:text" json:"system_inside_ip"`          //【系统】内网ip
-	GoVersion             float64        `gorm:"type:bigint" json:"go_version"`              //【程序】Go版本
+	GoVersion             string         `gorm:"type:text" json:"go_version"`                //【程序】Go版本
 }
 
 // AutoMigrate 自动迁移
