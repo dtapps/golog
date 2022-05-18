@@ -43,7 +43,7 @@ type GinPostgresqlLog struct {
 	CostTime          int64          `gorm:"type:bigint" json:"cost_time"`          //【系统】花费时间
 	SystemHostName    string         `gorm:"type:text" json:"system_host_name"`     //【系统】主机名
 	SystemInsideIp    string         `gorm:"type:text" json:"system_inside_ip"`     //【系统】内网ip
-	GoVersion         string         `gorm:"type:bigint" json:"go_version"`         //【程序】Go版本
+	GoVersion         string         `gorm:"type:text" json:"go_version"`           //【程序】Go版本
 }
 
 // AutoMigrate 自动迁移
