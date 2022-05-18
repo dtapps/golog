@@ -3,6 +3,7 @@ package golog
 import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"log"
 )
 
 // 框架定义
@@ -46,24 +47,28 @@ type GinPostgresqlLog struct {
 }
 
 // AutoMigrate 自动迁移
-func (g *gin) AutoMigrate() {
-	err := g.db.Table(g.tableName).AutoMigrate(&GinPostgresqlLog{})
+func (p *gin) AutoMigrate() {
+	err := p.db.Table(p.tableName).AutoMigrate(&GinPostgresqlLog{})
 	if err != nil {
 		panic("创建表失败：" + err.Error())
 	}
 }
 
 // Record 记录日志
-func (g *gin) Record(content GinPostgresqlLog) int64 {
-	content.SystemHostName = g.hostname
+func (p *gin) Record(content GinPostgresqlLog) *gorm.DB {
+	content.SystemHostName = p.hostname
 	if content.SystemInsideIp == "" {
-		content.SystemInsideIp = g.insideIp
+		content.SystemInsideIp = p.insideIp
 	}
-	content.GoVersion = g.goVersion
-	return g.db.Table(g.tableName).Create(&content).RowsAffected
+	content.GoVersion = p.goVersion
+	resp := p.db.Table(p.tableName).Create(&content)
+	if resp.RowsAffected == 0 {
+		log.Println("gin：", resp.Error)
+	}
+	return resp
 }
 
 // Query 查询
-func (g *gin) Query() *gorm.DB {
-	return g.db.Table(g.tableName)
+func (p *gin) Query() *gorm.DB {
+	return p.db.Table(p.tableName)
 }

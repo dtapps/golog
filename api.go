@@ -3,6 +3,7 @@ package golog
 import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"log"
 )
 
 // 接口定义
@@ -35,24 +36,28 @@ type ApiPostgresqlLog struct {
 }
 
 // AutoMigrate 自动迁移
-func (a *api) AutoMigrate() {
-	err := a.db.Table(a.tableName).AutoMigrate(&ApiPostgresqlLog{})
+func (p *api) AutoMigrate() {
+	err := p.db.Table(p.tableName).AutoMigrate(&ApiPostgresqlLog{})
 	if err != nil {
 		panic("创建表失败：" + err.Error())
 	}
 }
 
 // Record 记录日志
-func (a *api) Record(content ApiPostgresqlLog) int64 {
-	content.SystemHostName = a.hostname
+func (p *api) Record(content ApiPostgresqlLog) *gorm.DB {
+	content.SystemHostName = p.hostname
 	if content.SystemInsideIp == "" {
-		content.SystemInsideIp = a.insideIp
+		content.SystemInsideIp = p.insideIp
 	}
-	content.GoVersion = a.goVersion
-	return a.db.Table(a.tableName).Create(&content).RowsAffected
+	content.GoVersion = p.goVersion
+	resp := p.db.Table(p.tableName).Create(&content)
+	if resp.RowsAffected == 0 {
+		log.Println("api：", resp.Error)
+	}
+	return resp
 }
 
 // Query 查询
-func (a *api) Query() *gorm.DB {
-	return a.db.Table(a.tableName)
+func (p *api) Query() *gorm.DB {
+	return p.db.Table(p.tableName)
 }
