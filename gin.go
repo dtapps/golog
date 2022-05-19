@@ -1,18 +1,48 @@
 package golog
 
 import (
+	"go.dtapp.net/goip"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"log"
+	"os"
+	"runtime"
+	"strings"
 )
 
-// 框架定义
-type gin struct {
+type GinConfig struct {
+	Db        *gorm.DB // 驱动
+	TableName string   // 表名
+}
+
+// Gin 框架
+type Gin struct {
 	db        *gorm.DB // pgsql数据库
 	tableName string   // 日志表名
 	insideIp  string   // 内网ip
 	hostname  string   // 主机名
 	goVersion string   // go版本
+}
+
+// NewGin 创建框架实例化
+func NewGin(config *GinConfig) *Gin {
+	app := &Gin{}
+	if config.Db == nil {
+		panic("驱动不正常")
+	}
+	if config.TableName == "" {
+		panic("表名不能为空")
+	}
+	hostname, _ := os.Hostname()
+
+	app.db = config.Db
+	app.tableName = config.TableName
+	app.hostname = hostname
+	app.insideIp = goip.GetInsideIp()
+	app.goVersion = strings.TrimPrefix(runtime.Version(), "go")
+
+	app.AutoMigrate()
+	return app
 }
 
 // GinPostgresqlLog 结构体
@@ -47,7 +77,7 @@ type GinPostgresqlLog struct {
 }
 
 // AutoMigrate 自动迁移
-func (p *gin) AutoMigrate() {
+func (p *Gin) AutoMigrate() {
 	err := p.db.Table(p.tableName).AutoMigrate(&GinPostgresqlLog{})
 	if err != nil {
 		panic("创建表失败：" + err.Error())
@@ -55,7 +85,7 @@ func (p *gin) AutoMigrate() {
 }
 
 // Record 记录日志
-func (p *gin) Record(content GinPostgresqlLog) *gorm.DB {
+func (p *Gin) Record(content GinPostgresqlLog) *gorm.DB {
 	content.SystemHostName = p.hostname
 	if content.SystemInsideIp == "" {
 		content.SystemInsideIp = p.insideIp
@@ -63,12 +93,12 @@ func (p *gin) Record(content GinPostgresqlLog) *gorm.DB {
 	content.GoVersion = p.goVersion
 	resp := p.db.Table(p.tableName).Create(&content)
 	if resp.RowsAffected == 0 {
-		log.Println("gin：", resp.Error)
+		log.Println("Gin：", resp.Error)
 	}
 	return resp
 }
 
 // Query 查询
-func (p *gin) Query() *gorm.DB {
+func (p *Gin) Query() *gorm.DB {
 	return p.db.Table(p.tableName)
 }
