@@ -3,10 +3,10 @@ module go.dtapp.net/golog
 go 1.18
 
 require (
-	go.dtapp.net/goip v1.0.15
+	go.dtapp.net/goip v1.0.16
 	go.dtapp.net/gotime v1.0.2
 	gorm.io/datatypes v1.0.6
-	gorm.io/driver/postgres v1.3.5
+	gorm.io/driver/postgres v1.3.6
 	gorm.io/gorm v1.23.5
 )
 
@@ -27,7 +27,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.dtapp.net/gorequest v1.0.18 // indirect
 	go.dtapp.net/gostring v1.0.3 // indirect
-	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167 // indirect
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
 )
