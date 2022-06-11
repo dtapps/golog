@@ -3,11 +3,13 @@ module go.dtapp.net/golog
 go 1.18
 
 require (
-	go.dtapp.net/goip v1.0.16
+	github.com/natefinch/lumberjack v2.0.0+incompatible
+	go.dtapp.net/goip v1.0.17
 	go.dtapp.net/gotime v1.0.2
+	go.uber.org/zap v1.21.0
 	gorm.io/datatypes v1.0.6
-	gorm.io/driver/postgres v1.3.6
-	gorm.io/gorm v1.23.5
+	gorm.io/driver/postgres v1.3.7
+	gorm.io/gorm v1.23.6
 )
 
 require (
@@ -25,9 +27,13 @@ require (
 	github.com/saracen/go7z v0.0.0-20191010121135-9c09b6bd7fda // indirect
 	github.com/saracen/solidblock v0.0.0-20190426153529-45df20abab6f // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	go.dtapp.net/gorequest v1.0.18 // indirect
+	go.dtapp.net/gorequest v1.0.19 // indirect
 	go.dtapp.net/gostring v1.0.3 // indirect
-	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.8.0 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gorm.io/driver/mysql v1.3.3 // indirect
+	golang.org/x/tools v0.1.11 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
+	gorm.io/driver/mysql v1.3.4 // indirect
 )
