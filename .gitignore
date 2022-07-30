@@ -6,3 +6,4 @@
 *.log
 gomod.sh
 time_test.go
+/vendor/
