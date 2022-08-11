@@ -6,7 +6,6 @@ import (
 	"go.dtapp.net/gorequest"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"log"
 	"time"
 	"unicode/utf8"
 )
@@ -29,13 +28,13 @@ type apiPostgresqlLog struct {
 	SystemHostName        string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`     //【系统】主机名
 	SystemInsideIp        string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`    //【系统】内网ip
 	GoVersion             string         `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`          //【程序】Go版本
+	SdkVersion            string         `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`        //【程序】Sdk版本
 }
 
 // 记录日志
 func (c *ApiClient) gormRecord(postgresqlLog apiPostgresqlLog) error {
 
 	if utf8.ValidString(string(postgresqlLog.ResponseBody)) == false {
-		log.Println("内容格式无法记录")
 		postgresqlLog.ResponseBody = datatypes.JSON("")
 	}
 
@@ -54,9 +53,8 @@ func (c *ApiClient) GormQuery() *gorm.DB {
 }
 
 // GormMiddleware 中间件
-func (c *ApiClient) GormMiddleware(request gorequest.Response) {
+func (c *ApiClient) GormMiddleware(request gorequest.Response, sdkVersion string) {
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" {
-		log.Println("内容格式无法记录")
 		return
 	}
 	c.gormRecord(apiPostgresqlLog{
@@ -72,11 +70,12 @@ func (c *ApiClient) GormMiddleware(request gorequest.Response) {
 		ResponseBody:          request.ResponseBody,                                             //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
 		ResponseTime:          request.ResponseTime,                                             //【返回】时间
+		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 }
 
 // GormMiddlewareXml 中间件
-func (c *ApiClient) GormMiddlewareXml(request gorequest.Response) {
+func (c *ApiClient) GormMiddlewareXml(request gorequest.Response, sdkVersion string) {
 	c.gormRecord(apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                                                   //【请求】时间
 		RequestUri:            request.RequestUri,                                                                    //【请求】链接
@@ -90,11 +89,12 @@ func (c *ApiClient) GormMiddlewareXml(request gorequest.Response) {
 		ResponseBody:          datatypes.JSON(gojson.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                                         //【返回】大小
 		ResponseTime:          request.ResponseTime,                                                                  //【返回】时间
+		SdkVersion:            sdkVersion,                                                                            //【程序】Sdk版本
 	})
 }
 
 // GormMiddlewareCustom 中间件
-func (c *ApiClient) GormMiddlewareCustom(api string, request gorequest.Response) {
+func (c *ApiClient) GormMiddlewareCustom(api string, request gorequest.Response, sdkVersion string) {
 	c.gormRecord(apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                              //【请求】时间
 		RequestUri:            request.RequestUri,                                               //【请求】链接
@@ -108,5 +108,6 @@ func (c *ApiClient) GormMiddlewareCustom(api string, request gorequest.Response)
 		ResponseBody:          request.ResponseBody,                                             //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
 		ResponseTime:          request.ResponseTime,                                             //【返回】时间
+		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 }

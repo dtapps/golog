@@ -39,11 +39,12 @@ type ginPostgresqlLog struct {
 	ResponseTime      time.Time      `gorm:"index;comment:【返回】时间" json:"response_time,omitempty"`               //【返回】时间
 	ResponseCode      int            `gorm:"index;comment:【返回】状态码" json:"response_code,omitempty"`              //【返回】状态码
 	ResponseMsg       string         `gorm:"comment:【返回】描述" json:"response_msg,omitempty"`                      //【返回】描述
-	ResponseData      datatypes.JSON `gorm:"type:jsonb;comment:/【返回】数据" json:"response_data,omitempty"`         //【返回】数据
+	ResponseData      datatypes.JSON `gorm:"type:jsonb;comment:【返回】数据" json:"response_data,omitempty"`          //【返回】数据
 	CostTime          int64          `gorm:"comment:【系统】花费时间" json:"cost_time,omitempty"`                       //【系统】花费时间
 	SystemHostName    string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`           //【系统】主机名
 	SystemInsideIp    string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`          //【系统】内网ip
 	GoVersion         string         `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`                //【程序】Go版本
+	SdkVersion        string         `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`              //【程序】Sdk版本
 }
 
 // gormRecord 记录日志
@@ -54,6 +55,7 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) error {
 		postgresqlLog.SystemInsideIp = c.config.insideIp
 	}
 	postgresqlLog.GoVersion = c.config.goVersion
+	postgresqlLog.SdkVersion = Version
 
 	return c.gormClient.Table(c.config.tableName).Create(&postgresqlLog).Error
 }
