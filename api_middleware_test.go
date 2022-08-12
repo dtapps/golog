@@ -1,4 +1,4 @@
-package gin_middleware
+package golog
 
 import (
 	"context"

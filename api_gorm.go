@@ -4,7 +4,6 @@ import (
 	"context"
 	"go.dtapp.net/dorm"
 	"go.dtapp.net/gojson"
-	"go.dtapp.net/golog/gin_middleware"
 	"go.dtapp.net/gorequest"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -46,7 +45,8 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 		postgresqlLog.SystemInsideIp = c.config.insideIp
 	}
 	postgresqlLog.GoVersion = c.config.goVersion
-	postgresqlLog.TraceId = gin_middleware.GetTraceIdContext(ctx)
+
+	postgresqlLog.TraceId = GetTraceIdContext(ctx)
 
 	return c.gormClient.Table(c.config.tableName).Create(&postgresqlLog).Error
 }

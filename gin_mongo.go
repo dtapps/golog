@@ -42,6 +42,7 @@ type ginMongoLog struct {
 	SystemHostName    string             `json:"system_host_name,omitempty" bson:"system_host_name,omitempty"`       //【系统】主机名
 	SystemInsideIp    string             `json:"system_inside_ip,omitempty" bson:"system_inside_ip,omitempty"`       //【系统】内网ip
 	GoVersion         string             `json:"go_version,omitempty" bson:"go_version,omitempty"`                   //【程序】Go版本
+	SdkVersion        string             `json:"sdk_version,omitempty" bson:"sdk_version,omitempty"`                 //【程序】Sdk版本
 }
 
 // 记录日志
@@ -52,6 +53,8 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) error {
 		mongoLog.SystemInsideIp = c.config.insideIp
 	}
 	mongoLog.GoVersion = c.config.goVersion
+
+	mongoLog.SdkVersion = Version
 
 	mongoLog.LogId = primitive.NewObjectID()
 
@@ -131,7 +134,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					c.mongoRecord(ginMongoLog{
-						TraceId:           ginCtx.MustGet("trace_id").(string),                              //【系统】链编号
+						TraceId:           GetTraceId(ginCtx),                                               //【系统】链编号
 						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                       //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                 //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                        //【请求】请求链接
@@ -156,7 +159,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 				} else {
 					c.mongoRecord(ginMongoLog{
-						TraceId:           ginCtx.MustGet("trace_id").(string),                              //【系统】链编号
+						TraceId:           GetTraceId(ginCtx),                                               //【系统】链编号
 						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                       //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                 //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                        //【请求】请求链接
