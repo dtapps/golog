@@ -7,8 +7,8 @@ import (
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
+	"go.dtapp.net/gourl"
 	"go.dtapp.net/goxml"
-	"golang/library/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -133,7 +133,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					c.gormRecord(ginPostgresqlLog{
-						TraceId:           gotrace_id.GetTraceId(ginCtx),                                        //【系统】链编号
+						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                                     //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
@@ -158,7 +158,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					})
 				} else {
 					c.gormRecord(ginPostgresqlLog{
-						TraceId:           gotrace_id.GetTraceId(ginCtx),                                        //【系统】链编号
+						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                                     //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接

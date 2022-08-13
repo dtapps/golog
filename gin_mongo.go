@@ -135,7 +135,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					c.mongoRecord(ginMongoLog{
-						TraceId:           gotrace_id.GetTraceId(ginCtx),                                //【系统】链编号
+						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                             //【系统】链编号
 						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                   //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
@@ -160,7 +160,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 				} else {
 					c.mongoRecord(ginMongoLog{
-						TraceId:           gotrace_id.GetTraceId(ginCtx),                                //【系统】链编号
+						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                             //【系统】链编号
 						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                   //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
