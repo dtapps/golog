@@ -5,84 +5,53 @@ import (
 	"errors"
 	"go.dtapp.net/dorm"
 	"go.dtapp.net/goip"
-	"gorm.io/gorm"
 	"os"
 	"runtime"
 )
 
+type ApiClientConfig struct {
+	GormClient *dorm.GormClient // 数据库驱动
+	IpService  *goip.Client     // ip服务
+	TableName  string           // 表名
+	LogClient  *GoLog           // 日志驱动
+	LogDebug   bool             // 日志开关
+}
+
 // ApiClient 接口
 type ApiClient struct {
-	gormClient  *gorm.DB          // 数据库驱动
-	mongoClient *dorm.MongoClient // 数据库驱动
-	config      struct {
-		logType        string // 日志类型
-		tableName      string // 表名
-		databaseName   string // 库名
-		collectionName string // 表名
-		insideIp       string // 内网ip
-		hostname       string // 主机名
-		goVersion      string // go版本
-	} // 配置
+	gormClient *dorm.GormClient // 数据库驱动
+	logClient  *GoLog           // 日志驱动
+	config     struct {
+		tableName string // 表名
+		insideIp  string // 内网ip
+		hostname  string // 主机名
+		goVersion string // go版本
+		logDebug  bool   // 日志开关
+	}
 }
 
 // NewApiClient 创建接口实例化
-// WithGormClient && WithTableName
-// WithMongoCollectionClient && WithDatabaseName && WithCollectionName
-func NewApiClient(attrs ...*OperationAttr) (*ApiClient, error) {
+func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 	c := &ApiClient{}
-	for _, attr := range attrs {
-		if attr.gormClient != nil {
-			c.gormClient = attr.gormClient
-			c.config.logType = attr.logType
-		}
-		if attr.mongoClient != nil {
-			c.mongoClient = attr.mongoClient
-			c.config.logType = attr.logType
-		}
-		if attr.tableName != "" {
-			c.config.tableName = attr.tableName
-		}
-		if attr.databaseName != "" {
-			c.config.databaseName = attr.databaseName
-		}
-		if attr.collectionName != "" {
-			c.config.collectionName = attr.collectionName
-		}
+
+	c.gormClient = config.GormClient
+	c.config.tableName = config.TableName
+
+	c.logClient = config.LogClient
+	c.config.logDebug = config.LogDebug
+
+	if c.gormClient.Db == nil {
+		return nil, errors.New("驱动不能为空")
 	}
 
-	switch c.config.logType {
-	case logTypeGorm:
+	if c.config.tableName == "" {
+		return nil, errors.New("表名不能为空")
+	}
 
-		if c.gormClient == nil {
-			return nil, errors.New("驱动不能为空")
-		}
-
-		if c.config.tableName == "" {
-			return nil, errors.New("表名不能为空")
-		}
-
-		err := c.gormClient.Table(c.config.tableName).AutoMigrate(&apiPostgresqlLog{})
-		if err != nil {
-			return nil, errors.New("创建表失败：" + err.Error())
-		}
-
-	case logTypeMongo:
-
-		if c.mongoClient.Db == nil {
-			return nil, errors.New("没有设置驱动")
-		}
-
-		if c.config.databaseName == "" {
-			return nil, errors.New("没有设置库名")
-		}
-
-		if c.config.collectionName == "" {
-			return nil, errors.New("没有设置表名")
-		}
-
-	default:
-		return nil, errors.New("驱动为空")
+	err := c.gormClient.Db.Table(c.config.tableName).AutoMigrate(&apiPostgresqlLog{})
+	if err != nil {
+		return nil, errors.New("创建表失败：" + err.Error())
 	}
 
 	hostname, _ := os.Hostname()

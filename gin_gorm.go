@@ -12,7 +12,6 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"io/ioutil"
-	"log"
 	"net"
 	"time"
 )
@@ -46,7 +45,6 @@ type ginPostgresqlLog struct {
 	SystemHostName    string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`           //【系统】主机名
 	SystemInsideIp    string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`          //【系统】内网ip
 	GoVersion         string         `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`                //【程序】Go版本
-	SdkVersion        string         `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`              //【程序】Sdk版本
 }
 
 // gormRecord 记录日志
@@ -58,14 +56,12 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) error {
 	}
 	postgresqlLog.GoVersion = c.config.goVersion
 
-	postgresqlLog.SdkVersion = Version
-
-	return c.gormClient.Table(c.config.tableName).Create(&postgresqlLog).Error
+	return c.gormClient.Db.Table(c.config.tableName).Create(&postgresqlLog).Error
 }
 
 // GormQuery 查询
 func (c *GinClient) GormQuery() *gorm.DB {
-	return c.gormClient.Table(c.config.tableName)
+	return c.gormClient.Db.Table(c.config.tableName)
 }
 
 // GormMiddleware 中间件
@@ -158,7 +154,9 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						log.Println("log.gormRecord：", err.Error())
+						if c.config.logDebug == true {
+							c.logClient.Logger.Sugar().Errorf("[log.gormRecord]%s", err.Error())
+						}
 					}
 				} else {
 					err := c.gormRecord(ginPostgresqlLog{
@@ -186,7 +184,9 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						log.Println("log.gormRecord：", err.Error())
+						if c.config.logDebug == true {
+							c.logClient.Logger.Sugar().Errorf("[log.gormRecord]%s", err.Error())
+						}
 					}
 				}
 			}

@@ -9,7 +9,6 @@ import (
 	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"log"
 	"time"
 	"unicode/utf8"
 )
@@ -33,7 +32,6 @@ type apiPostgresqlLog struct {
 	SystemHostName        string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`     //【系统】主机名
 	SystemInsideIp        string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`    //【系统】内网ip
 	GoVersion             string         `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`          //【程序】Go版本
-	SdkVersion            string         `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`        //【程序】Sdk版本
 }
 
 // 记录日志
@@ -51,16 +49,16 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 
 	postgresqlLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
 
-	return c.gormClient.Table(c.config.tableName).Create(&postgresqlLog).Error
+	return c.gormClient.Db.Table(c.config.tableName).Create(&postgresqlLog).Error
 }
 
 // GormQuery 查询
 func (c *ApiClient) GormQuery() *gorm.DB {
-	return c.gormClient.Table(c.config.tableName)
+	return c.gormClient.Db.Table(c.config.tableName)
 }
 
 // GormMiddleware 中间件
-func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
+func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Response) {
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" {
 		return
 	}
@@ -77,15 +75,16 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		ResponseBody:          request.ResponseBody,                                             //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
 		ResponseTime:          request.ResponseTime,                                             //【返回】时间
-		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		log.Println("log.GormMiddleware：", err.Error())
+		if c.config.logDebug == true {
+			c.logClient.Logger.Sugar().Errorf("[log.GormMiddleware]%s", err.Error())
+		}
 	}
 }
 
 // GormMiddlewareXml 中间件
-func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
+func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Response) {
 	err := c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                                                   //【请求】时间
 		RequestUri:            request.RequestUri,                                                                    //【请求】链接
@@ -99,15 +98,16 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		ResponseBody:          datatypes.JSON(gojson.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                                         //【返回】大小
 		ResponseTime:          request.ResponseTime,                                                                  //【返回】时间
-		SdkVersion:            sdkVersion,                                                                            //【程序】Sdk版本
 	})
 	if err != nil {
-		log.Println("log.GormMiddlewareXml：", err.Error())
+		if c.config.logDebug == true {
+			c.logClient.Logger.Sugar().Errorf("[log.GormMiddlewareXml]%s", err.Error())
+		}
 	}
 }
 
 // GormMiddlewareCustom 中间件
-func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
+func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 	err := c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                              //【请求】时间
 		RequestUri:            request.RequestUri,                                               //【请求】链接
@@ -121,9 +121,10 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		ResponseBody:          request.ResponseBody,                                             //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
 		ResponseTime:          request.ResponseTime,                                             //【返回】时间
-		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		log.Println("log.GormMiddlewareCustom：", err.Error())
+		if c.config.logDebug == true {
+			c.logClient.Logger.Sugar().Errorf("[log.GormMiddlewareCustom]%s", err.Error())
+		}
 	}
 }
