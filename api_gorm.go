@@ -5,6 +5,8 @@ import (
 	"go.dtapp.net/dorm"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
+	"go.dtapp.net/gotrace_id"
+	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
@@ -46,7 +48,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 	}
 	postgresqlLog.GoVersion = c.config.goVersion
 
-	postgresqlLog.TraceId = GetTraceIdContext(ctx)
+	postgresqlLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
 
 	return c.gormClient.Table(c.config.tableName).Create(&postgresqlLog).Error
 }
@@ -64,8 +66,8 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 	c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                              //【请求】时间
 		RequestUri:            request.RequestUri,                                               //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,                       //【请求】链接
-		RequestApi:            gorequest.UriParse(request.RequestUri).Path,                      //【请求】接口
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                           //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,                          //【请求】接口
 		RequestMethod:         request.RequestMethod,                                            //【请求】方式
 		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
 		RequestHeader:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
@@ -83,8 +85,8 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 	c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                                                   //【请求】时间
 		RequestUri:            request.RequestUri,                                                                    //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,                                            //【请求】链接
-		RequestApi:            gorequest.UriParse(request.RequestUri).Path,                                           //【请求】接口
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                                                //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,                                               //【请求】接口
 		RequestMethod:         request.RequestMethod,                                                                 //【请求】方式
 		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),                       //【请求】参数
 		RequestHeader:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestHeader)),                       //【请求】头部
@@ -102,7 +104,7 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 	c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                              //【请求】时间
 		RequestUri:            request.RequestUri,                                               //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,                       //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                           //【请求】链接
 		RequestApi:            api,                                                              //【请求】接口
 		RequestMethod:         request.RequestMethod,                                            //【请求】方式
 		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),  //【请求】参数

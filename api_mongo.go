@@ -5,6 +5,8 @@ import (
 	"go.dtapp.net/dorm"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
+	"go.dtapp.net/gotrace_id"
+	"go.dtapp.net/gourl"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -39,7 +41,7 @@ func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongoLog) error
 	}
 	mongoLog.GoVersion = c.config.goVersion
 
-	mongoLog.TraceId = GetTraceIdContext(ctx)
+	mongoLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
 
 	mongoLog.LogId = primitive.NewObjectID()
 
@@ -58,8 +60,8 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 	c.mongoRecord(ctx, apiMongoLog{
 		RequestTime:           gotime.SetCurrent(request.RequestTime).Timestamp(),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,          //【请求】链接
-		RequestApi:            gorequest.UriParse(request.RequestUri).Path,         //【请求】接口
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,             //【请求】接口
 		RequestMethod:         request.RequestMethod,                               //【请求】方式
 		RequestParams:         request.RequestParams,                               //【请求】参数
 		RequestHeader:         request.RequestHeader,                               //【请求】头部
@@ -77,8 +79,8 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 	c.mongoRecord(ctx, apiMongoLog{
 		RequestTime:           gotime.SetCurrent(request.RequestTime).Timestamp(),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,          //【请求】链接
-		RequestApi:            gorequest.UriParse(request.RequestUri).Path,         //【请求】接口
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,             //【请求】接口
 		RequestMethod:         request.RequestMethod,                               //【请求】方式
 		RequestParams:         request.RequestParams,                               //【请求】参数
 		RequestHeader:         request.RequestHeader,                               //【请求】头部
@@ -96,7 +98,7 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 	c.mongoRecord(ctx, apiMongoLog{
 		RequestTime:           gotime.SetCurrent(request.RequestTime).Timestamp(),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
-		RequestUrl:            gorequest.UriParse(request.RequestUri).Url,          //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
 		RequestApi:            api,                                                 //【请求】接口
 		RequestMethod:         request.RequestMethod,                               //【请求】方式
 		RequestParams:         request.RequestParams,                               //【请求】参数

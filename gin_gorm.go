@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
-	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
+	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/goxml"
+	"golang/library/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -132,11 +133,11 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					c.gormRecord(ginPostgresqlLog{
-						TraceId:           GetTraceId(ginCtx),                                                   //【系统】链编号
+						TraceId:           gotrace_id.GetTraceId(ginCtx),                                        //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
-						RequestApi:        gorequest.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),     //【请求】请求接口
+						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),         //【请求】请求接口
 						RequestMethod:     ginCtx.Request.Method,                                                //【请求】请求方式
 						RequestProto:      ginCtx.Request.Proto,                                                 //【请求】请求协议
 						RequestUa:         ginCtx.Request.UserAgent(),                                           //【请求】请求UA
@@ -157,11 +158,11 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					})
 				} else {
 					c.gormRecord(ginPostgresqlLog{
-						TraceId:           GetTraceId(ginCtx),                                                   //【系统】链编号
+						TraceId:           gotrace_id.GetTraceId(ginCtx),                                        //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
-						RequestApi:        gorequest.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),     //【请求】请求接口
+						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),         //【请求】请求接口
 						RequestMethod:     ginCtx.Request.Method,                                                //【请求】请求方式
 						RequestProto:      ginCtx.Request.Proto,                                                 //【请求】请求协议
 						RequestUa:         ginCtx.Request.UserAgent(),                                           //【请求】请求UA
