@@ -45,6 +45,7 @@ type ginPostgresqlLog struct {
 	SystemHostName    string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`           //【系统】主机名
 	SystemInsideIp    string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`          //【系统】内网ip
 	GoVersion         string         `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`                //【程序】Go版本
+	SdkVersion        string         `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`              //【程序】Sdk版本
 }
 
 // gormRecord 记录日志
@@ -55,6 +56,8 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) error {
 		postgresqlLog.SystemInsideIp = c.config.insideIp
 	}
 	postgresqlLog.GoVersion = c.config.goVersion
+
+	postgresqlLog.SdkVersion = Version
 
 	return c.gormClient.Db.Table(c.config.tableName).Create(&postgresqlLog).Error
 }
