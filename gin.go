@@ -16,7 +16,7 @@ type GinClientConfig struct {
 	GormClient *dorm.GormClient // 数据库驱动
 	IpService  *goip.Client     // ip服务
 	TableName  string           // 表名
-	LogClient  *GoLog           // 日志驱动
+	LogClient  *ZapLog          // 日志驱动
 	LogDebug   bool             // 日志开关
 }
 
@@ -24,7 +24,7 @@ type GinClientConfig struct {
 type GinClient struct {
 	gormClient *dorm.GormClient // 数据库驱动
 	ipService  *goip.Client     // ip服务
-	logClient  *GoLog           // 日志驱动
+	logClient  *ZapLog          // 日志驱动
 	config     struct {
 		tableName string // 表名
 		insideIp  string // 内网ip

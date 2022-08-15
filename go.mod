@@ -5,17 +5,18 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
-	go.dtapp.net/dorm v1.0.19
+	github.com/rs/zerolog v1.27.0
+	github.com/sirupsen/logrus v1.9.0
+	go.dtapp.net/dorm v1.0.26
 	go.dtapp.net/goip v1.0.25
 	go.dtapp.net/gojson v1.0.1
-	go.dtapp.net/gorequest v1.0.26
+	go.dtapp.net/gorequest v1.0.27
 	go.dtapp.net/gotime v1.0.5
-	go.dtapp.net/gotrace_id v1.0.2
+	go.dtapp.net/gotrace_id v1.0.5
 	go.dtapp.net/gourl v1.0.0
 	go.dtapp.net/goxml v1.0.1
 	go.uber.org/zap v1.22.0
 	gorm.io/datatypes v1.0.7
-	gorm.io/driver/postgres v1.3.8
 	gorm.io/gorm v1.23.8
 )
 
@@ -46,6 +47,7 @@ require (
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.10.6 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -54,7 +56,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/saracen/go7z v0.0.0-20191010121135-9c09b6bd7fda // indirect
 	github.com/saracen/solidblock v0.0.0-20190426153529-45df20abab6f // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
@@ -85,6 +86,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.3.5 // indirect
+	gorm.io/driver/postgres v1.3.8 // indirect
 	gorm.io/driver/sqlite v1.3.6 // indirect
 	gorm.io/driver/sqlserver v1.3.2 // indirect
 	mellium.im/sasl v0.2.1 // indirect

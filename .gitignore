@@ -5,5 +5,5 @@
 .vscode
 *.log
 gomod.sh
-time_test.go
+*_test.go
 /vendor/

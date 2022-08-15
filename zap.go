@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type ConfigGoLog struct {
+type ZapLogConfig struct {
 	LogPath      string // 日志文件路径
 	LogName      string // 日志文件名
 	LogLevel     string // 日志级别 debug/info/warn/error，debug输出：debug/info/warn/error日志。 info输出：info/warn/error日志。 warn输出：warn/error日志。 error输出：error日志。
@@ -21,27 +21,18 @@ type ConfigGoLog struct {
 	LogInConsole bool   // 是否同时输出到控制台
 }
 
-type GoLog struct {
-	ConfigGoLog
+type ZapLog struct {
+	config *ZapLogConfig
 	Logger *zap.Logger
 }
 
-func NewGoLog(config *ConfigGoLog) *GoLog {
-	g := &GoLog{}
-	g.LogPath = config.LogPath
-	g.LogName = config.LogName
-	g.LogLevel = config.LogLevel
-	g.MaxSize = config.MaxSize
-	g.MaxBackups = config.MaxBackups
-	g.MaxAge = config.MaxAge
-	g.Compress = config.Compress
-	g.JsonFormat = config.JsonFormat
-	g.ShowLine = config.ShowLine
-	g.LogInConsole = config.LogInConsole
+func NewZapLog(config *ZapLogConfig) *ZapLog {
+
+	zl := &ZapLog{config: config}
 
 	// 设置日志级别
 	var level zapcore.Level
-	switch g.LogLevel {
+	switch zl.config.LogLevel {
 	case "debug":
 		level = zap.DebugLevel
 	case "info":
@@ -70,17 +61,17 @@ func NewGoLog(config *ConfigGoLog) *GoLog {
 
 	// 定义日志切割配置
 	hook := lumberjack.Logger{
-		Filename:   g.LogPath + g.LogName, // 日志文件的位置
-		MaxSize:    g.MaxSize,             // 在进行切割之前，日志文件的最大大小（以MB为单位）
-		MaxBackups: g.MaxBackups,          // 保留旧文件的最大个数
-		Compress:   g.Compress,            // 是否压缩 disabled by default
+		Filename:   zl.config.LogPath + zl.config.LogName, // 日志文件的位置
+		MaxSize:    zl.config.MaxSize,                     // 在进行切割之前，日志文件的最大大小（以MB为单位）
+		MaxBackups: zl.config.MaxBackups,                  // 保留旧文件的最大个数
+		Compress:   zl.config.Compress,                    // 是否压缩 disabled by default
 	}
-	if g.MaxAge > 0 {
-		hook.MaxAge = g.MaxAge // days
+	if zl.config.MaxAge > 0 {
+		hook.MaxAge = zl.config.MaxAge // days
 	}
 
 	// 判断是否控制台输出日志
-	if g.LogInConsole {
+	if zl.config.LogInConsole {
 		syncer = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook))
 	} else {
 		syncer = zapcore.AddSync(&hook)
@@ -103,8 +94,9 @@ func NewGoLog(config *ConfigGoLog) *GoLog {
 	}
 
 	var encoder zapcore.Encoder
+
 	// 判断是否json格式输出
-	if g.JsonFormat {
+	if zl.config.JsonFormat {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	} else {
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
@@ -116,12 +108,12 @@ func NewGoLog(config *ConfigGoLog) *GoLog {
 		level,
 	)
 
-	g.Logger = zap.New(core)
+	zl.Logger = zap.New(core)
 
 	// 判断是否显示代码行号
-	if g.ShowLine {
-		g.Logger = g.Logger.WithOptions(zap.AddCaller())
+	if zl.config.ShowLine {
+		zl.Logger = zl.Logger.WithOptions(zap.AddCaller())
 	}
 
-	return g
+	return zl
 }
