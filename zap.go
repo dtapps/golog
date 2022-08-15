@@ -1,6 +1,7 @@
 package golog
 
 import (
+	"context"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -23,7 +24,7 @@ type ZapLogConfig struct {
 
 type ZapLog struct {
 	config *ZapLogConfig
-	Logger *zap.Logger
+	logger *zap.Logger
 }
 
 func NewZapLog(config *ZapLogConfig) *ZapLog {
@@ -108,12 +109,77 @@ func NewZapLog(config *ZapLogConfig) *ZapLog {
 		level,
 	)
 
-	zl.Logger = zap.New(core)
+	zl.logger = zap.New(core)
 
 	// 判断是否显示代码行号
 	if zl.config.ShowLine {
-		zl.Logger = zl.Logger.WithOptions(zap.AddCaller())
+		zl.logger = zl.logger.WithOptions(zap.AddCaller())
 	}
 
 	return zl
+}
+
+// Panic 记录日志，然后panic
+func (zl *ZapLog) Panic(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Panic(args...)
+}
+
+// Panicf 记录日志，然后panic
+func (zl *ZapLog) Panicf(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Panicf(template, args...)
+}
+
+// Fatal 有致命性错误，导致程序崩溃，记录日志，然后退出
+func (zl *ZapLog) Fatal(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Fatal(args...)
+}
+
+// Fatalf 有致命性错误，导致程序崩溃，记录日志，然后退出
+func (zl *ZapLog) Fatalf(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Fatalf(template, args...)
+}
+
+// Error 错误日志
+func (zl *ZapLog) Error(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Error(args...)
+}
+
+// Errorf 错误日志
+func (zl *ZapLog) Errorf(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Errorf(template, args...)
+}
+
+// Warn 警告日志
+func (zl *ZapLog) Warn(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Warn(args...)
+}
+
+// Warnf 警告日志
+func (zl *ZapLog) Warnf(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Warnf(template, args...)
+}
+
+// Info 核心流程日志
+func (zl *ZapLog) Info(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Info(args...)
+}
+
+// Infof 核心流程日志
+func (zl *ZapLog) Infof(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Infof(template, args...)
+}
+
+// Debug debug日志（调试日志）
+func (zl *ZapLog) Debug(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Debug(args...)
+}
+
+// Debugf debug日志（调试日志）
+func (zl *ZapLog) Debugf(ctx context.Context, template string, args ...interface{}) {
+	zl.logger.Sugar().Debugf(template, args...)
+}
+
+// Trace 粒度超细的，一般情况下我们使用不上
+func (zl *ZapLog) Trace(ctx context.Context, args ...interface{}) {
+	zl.logger.Sugar().Debug(args...)
 }

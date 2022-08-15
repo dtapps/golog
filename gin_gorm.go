@@ -2,6 +2,7 @@ package golog
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
@@ -158,7 +159,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.config.logDebug == true {
-							c.logClient.Logger.Sugar().Errorf("[log.gormRecord]%s", err.Error())
+							c.logClient.Errorf(gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx), err.Error())
 						}
 					}
 				} else {
@@ -188,7 +189,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.config.logDebug == true {
-							c.logClient.Logger.Sugar().Errorf("[log.gormRecord]%s", err.Error())
+							c.logClient.Errorf(gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx), "[log.gormRecord]%s", err.Error())
 						}
 					}
 				}

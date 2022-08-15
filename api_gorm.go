@@ -80,7 +80,7 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 	})
 	if err != nil {
 		if c.config.logDebug == true {
-			c.logClient.Logger.Sugar().Errorf("[log.GormMiddleware]%s", err.Error())
+			c.logClient.Errorf(ctx, "[log.GormMiddleware]%s", err.Error())
 		}
 	}
 }
@@ -104,7 +104,7 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 	})
 	if err != nil {
 		if c.config.logDebug == true {
-			c.logClient.Logger.Sugar().Errorf("[log.GormMiddlewareXml]%s", err.Error())
+			c.logClient.Errorf(ctx, "[log.GormMiddlewareXml]%s", err.Error())
 		}
 	}
 }
@@ -128,7 +128,7 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 	})
 	if err != nil {
 		if c.config.logDebug == true {
-			c.logClient.Logger.Sugar().Errorf("[log.GormMiddlewareCustom]%s", err.Error())
+			c.logClient.Errorf(ctx, "[log.GormMiddlewareCustom]%s", err.Error())
 		}
 	}
 }
