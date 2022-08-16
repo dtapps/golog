@@ -18,6 +18,9 @@ func NewLogRusConsole() *LogRusConsole {
 	lrc := &LogRusConsole{}
 	lrc.logger = logrus.New()
 
+	// 设置文件名和方法信息
+	lrc.logger.SetReportCaller(true)
+
 	lrc.logger.SetFormatter(&logrus.TextFormatter{
 		ForceColors:     true,
 		TimestampFormat: gotime.DateTimeFormat,
@@ -26,30 +29,7 @@ func NewLogRusConsole() *LogRusConsole {
 	return lrc
 }
 
-// 跟踪编号
-func (lrc *LogRusConsole) withTraceId(ctx context.Context) {
-	traceId := gotrace_id.GetTraceIdContext(ctx)
-	if traceId == "" {
-		lrc.entry = lrc.logger.WithFields(logrus.Fields{})
-	} else {
-		lrc.entry = lrc.logger.WithField("trace_id", gotrace_id.GetTraceIdContext(ctx))
-	}
-}
-
-// Print 打印
-func (lrc *LogRusConsole) Print(ctx context.Context, args ...interface{}) {
-	lrc.withTraceId(ctx)
-	lrc.entry.Print(args...)
-}
-
-// Printf 打印
-func (lrc *LogRusConsole) Printf(ctx context.Context, format string, args ...interface{}) {
-	lrc.withTraceId(ctx)
-	lrc.entry.Printf(format, args...)
-}
-
-// Println 打印
-func (lrc *LogRusConsole) Println(ctx context.Context, args ...interface{}) {
-	lrc.withTraceId(ctx)
-	lrc.entry.Println(args...)
+// WithTraceId 跟踪编号
+func (lrc *LogRusConsole) WithTraceId(ctx context.Context) *logrus.Entry {
+	return lrc.logger.WithField("trace_id", gotrace_id.GetTraceIdContext(ctx))
 }
