@@ -7,12 +7,12 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/rs/zerolog v1.27.0
 	github.com/sirupsen/logrus v1.9.0
-	go.dtapp.net/dorm v1.0.27
+	go.dtapp.net/dorm v1.0.28
 	go.dtapp.net/goip v1.0.25
 	go.dtapp.net/gojson v1.0.1
 	go.dtapp.net/gorequest v1.0.27
 	go.dtapp.net/gotime v1.0.5
-	go.dtapp.net/gotrace_id v1.0.5
+	go.dtapp.net/gotrace_id v1.0.6
 	go.dtapp.net/gourl v1.0.0
 	go.dtapp.net/goxml v1.0.1
 	go.uber.org/zap v1.22.0
