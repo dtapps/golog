@@ -131,6 +131,9 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 
 			// 记录
 			if c.gormClient != nil {
+
+				var traceId = gotrace_id.GetGinTraceId(ginCtx)
+
 				host := ""
 				if ginCtx.Request.TLS == nil {
 					host = "http://" + ginCtx.Request.Host
@@ -139,7 +142,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                                     //【系统】链编号
+						TraceId:           traceId,                                                              //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
@@ -169,7 +172,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					}
 				} else {
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           gotrace_id.GetGinTraceId(ginCtx),                                     //【系统】链编号
+						TraceId:           traceId,                                                              //【系统】链编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
