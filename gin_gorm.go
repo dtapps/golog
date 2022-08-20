@@ -14,6 +14,7 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"io/ioutil"
+	"log"
 	"net"
 	"time"
 )
@@ -80,6 +81,8 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 		// 获取
 		data, _ := ioutil.ReadAll(ginCtx.Request.Body)
 
+		log.Printf("[golog.GormMiddleware]%s\n", data)
+
 		// 复用
 		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 
@@ -113,7 +116,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 			requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", "", ""
 			if c.ipService != nil {
 				if net.ParseIP(clientIp).To4() != nil {
-					// 判断是不是IPV4
+					// 判断是不是IPv4
 					_, info := c.ipService.Ipv4(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpRegion = info.Region
@@ -121,7 +124,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					requestClientIpCity = info.City
 					requestClientIpIsp = info.ISP
 				} else if net.ParseIP(clientIp).To16() != nil {
-					// 判断是不是IPV6
+					// 判断是不是IPv6
 					info := c.ipService.Ipv6(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpProvince = info.Province
@@ -130,7 +133,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 			}
 
 			// 记录
-			if c.gormClient != nil {
+			if c.gormClient != nil && c.gormClient.Db != nil {
 
 				var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
@@ -142,7 +145,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 				if len(jsonBody) > 0 {
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           traceId,                                                              //【系统】链编号
+						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
@@ -172,7 +175,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					}
 				} else {
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           traceId,                                                              //【系统】链编号
+						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
