@@ -79,7 +79,7 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug == true {
+		if c.config.logDebug {
 			c.logClient.Errorf(ctx, "[log.GormMiddleware]%s", err.Error())
 		}
 	}
@@ -103,7 +103,7 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		SdkVersion:            sdkVersion,                                                                            //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug == true {
+		if c.config.logDebug {
 			c.logClient.Errorf(ctx, "[log.GormMiddlewareXml]%s", err.Error())
 		}
 	}
@@ -127,7 +127,7 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug == true {
+		if c.config.logDebug {
 			c.logClient.Errorf(ctx, "[log.GormMiddlewareCustom]%s", err.Error())
 		}
 	}

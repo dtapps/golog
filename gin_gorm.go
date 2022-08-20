@@ -81,7 +81,9 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 		// 获取
 		data, _ := ioutil.ReadAll(ginCtx.Request.Body)
 
-		log.Printf("[golog.GormMiddleware]%s\n", data)
+		if c.config.logDebug {
+			log.Printf("[golog.GormMiddleware] %s\n", data)
+		}
 
 		// 复用
 		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(data))
@@ -110,8 +112,21 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 			if len(jsonBody) <= 0 {
 				xmlBody = goxml.XmlDecode(string(data))
 			}
+
+			if c.config.logDebug {
+				log.Printf("[golog.len(jsonBody)] %v\n", len(jsonBody))
+			}
+
 			if err != nil {
+				if c.config.logDebug {
+					log.Printf("[golog.json.Unmarshal] %s %s\n", jsonBody, err)
+				}
 				xmlBody = goxml.XmlDecode(string(data))
+			}
+
+			if c.config.logDebug {
+				log.Printf("[golog.xmlBody] %s\n", xmlBody)
+				log.Printf("[golog.jsonBody] %s\n", jsonBody)
 			}
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
@@ -148,7 +163,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					host = "https://" + ginCtx.Request.Host
 				}
 				if len(jsonBody) > 0 {
-					err := c.gormRecord(ginPostgresqlLog{
+					err = c.gormRecord(ginPostgresqlLog{
 						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
@@ -173,12 +188,13 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						if c.config.logDebug == true {
+						if c.config.logDebug {
 							c.logClient.Errorf(ctx, err.Error())
+							log.Printf("[golog.gormRecord] %s\n", err)
 						}
 					}
 				} else {
-					err := c.gormRecord(ginPostgresqlLog{
+					err = c.gormRecord(ginPostgresqlLog{
 						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
@@ -203,8 +219,9 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						if c.config.logDebug == true {
-							c.logClient.Errorf(ctx, "[log.gormRecord]%s", err.Error())
+						if c.config.logDebug {
+							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
+							log.Printf("[golog.gormRecord] %s\n", err)
 						}
 					}
 				}
