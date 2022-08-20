@@ -163,6 +163,11 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					host = "https://" + ginCtx.Request.Host
 				}
 				if len(jsonBody) > 0 {
+					if c.config.logDebug {
+						log.Printf("[golog.gormRecord.json.request_body] %s\n", jsonBody)
+						log.Printf("[golog.gormRecord.json.request_body] %s\n", gojson.JsonEncodeNoError(jsonBody))
+						log.Printf("[golog.gormRecord.json.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(jsonBody)))
+					}
 					err = c.gormRecord(ginPostgresqlLog{
 						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
@@ -189,11 +194,16 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.config.logDebug {
-							c.logClient.Errorf(ctx, err.Error())
-							log.Printf("[golog.gormRecord] %s\n", err)
+							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
+							log.Printf("[golog.gormRecord.json] %s\n", err)
 						}
 					}
 				} else {
+					if c.config.logDebug {
+						log.Printf("[golog.gormRecord.xml.request_body] %s\n", xmlBody)
+						log.Printf("[golog.gormRecord.xml.request_body] %s\n", gojson.JsonEncodeNoError(xmlBody))
+						log.Printf("[golog.gormRecord.xml.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(xmlBody)))
+					}
 					err = c.gormRecord(ginPostgresqlLog{
 						TraceId:           traceId,                                                              //【系统】跟踪编号
 						RequestTime:       requestTime,                                                          //【请求】时间
@@ -221,7 +231,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					if err != nil {
 						if c.config.logDebug {
 							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
-							log.Printf("[golog.gormRecord] %s\n", err)
+							log.Printf("[golog.gormRecord.xml] %s\n", err)
 						}
 					}
 				}

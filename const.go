@@ -1,3 +1,3 @@
 package golog
 
-const Version = "1.0.35"
+const Version = "1.0.36"
