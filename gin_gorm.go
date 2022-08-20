@@ -106,8 +106,11 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 			// 解析请求内容
 			var xmlBody map[string]string
 			var jsonBody map[string]interface{}
-			_ = json.Unmarshal(data, &jsonBody)
+			err := json.Unmarshal(data, &jsonBody)
 			if len(jsonBody) <= 0 {
+				xmlBody = goxml.XmlDecode(string(data))
+			}
+			if err != nil {
 				xmlBody = goxml.XmlDecode(string(data))
 			}
 
@@ -115,16 +118,17 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 
 			requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", "", ""
 			if c.ipService != nil {
+				// 判断是不是IPv4
 				if net.ParseIP(clientIp).To4() != nil {
-					// 判断是不是IPv4
 					_, info := c.ipService.Ipv4(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpRegion = info.Region
 					requestClientIpProvince = info.Province
 					requestClientIpCity = info.City
 					requestClientIpIsp = info.ISP
-				} else if net.ParseIP(clientIp).To16() != nil {
-					// 判断是不是IPv6
+				}
+				// 判断是不是IPv6
+				if net.ParseIP(clientIp).To16() != nil {
 					info := c.ipService.Ipv6(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpProvince = info.Province
