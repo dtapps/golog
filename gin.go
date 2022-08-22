@@ -22,15 +22,24 @@ type GinClientConfig struct {
 
 // GinClient 框架
 type GinClient struct {
-	gormClient *dorm.GormClient // 数据库驱动
-	ipService  *goip.Client     // ip服务
-	logClient  *ZapLog          // 日志驱动
-	config     struct {
+	gormClient  *dorm.GormClient  // 数据库驱动
+	mongoClient *dorm.MongoClient // 数据库驱动
+	ipService   *goip.Client      // ip服务
+	logClient   *ZapLog           // 日志驱动
+	config      struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
 		hostname  string // 主机名
 		goVersion string // go版本
 		logDebug  bool   // 日志开关
+	}
+	mongoConfig struct {
+		databaseName   string // 库名
+		collectionName string // 表名
+		insideIp       string // 内网ip
+		hostname       string // 主机名
+		goVersion      string // go版本
+		debug          bool   // 日志开关
 	}
 }
 
@@ -65,6 +74,44 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	c.config.hostname = hostname
 	c.config.insideIp = goip.GetInsideIp(context.Background())
 	c.config.goVersion = runtime.Version()
+
+	return c, nil
+}
+
+// NewGinMongoClient 创建框架实例化
+// mongoClient 数据库服务
+// ipService ip服务
+// databaseName 库名
+// collectionName 表名
+func NewGinMongoClient(mongoClient *dorm.MongoClient, ipService *goip.Client, databaseName string, collectionName string, debug bool) (*GinClient, error) {
+
+	c := &GinClient{}
+
+	if mongoClient.Db == nil {
+		return nil, errors.New("没有设置驱动")
+	}
+
+	c.mongoClient = mongoClient
+
+	if databaseName == "" {
+		return nil, errors.New("没有设置库名")
+	}
+	c.mongoConfig.databaseName = databaseName
+
+	if collectionName == "" {
+		return nil, errors.New("没有设置表名")
+	}
+	c.mongoConfig.collectionName = collectionName
+
+	c.ipService = ipService
+
+	c.mongoConfig.debug = debug
+
+	hostname, _ := os.Hostname()
+
+	c.mongoConfig.hostname = hostname
+	c.mongoConfig.insideIp = goip.GetInsideIp(context.Background())
+	c.mongoConfig.goVersion = runtime.Version()
 
 	return c, nil
 }

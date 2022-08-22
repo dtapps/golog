@@ -15,6 +15,7 @@ require (
 	go.dtapp.net/gotrace_id v1.0.6
 	go.dtapp.net/gourl v1.0.0
 	go.dtapp.net/goxml v1.0.1
+	go.mongodb.org/mongo-driver v1.10.1
 	go.uber.org/zap v1.22.0
 	gorm.io/datatypes v1.0.7
 	gorm.io/gorm v1.23.8
@@ -73,7 +74,6 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.dtapp.net/gorandom v1.0.1 // indirect
 	go.dtapp.net/gostring v1.0.9 // indirect
-	go.mongodb.org/mongo-driver v1.10.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8 // indirect
