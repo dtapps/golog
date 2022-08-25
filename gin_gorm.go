@@ -141,17 +141,16 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 
 			requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", "", ""
 			if c.ipService != nil {
-				// 判断是不是IPv4
 				if net.ParseIP(clientIp).To4() != nil {
+					// IPv4
 					_, info := c.ipService.Ipv4(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpRegion = info.Region
 					requestClientIpProvince = info.Province
 					requestClientIpCity = info.City
 					requestClientIpIsp = info.ISP
-				}
-				// 判断是不是IPv6
-				if net.ParseIP(clientIp).To16() != nil {
+				} else if net.ParseIP(clientIp).To16() != nil {
+					// IPv6
 					info := c.ipService.Ipv6(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpProvince = info.Province

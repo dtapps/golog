@@ -144,18 +144,17 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 
 			requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", "", ""
 			if c.ipService != nil {
-				if net.ParseIP(ginCtx.ClientIP()).To4() != nil {
-					// 判断是不是IPV4
-					_, info := c.ipService.Ipv4(ginCtx.ClientIP())
+				if net.ParseIP(clientIp).To4() != nil {
+					// IPv4
+					_, info := c.ipService.Ipv4(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpRegion = info.Region
 					requestClientIpProvince = info.Province
 					requestClientIpCity = info.City
 					requestClientIpIsp = info.ISP
-				}
-				if net.ParseIP(ginCtx.ClientIP()).To16() != nil {
-					// 判断是不是IPV6
-					info := c.ipService.Ipv6(ginCtx.ClientIP())
+				} else if net.ParseIP(clientIp).To16() != nil {
+					// IPv6
+					info := c.ipService.Ipv6(clientIp)
 					requestClientIpCountry = info.Country
 					requestClientIpProvince = info.Province
 					requestClientIpCity = info.City
@@ -175,7 +174,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 				}
 				if dataJson {
 					if c.mongoConfig.debug {
-						log.Printf("[golog.MongoMiddleware.gormRecord.json.request_body] %s\n", jsonBody)
+						log.Printf("[golog.MongoMiddleware.mongoRecord.json.request_body] %s\n", jsonBody)
 					}
 					err := c.mongoRecord(ginMongoLog{
 						TraceId:           traceId,                                                      //【系统】跟踪编号
@@ -203,13 +202,13 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.mongoConfig.debug {
-							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
-							log.Printf("[golog.MongoMiddleware.gormRecord.json] %s\n", err)
+							c.logClient.Errorf(ctx, "[log.mongoRecord] %s", err.Error())
+							log.Printf("[golog.MongoMiddleware.mongoRecord.json] %s\n", err)
 						}
 					}
 				} else {
 					if c.mongoConfig.debug {
-						log.Printf("[golog.MongoMiddleware.gormRecord.xml.request_body] %s\n", xmlBody)
+						log.Printf("[golog.MongoMiddleware.mongoRecord.xml.request_body] %s\n", xmlBody)
 					}
 					err := c.mongoRecord(ginMongoLog{
 						TraceId:           traceId,                                                      //【系统】跟踪编号
@@ -237,8 +236,8 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.mongoConfig.debug {
-							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
-							log.Printf("[golog.MongoMiddleware.gormRecord.xml] %s\n", err)
+							c.logClient.Errorf(ctx, "[log.mongoRecord] %s", err.Error())
+							log.Printf("[golog.MongoMiddleware.mongoRecord.xml] %s\n", err)
 						}
 					}
 				}

@@ -517,8 +517,8 @@ github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxt
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 go.dtapp.net/dorm v1.0.29 h1:viOJ66S0x84dzSVUd9rHr4aGCziQupfrJGWPXI6GDAo=
 go.dtapp.net/dorm v1.0.29/go.mod h1:4YgRRh77Y+zn5eitmID8h33kyGSKYuYIWRlo9oI2YxI=
-go.dtapp.net/goip v1.0.27 h1:C12v7Hm2zKW+GkRc5qZsjL1YYnCNCkl5R3DvLDfKubc=
-go.dtapp.net/goip v1.0.27/go.mod h1:ZqPPUvpOSzdtB/dEZFiaD0CBRZmvIzjDmm3XkpMC9Bo=
+go.dtapp.net/goip v1.0.28 h1:wZt+wbzNhOLRUJnepG4c8HhUr4V9jNXOF6wJ1h7jUvU=
+go.dtapp.net/goip v1.0.28/go.mod h1:ZqPPUvpOSzdtB/dEZFiaD0CBRZmvIzjDmm3XkpMC9Bo=
 go.dtapp.net/gojson v1.0.1 h1:MHeSGlq1KxzL7rCkm18fhwW4GNORHohdDMmxY5PupKY=
 go.dtapp.net/gojson v1.0.1/go.mod h1:TkkpTNxHBKxul0e7gC5MrL1K4ICFB9mQ7wHzjBah3/k=
 go.dtapp.net/gorandom v1.0.1 h1:IWfMClh1ECPvyUjlqD7MwLq4mZdUusD1qAwAdsvEJBs=

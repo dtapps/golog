@@ -8,7 +8,7 @@ require (
 	github.com/rs/zerolog v1.27.0
 	github.com/sirupsen/logrus v1.9.0
 	go.dtapp.net/dorm v1.0.29
-	go.dtapp.net/goip v1.0.27
+	go.dtapp.net/goip v1.0.28
 	go.dtapp.net/gojson v1.0.1
 	go.dtapp.net/gorequest v1.0.27
 	go.dtapp.net/gotime v1.0.5
