@@ -15,13 +15,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"time"
 )
 
 // 模型结构体
 type ginMongoLog struct {
 	LogId             primitive.ObjectID `json:"log_id,omitempty" bson:"_id,omitempty"`                              //【记录】编号
 	TraceId           string             `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                       //【系统】跟踪编号
-	RequestTime       int64              `json:"request_time,omitempty" bson:"request_time,omitempty"`               //【请求】时间
+	RequestTime       time.Time          `json:"request_time,omitempty" bson:"request_time,omitempty"`               //【请求】时间
 	RequestUri        string             `json:"request_uri,omitempty" bson:"request_uri,omitempty"`                 //【请求】请求链接 域名+路径+参数
 	RequestUrl        string             `json:"request_url,omitempty" bson:"request_url,omitempty"`                 //【请求】请求链接 域名+路径
 	RequestApi        string             `json:"request_api,omitempty" bson:"request_api,omitempty"`                 //【请求】请求接口 路径
@@ -38,7 +39,7 @@ type ginMongoLog struct {
 	RequestIpCity     string             `json:"request_ip_city,omitempty" bson:"request_ip_city,omitempty"`         //【请求】请求客户端城市
 	RequestIpIsp      string             `json:"request_ip_isp,omitempty" bson:"request_ip_isp,omitempty"`           //【请求】请求客户端运营商
 	RequestHeader     interface{}        `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
-	ResponseTime      int64              `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
+	ResponseTime      time.Time          `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
 	ResponseCode      int                `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
 	ResponseMsg       string             `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
 	ResponseData      interface{}        `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
@@ -178,7 +179,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					}
 					err := c.mongoRecord(ginMongoLog{
 						TraceId:           traceId,                                                      //【系统】跟踪编号
-						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                   //【请求】时间
+						RequestTime:       requestTime,                                                  //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
 						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
@@ -195,7 +196,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 						RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 						RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
 						RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-						ResponseTime:      gotime.SetCurrent(gotime.Current().Time).Timestamp(),         //【返回】时间
+						ResponseTime:      gotime.Current().Time,                                        //【返回】时间
 						ResponseCode:      responseCode,                                                 //【返回】状态码
 						ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
 						CostTime:          endTime - startTime,                                          //【系统】花费时间
@@ -212,7 +213,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					}
 					err := c.mongoRecord(ginMongoLog{
 						TraceId:           traceId,                                                      //【系统】跟踪编号
-						RequestTime:       gotime.SetCurrent(requestTime).Timestamp(),                   //【请求】时间
+						RequestTime:       requestTime,                                                  //【请求】时间
 						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
 						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
 						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
@@ -229,7 +230,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 						RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 						RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
 						RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-						ResponseTime:      gotime.SetCurrent(gotime.Current().Time).Timestamp(),         //【返回】时间
+						ResponseTime:      gotime.Current().Time,                                        //【返回】时间
 						ResponseCode:      responseCode,                                                 //【返回】状态码
 						ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
 						CostTime:          endTime - startTime,                                          //【系统】花费时间
