@@ -2,7 +2,6 @@ package golog
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
@@ -54,20 +53,20 @@ type ginPostgresqlLog struct {
 // gormRecord 记录日志
 func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) error {
 
-	postgresqlLog.SystemHostName = c.config.hostname
+	postgresqlLog.SystemHostName = c.gormConfig.hostname
 	if postgresqlLog.SystemInsideIp == "" {
-		postgresqlLog.SystemInsideIp = c.config.insideIp
+		postgresqlLog.SystemInsideIp = c.gormConfig.insideIp
 	}
-	postgresqlLog.GoVersion = c.config.goVersion
+	postgresqlLog.GoVersion = c.gormConfig.goVersion
 
 	postgresqlLog.SdkVersion = Version
 
-	return c.gormClient.Db.Table(c.config.tableName).Create(&postgresqlLog).Error
+	return c.gormClient.Db.Table(c.gormConfig.tableName).Create(&postgresqlLog).Error
 }
 
 // GormQuery 查询
 func (c *GinClient) GormQuery() *gorm.DB {
-	return c.gormClient.Db.Table(c.config.tableName)
+	return c.gormClient.Db.Table(c.gormConfig.tableName)
 }
 
 // GormMiddleware 中间件
@@ -81,7 +80,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 		// 获取
 		data, _ := ioutil.ReadAll(ginCtx.Request.Body)
 
-		if c.config.logDebug {
+		if c.gormConfig.debug {
 			log.Printf("[golog.GormMiddleware] %s\n", data)
 		}
 
@@ -103,8 +102,6 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 
 		go func() {
 
-			var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
-
 			var dataJson = true
 
 			// 解析请求内容
@@ -119,12 +116,12 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					xmlBody = goxml.XmlDecode(string(data))
 				}
 
-				if c.config.logDebug {
+				if c.gormConfig.debug {
 					log.Printf("[golog.GormMiddleware.len(jsonBody)] %v\n", len(jsonBody))
 				}
 
 				if err != nil {
-					if c.config.logDebug {
+					if c.gormConfig.debug {
 						log.Printf("[golog.GormMiddleware.json.Unmarshal] %s %s\n", jsonBody, err)
 					}
 					dataJson = false
@@ -132,7 +129,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 			}
 
-			if c.config.logDebug {
+			if c.gormConfig.debug {
 				log.Printf("[golog.GormMiddleware.xmlBody] %s\n", xmlBody)
 				log.Printf("[golog.GormMiddleware.jsonBody] %s\n", jsonBody)
 			}
@@ -170,7 +167,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					host = "https://" + ginCtx.Request.Host
 				}
 				if dataJson {
-					if c.config.logDebug {
+					if c.gormConfig.debug {
 						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", jsonBody)
 						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", gojson.JsonEncodeNoError(jsonBody))
 						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(jsonBody)))
@@ -200,13 +197,12 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						if c.config.logDebug {
-							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
+						if c.gormConfig.debug {
 							log.Printf("[golog.GormMiddleware.gormRecord.json] %s\n", err)
 						}
 					}
 				} else {
-					if c.config.logDebug {
+					if c.gormConfig.debug {
 						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", xmlBody)
 						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", gojson.JsonEncodeNoError(xmlBody))
 						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(xmlBody)))
@@ -236,8 +232,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						CostTime:          endTime - startTime,                                                  //【系统】花费时间
 					})
 					if err != nil {
-						if c.config.logDebug {
-							c.logClient.Errorf(ctx, "[log.gormRecord] %s", err.Error())
+						if c.gormConfig.debug {
 							log.Printf("[golog.GormMiddleware.gormRecord.xml] %s\n", err)
 						}
 					}

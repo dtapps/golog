@@ -2,7 +2,6 @@ package golog
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
@@ -106,8 +105,6 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 
 		go func() {
 
-			var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
-
 			var dataJson = true
 
 			// 解析请求内容
@@ -202,7 +199,6 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.mongoConfig.debug {
-							c.logClient.Errorf(ctx, "[log.mongoRecord] %s", err.Error())
 							log.Printf("[golog.MongoMiddleware.mongoRecord.json] %s\n", err)
 						}
 					}
@@ -236,7 +232,6 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					})
 					if err != nil {
 						if c.mongoConfig.debug {
-							c.logClient.Errorf(ctx, "[log.mongoRecord] %s", err.Error())
 							log.Printf("[golog.MongoMiddleware.mongoRecord.xml] %s\n", err)
 						}
 					}

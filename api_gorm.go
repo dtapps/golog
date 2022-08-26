@@ -9,6 +9,7 @@ import (
 	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"log"
 	"time"
 	"unicode/utf8"
 )
@@ -42,20 +43,20 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 		postgresqlLog.ResponseBody = datatypes.JSON("")
 	}
 
-	postgresqlLog.SystemHostName = c.config.hostname
+	postgresqlLog.SystemHostName = c.gormConfig.hostname
 	if postgresqlLog.SystemInsideIp == "" {
-		postgresqlLog.SystemInsideIp = c.config.insideIp
+		postgresqlLog.SystemInsideIp = c.gormConfig.insideIp
 	}
-	postgresqlLog.GoVersion = c.config.goVersion
+	postgresqlLog.GoVersion = c.gormConfig.goVersion
 
 	postgresqlLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
 
-	return c.gormClient.Db.Table(c.config.tableName).Create(&postgresqlLog).Error
+	return c.gormClient.Db.Table(c.gormConfig.tableName).Create(&postgresqlLog).Error
 }
 
 // GormQuery 查询
 func (c *ApiClient) GormQuery() *gorm.DB {
-	return c.gormClient.Db.Table(c.config.tableName)
+	return c.gormClient.Db.Table(c.gormConfig.tableName)
 }
 
 // GormMiddleware 中间件
@@ -79,8 +80,8 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.GormMiddleware]%s", err.Error())
+		if c.gormConfig.debug {
+			log.Printf("[log.GormMiddleware]%s\n", err.Error())
 		}
 	}
 }
@@ -103,8 +104,8 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		SdkVersion:            sdkVersion,                                                                            //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.GormMiddlewareXml]%s", err.Error())
+		if c.gormConfig.debug {
+			log.Printf("[log.GormMiddlewareXml]%s\n", err.Error())
 		}
 	}
 }
@@ -127,8 +128,8 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.GormMiddlewareCustom]%s", err.Error())
+		if c.gormConfig.debug {
+			log.Printf("[log.GormMiddlewareCustom]%s\n", err.Error())
 		}
 	}
 }

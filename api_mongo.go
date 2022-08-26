@@ -7,6 +7,7 @@ import (
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"log"
 	"time"
 )
 
@@ -73,8 +74,8 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 		SdkVersion:            sdkVersion,                              //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.MongoMiddleware]%s", err.Error())
+		if c.mongoConfig.debug {
+			log.Printf("[log.MongoMiddleware]%s\n", err.Error())
 		}
 	}
 }
@@ -97,8 +98,8 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		SdkVersion:            sdkVersion,                                  //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.MongoMiddlewareXml]%s", err.Error())
+		if c.mongoConfig.debug {
+			log.Printf("[log.MongoMiddlewareXml]%s\n", err.Error())
 		}
 	}
 }
@@ -121,8 +122,8 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 		SdkVersion:            sdkVersion,                             //【程序】Sdk版本
 	})
 	if err != nil {
-		if c.config.logDebug {
-			c.logClient.Errorf(ctx, "[log.MongoMiddlewareCustom]%s", err.Error())
+		if c.mongoConfig.debug {
+			log.Printf("[log.MongoMiddlewareCustom]%s\n", err.Error())
 		}
 	}
 }
