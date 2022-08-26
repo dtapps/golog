@@ -34,11 +34,15 @@ type GinClient struct {
 	}
 }
 
+// client 数据库服务
+// string 表名
+type ginGormClientFun func() (*dorm.GormClient, string)
+
 // NewGinGormClient 创建框架实例化
 // client 数据库服务
-// tableName=表名
+// tableName 表名
 // ipService ip服务
-func NewGinGormClient(gormClientFun func() (client *dorm.GormClient, tableName string), ipService *goip.Client, debug bool) (*GinClient, error) {
+func NewGinGormClient(gormClientFun ginGormClientFun, ipService *goip.Client, debug bool) (*GinClient, error) {
 
 	c := &GinClient{}
 
@@ -73,12 +77,17 @@ func NewGinGormClient(gormClientFun func() (client *dorm.GormClient, tableName s
 	return c, nil
 }
 
+// client 数据库服务
+// string 库名
+// string 表名
+type ginMongoClientFun func() (*dorm.MongoClient, string, string)
+
 // NewGinMongoClient 创建框架实例化
 // client 数据库服务
 // databaseName 库名
 // collectionName 表名
 // ipService ip服务
-func NewGinMongoClient(mongoClientFun func() (client *dorm.MongoClient, databaseName string, collectionName string), ipService *goip.Client, debug bool) (*GinClient, error) {
+func NewGinMongoClient(mongoClientFun ginMongoClientFun, ipService *goip.Client, debug bool) (*GinClient, error) {
 
 	c := &GinClient{}
 

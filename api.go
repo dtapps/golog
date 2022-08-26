@@ -30,10 +30,14 @@ type ApiClient struct {
 	}
 }
 
+// client 数据库服务
+// string 表名
+type apiGormClientFun func() (*dorm.GormClient, string)
+
 // NewApiGormClient 创建接口实例化
 // client 数据库服务
 // tableName 表名
-func NewApiGormClient(gormClientFun func() (client *dorm.GormClient, tableName string), debug bool) (*ApiClient, error) {
+func NewApiGormClient(gormClientFun apiGormClientFun, debug bool) (*ApiClient, error) {
 
 	c := &ApiClient{}
 
@@ -66,11 +70,16 @@ func NewApiGormClient(gormClientFun func() (client *dorm.GormClient, tableName s
 	return c, nil
 }
 
+// client 数据库服务
+// string 库名
+// string 表名
+type apiMongoClientFun func() (*dorm.MongoClient, string, string)
+
 // NewApiMongoClient 创建接口实例化
 // client 数据库服务
 // databaseName 库名
 // collectionName 表名
-func NewApiMongoClient(mongoClientFun func() (client *dorm.MongoClient, databaseName string, collectionName string), debug bool) (*ApiClient, error) {
+func NewApiMongoClient(mongoClientFun apiMongoClientFun, debug bool) (*ApiClient, error) {
 
 	c := &ApiClient{}
 
