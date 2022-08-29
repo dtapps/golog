@@ -3,7 +3,6 @@ package golog
 import (
 	"context"
 	"go.dtapp.net/dorm"
-	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
@@ -65,19 +64,19 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		return
 	}
 	err := c.gormRecord(ctx, apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                                              //【请求】时间
-		RequestUri:            request.RequestUri,                                               //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                           //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path,                          //【请求】接口
-		RequestMethod:         request.RequestMethod,                                            //【请求】方式
-		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
-		RequestHeader:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
-		ResponseHeader:        datatypes.JSON(gojson.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                                       //【返回】状态码
-		ResponseBody:          request.ResponseBody,                                             //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
-		ResponseTime:          request.ResponseTime,                                             //【返回】时间
-		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
+		RequestTime:           request.RequestTime,                                            //【请求】时间
+		RequestUri:            request.RequestUri,                                             //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,                        //【请求】接口
+		RequestMethod:         request.RequestMethod,                                          //【请求】方式
+		RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
+		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
+		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
+		ResponseBody:          request.ResponseBody,                                           //【返回】内容
+		ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
+		ResponseTime:          request.ResponseTime,                                           //【返回】时间
+		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	})
 	if err != nil {
 		if c.gormConfig.debug {
@@ -89,19 +88,19 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 // GormMiddlewareXml 中间件
 func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
 	err := c.gormRecord(ctx, apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                                                                   //【请求】时间
-		RequestUri:            request.RequestUri,                                                                    //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                                                //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path,                                               //【请求】接口
-		RequestMethod:         request.RequestMethod,                                                                 //【请求】方式
-		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),                       //【请求】参数
-		RequestHeader:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestHeader)),                       //【请求】头部
-		ResponseHeader:        datatypes.JSON(gojson.JsonEncodeNoError(request.ResponseHeader)),                      //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                                                            //【返回】状态码
-		ResponseBody:          datatypes.JSON(gojson.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,                                                         //【返回】大小
-		ResponseTime:          request.ResponseTime,                                                                  //【返回】时间
-		SdkVersion:            sdkVersion,                                                                            //【程序】Sdk版本
+		RequestTime:           request.RequestTime,                                                                 //【请求】时间
+		RequestUri:            request.RequestUri,                                                                  //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                                              //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,                                             //【请求】接口
+		RequestMethod:         request.RequestMethod,                                                               //【请求】方式
+		RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),                       //【请求】参数
+		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),                       //【请求】头部
+		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)),                      //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                                                          //【返回】状态码
+		ResponseBody:          datatypes.JSON(dorm.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
+		ResponseContentLength: request.ResponseContentLength,                                                       //【返回】大小
+		ResponseTime:          request.ResponseTime,                                                                //【返回】时间
+		SdkVersion:            sdkVersion,                                                                          //【程序】Sdk版本
 	})
 	if err != nil {
 		if c.gormConfig.debug {
@@ -113,19 +112,19 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 // GormMiddlewareCustom 中间件
 func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
 	err := c.gormRecord(ctx, apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                                              //【请求】时间
-		RequestUri:            request.RequestUri,                                               //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                           //【请求】链接
-		RequestApi:            api,                                                              //【请求】接口
-		RequestMethod:         request.RequestMethod,                                            //【请求】方式
-		RequestParams:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
-		RequestHeader:         datatypes.JSON(gojson.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
-		ResponseHeader:        datatypes.JSON(gojson.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                                       //【返回】状态码
-		ResponseBody:          request.ResponseBody,                                             //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,                                    //【返回】大小
-		ResponseTime:          request.ResponseTime,                                             //【返回】时间
-		SdkVersion:            sdkVersion,                                                       //【程序】Sdk版本
+		RequestTime:           request.RequestTime,                                            //【请求】时间
+		RequestUri:            request.RequestUri,                                             //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
+		RequestApi:            api,                                                            //【请求】接口
+		RequestMethod:         request.RequestMethod,                                          //【请求】方式
+		RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
+		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
+		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
+		ResponseBody:          request.ResponseBody,                                           //【返回】内容
+		ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
+		ResponseTime:          request.ResponseTime,                                           //【返回】时间
+		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	})
 	if err != nil {
 		if c.gormConfig.debug {

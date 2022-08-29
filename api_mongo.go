@@ -59,19 +59,19 @@ func (c *ApiClient) MongoQuery() *dorm.MongoClient {
 // MongoMiddleware 中间件
 func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
 	err := c.mongoRecord(ctx, apiMongolLog{
-		RequestTime:           request.RequestTime,                     //【请求】时间
-		RequestUri:            request.RequestUri,                      //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,  //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path, //【请求】接口
-		RequestMethod:         request.RequestMethod,                   //【请求】方式
-		RequestParams:         request.RequestParams,                   //【请求】参数
-		RequestHeader:         request.RequestHeader,                   //【请求】头部
-		ResponseHeader:        request.ResponseHeader,                  //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,              //【返回】状态码
-		ResponseBody:          request.ResponseBody,                    //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,           //【返回】大小
-		ResponseTime:          request.ResponseTime,                    //【返回】时间
-		SdkVersion:            sdkVersion,                              //【程序】Sdk版本
+		RequestTime:           request.RequestTime,                          //【请求】时间
+		RequestUri:            request.RequestUri,                           //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,       //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,      //【请求】接口
+		RequestMethod:         request.RequestMethod,                        //【请求】方式
+		RequestParams:         request.RequestParams,                        //【请求】参数
+		RequestHeader:         request.RequestHeader,                        //【请求】头部
+		ResponseHeader:        request.ResponseHeader,                       //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                   //【返回】状态码
+		ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody), //【返回】内容
+		ResponseContentLength: request.ResponseContentLength,                //【返回】大小
+		ResponseTime:          request.ResponseTime,                         //【返回】时间
+		SdkVersion:            sdkVersion,                                   //【程序】Sdk版本
 	})
 	if err != nil {
 		if c.mongoConfig.debug {
@@ -107,19 +107,19 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 // MongoMiddlewareCustom 中间件
 func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
 	err := c.mongoRecord(ctx, apiMongolLog{
-		RequestTime:           request.RequestTime,                    //【请求】时间
-		RequestUri:            request.RequestUri,                     //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url, //【请求】链接
-		RequestApi:            api,                                    //【请求】接口
-		RequestMethod:         request.RequestMethod,                  //【请求】方式
-		RequestParams:         request.RequestParams,                  //【请求】参数
-		RequestHeader:         request.RequestHeader,                  //【请求】头部
-		ResponseHeader:        request.ResponseHeader,                 //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,             //【返回】状态码
-		ResponseBody:          request.ResponseBody,                   //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,          //【返回】大小
-		ResponseTime:          request.ResponseTime,                   //【返回】时间
-		SdkVersion:            sdkVersion,                             //【程序】Sdk版本
+		RequestTime:           request.RequestTime,                          //【请求】时间
+		RequestUri:            request.RequestUri,                           //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,       //【请求】链接
+		RequestApi:            api,                                          //【请求】接口
+		RequestMethod:         request.RequestMethod,                        //【请求】方式
+		RequestParams:         request.RequestParams,                        //【请求】参数
+		RequestHeader:         request.RequestHeader,                        //【请求】头部
+		ResponseHeader:        request.ResponseHeader,                       //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                   //【返回】状态码
+		ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody), //【返回】内容
+		ResponseContentLength: request.ResponseContentLength,                //【返回】大小
+		ResponseTime:          request.ResponseTime,                         //【返回】时间
+		SdkVersion:            sdkVersion,                                   //【程序】Sdk版本
 	})
 	if err != nil {
 		if c.mongoConfig.debug {

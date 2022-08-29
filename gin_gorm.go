@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/gojson"
+	"go.dtapp.net/dorm"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
@@ -169,32 +169,32 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				if dataJson {
 					if c.gormConfig.debug {
 						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", jsonBody)
-						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", gojson.JsonEncodeNoError(jsonBody))
-						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(jsonBody)))
+						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", dorm.JsonEncodeNoError(jsonBody))
+						log.Printf("[golog.GormMiddleware.gormRecord.json.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(jsonBody)))
 					}
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           traceId,                                                              //【系统】跟踪编号
-						RequestTime:       requestTime,                                                          //【请求】时间
-						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
-						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
-						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),         //【请求】请求接口
-						RequestMethod:     ginCtx.Request.Method,                                                //【请求】请求方式
-						RequestProto:      ginCtx.Request.Proto,                                                 //【请求】请求协议
-						RequestUa:         ginCtx.Request.UserAgent(),                                           //【请求】请求UA
-						RequestReferer:    ginCtx.Request.Referer(),                                             //【请求】请求referer
-						RequestBody:       datatypes.JSON(gojson.JsonEncodeNoError(jsonBody)),                   //【请求】请求主体
-						RequestUrlQuery:   datatypes.JSON(gojson.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
-						RequestIp:         clientIp,                                                             //【请求】请求客户端Ip
-						RequestIpCountry:  requestClientIpCountry,                                               //【请求】请求客户端城市
-						RequestIpRegion:   requestClientIpRegion,                                                //【请求】请求客户端区域
-						RequestIpProvince: requestClientIpProvince,                                              //【请求】请求客户端省份
-						RequestIpCity:     requestClientIpCity,                                                  //【请求】请求客户端城市
-						RequestIpIsp:      requestClientIpIsp,                                                   //【请求】请求客户端运营商
-						RequestHeader:     datatypes.JSON(gojson.JsonEncodeNoError(ginCtx.Request.Header)),      //【请求】请求头
-						ResponseTime:      gotime.Current().Time,                                                //【返回】时间
-						ResponseCode:      responseCode,                                                         //【返回】状态码
-						ResponseData:      datatypes.JSON(responseBody),                                         //【返回】数据
-						CostTime:          endTime - startTime,                                                  //【系统】花费时间
+						TraceId:           traceId,                                                            //【系统】跟踪编号
+						RequestTime:       requestTime,                                                        //【请求】时间
+						RequestUri:        host + ginCtx.Request.RequestURI,                                   //【请求】请求链接
+						RequestUrl:        ginCtx.Request.RequestURI,                                          //【请求】请求链接
+						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),       //【请求】请求接口
+						RequestMethod:     ginCtx.Request.Method,                                              //【请求】请求方式
+						RequestProto:      ginCtx.Request.Proto,                                               //【请求】请求协议
+						RequestUa:         ginCtx.Request.UserAgent(),                                         //【请求】请求UA
+						RequestReferer:    ginCtx.Request.Referer(),                                           //【请求】请求referer
+						RequestBody:       datatypes.JSON(dorm.JsonEncodeNoError(jsonBody)),                   //【请求】请求主体
+						RequestUrlQuery:   datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
+						RequestIp:         clientIp,                                                           //【请求】请求客户端Ip
+						RequestIpCountry:  requestClientIpCountry,                                             //【请求】请求客户端城市
+						RequestIpRegion:   requestClientIpRegion,                                              //【请求】请求客户端区域
+						RequestIpProvince: requestClientIpProvince,                                            //【请求】请求客户端省份
+						RequestIpCity:     requestClientIpCity,                                                //【请求】请求客户端城市
+						RequestIpIsp:      requestClientIpIsp,                                                 //【请求】请求客户端运营商
+						RequestHeader:     datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.Header)),      //【请求】请求头
+						ResponseTime:      gotime.Current().Time,                                              //【返回】时间
+						ResponseCode:      responseCode,                                                       //【返回】状态码
+						ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
+						CostTime:          endTime - startTime,                                                //【系统】花费时间
 					})
 					if err != nil {
 						if c.gormConfig.debug {
@@ -204,32 +204,32 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				} else {
 					if c.gormConfig.debug {
 						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", xmlBody)
-						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", gojson.JsonEncodeNoError(xmlBody))
-						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(gojson.JsonEncodeNoError(xmlBody)))
+						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", dorm.JsonEncodeNoError(xmlBody))
+						log.Printf("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)))
 					}
 					err := c.gormRecord(ginPostgresqlLog{
-						TraceId:           traceId,                                                              //【系统】跟踪编号
-						RequestTime:       requestTime,                                                          //【请求】时间
-						RequestUri:        host + ginCtx.Request.RequestURI,                                     //【请求】请求链接
-						RequestUrl:        ginCtx.Request.RequestURI,                                            //【请求】请求链接
-						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),         //【请求】请求接口
-						RequestMethod:     ginCtx.Request.Method,                                                //【请求】请求方式
-						RequestProto:      ginCtx.Request.Proto,                                                 //【请求】请求协议
-						RequestUa:         ginCtx.Request.UserAgent(),                                           //【请求】请求UA
-						RequestReferer:    ginCtx.Request.Referer(),                                             //【请求】请求referer
-						RequestBody:       datatypes.JSON(gojson.JsonEncodeNoError(xmlBody)),                    //【请求】请求主体
-						RequestUrlQuery:   datatypes.JSON(gojson.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
-						RequestIp:         clientIp,                                                             //【请求】请求客户端Ip
-						RequestIpCountry:  requestClientIpCountry,                                               //【请求】请求客户端城市
-						RequestIpRegion:   requestClientIpRegion,                                                //【请求】请求客户端区域
-						RequestIpProvince: requestClientIpProvince,                                              //【请求】请求客户端省份
-						RequestIpCity:     requestClientIpCity,                                                  //【请求】请求客户端城市
-						RequestIpIsp:      requestClientIpIsp,                                                   //【请求】请求客户端运营商
-						RequestHeader:     datatypes.JSON(gojson.JsonEncodeNoError(ginCtx.Request.Header)),      //【请求】请求头
-						ResponseTime:      gotime.Current().Time,                                                //【返回】时间
-						ResponseCode:      responseCode,                                                         //【返回】状态码
-						ResponseData:      datatypes.JSON(responseBody),                                         //【返回】数据
-						CostTime:          endTime - startTime,                                                  //【系统】花费时间
+						TraceId:           traceId,                                                            //【系统】跟踪编号
+						RequestTime:       requestTime,                                                        //【请求】时间
+						RequestUri:        host + ginCtx.Request.RequestURI,                                   //【请求】请求链接
+						RequestUrl:        ginCtx.Request.RequestURI,                                          //【请求】请求链接
+						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),       //【请求】请求接口
+						RequestMethod:     ginCtx.Request.Method,                                              //【请求】请求方式
+						RequestProto:      ginCtx.Request.Proto,                                               //【请求】请求协议
+						RequestUa:         ginCtx.Request.UserAgent(),                                         //【请求】请求UA
+						RequestReferer:    ginCtx.Request.Referer(),                                           //【请求】请求referer
+						RequestBody:       datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)),                    //【请求】请求主体
+						RequestUrlQuery:   datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
+						RequestIp:         clientIp,                                                           //【请求】请求客户端Ip
+						RequestIpCountry:  requestClientIpCountry,                                             //【请求】请求客户端城市
+						RequestIpRegion:   requestClientIpRegion,                                              //【请求】请求客户端区域
+						RequestIpProvince: requestClientIpProvince,                                            //【请求】请求客户端省份
+						RequestIpCity:     requestClientIpCity,                                                //【请求】请求客户端城市
+						RequestIpIsp:      requestClientIpIsp,                                                 //【请求】请求客户端运营商
+						RequestHeader:     datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.Header)),      //【请求】请求头
+						ResponseTime:      gotime.Current().Time,                                              //【返回】时间
+						ResponseCode:      responseCode,                                                       //【返回】状态码
+						ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
+						CostTime:          endTime - startTime,                                                //【系统】花费时间
 					})
 					if err != nil {
 						if c.gormConfig.debug {
