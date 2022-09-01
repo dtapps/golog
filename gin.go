@@ -103,6 +103,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 		c.gormConfig.goVersion = runtime.Version()
 
 		c.log.gorm = true
+
 	}
 
 	if mongoClient != nil || mongoClient.Db != nil {
@@ -128,6 +129,13 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 		c.mongoConfig.goVersion = runtime.Version()
 
 		c.log.mongo = true
+
+		// 创建时间序列集合
+		c.mongoCreateCollection()
+
+		// 创建索引
+		c.mongoCreateIndexes()
+
 	}
 
 	return c, nil

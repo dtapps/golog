@@ -58,6 +58,8 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 	c.gormConfig.insideIp = goip.GetInsideIp(ctx)
 	c.gormConfig.goVersion = runtime.Version()
 
+	c.log.gorm = true
+
 	return c, nil
 }
 

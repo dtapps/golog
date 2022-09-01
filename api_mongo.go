@@ -59,7 +59,19 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 	c.mongoConfig.insideIp = goip.GetInsideIp(ctx)
 	c.mongoConfig.goVersion = runtime.Version()
 
+	c.log.mongo = true
+
 	// 创建时间序列集合
+	c.mongoCreateCollection()
+
+	// 创建索引
+	c.mongoCreateIndexes()
+
+	return c, nil
+}
+
+// 创建时间序列集合
+func (c *ApiClient) mongoCreateCollection() {
 	var commandResult bson.M
 	commandErr := c.mongoClient.Db.Database(c.mongoConfig.databaseName).RunCommand(context.TODO(), bson.D{{
 		"listCollections", 1,
@@ -72,8 +84,10 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 			log.Println("创建时间序列集合：", err)
 		}
 	}
+}
 
-	// 创建索引
+// 创建索引
+func (c *ApiClient) mongoCreateIndexes() {
 	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"trace_id", 1},
 	}}))
@@ -101,8 +115,6 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"sdk_version", -1},
 	}}))
-
-	return c, nil
 }
 
 // 模型结构体
