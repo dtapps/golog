@@ -110,10 +110,7 @@ func (c *ApiClient) GormQuery() *gorm.DB {
 
 // GormMiddleware 中间件
 func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
-	err := c.gormRecord(ctx, apiPostgresqlLog{
+	data := apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                            //【请求】时间
 		RequestUri:            request.RequestUri,                                             //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
@@ -123,51 +120,59 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
 		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
-		ResponseBody:          request.ResponseBody,                                           //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
 		ResponseTime:          request.ResponseTime,                                           //【返回】时间
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
-	})
-	if err != nil {
-		if c.gormConfig.debug {
-			log.Printf("[log.GormMiddleware]%s\n", err.Error())
+	}
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		log.Printf("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+	} else {
+		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
+			data.ResponseBody = request.ResponseBody //【返回】内容
+		} else {
+			log.Printf("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
+	}
+	err := c.gormRecord(ctx, data)
+	if err != nil {
+		log.Printf("[log.GormMiddleware]：%s\n", err.Error())
 	}
 }
 
 // GormMiddlewareXml 中间件
 func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
+	data := apiPostgresqlLog{
+		RequestTime:           request.RequestTime,                                            //【请求】时间
+		RequestUri:            request.RequestUri,                                             //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,                        //【请求】接口
+		RequestMethod:         request.RequestMethod,                                          //【请求】方式
+		RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
+		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
+		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
+		ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
+		ResponseTime:          request.ResponseTime,                                           //【返回】时间
+		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
-	err := c.gormRecord(ctx, apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                                                                 //【请求】时间
-		RequestUri:            request.RequestUri,                                                                  //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                                              //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path,                                             //【请求】接口
-		RequestMethod:         request.RequestMethod,                                                               //【请求】方式
-		RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),                       //【请求】参数
-		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),                       //【请求】头部
-		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)),                      //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                                                          //【返回】状态码
-		ResponseBody:          datatypes.JSON(dorm.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
-		ResponseContentLength: request.ResponseContentLength,                                                       //【返回】大小
-		ResponseTime:          request.ResponseTime,                                                                //【返回】时间
-		SdkVersion:            sdkVersion,                                                                          //【程序】Sdk版本
-	})
-	if err != nil {
-		if c.gormConfig.debug {
-			log.Printf("[log.GormMiddlewareXml]%s\n", err.Error())
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		log.Printf("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+	} else {
+		if len(dorm.XmlDecodeNoError(request.ResponseBody)) > 0 {
+			data.ResponseBody = datatypes.JSON(dorm.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))) //【返回】内容
+		} else {
+			log.Printf("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
+	}
+	err := c.gormRecord(ctx, data)
+	if err != nil {
+		log.Printf("[log.GormMiddlewareXml]：%s\n", err.Error())
 	}
 }
 
 // GormMiddlewareCustom 中间件
 func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
-	err := c.gormRecord(ctx, apiPostgresqlLog{
+	data := apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                            //【请求】时间
 		RequestUri:            request.RequestUri,                                             //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
@@ -177,14 +182,21 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
 		ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
-		ResponseBody:          request.ResponseBody,                                           //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
 		ResponseTime:          request.ResponseTime,                                           //【返回】时间
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
-	})
-	if err != nil {
-		if c.gormConfig.debug {
-			log.Printf("[log.GormMiddlewareCustom]%s\n", err.Error())
+	}
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		log.Printf("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+	} else {
+		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
+			data.ResponseBody = request.ResponseBody //【返回】内容
+		} else {
+			log.Printf("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
+	}
+	err := c.gormRecord(ctx, data)
+	if err != nil {
+		log.Printf("[log.GormMiddlewareCustom]：%s\n", err.Error())
 	}
 }

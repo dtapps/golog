@@ -120,23 +120,15 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) error {
 }
 
 func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]interface{}, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
-	host := ""
-	if ginCtx.Request.TLS == nil {
-		host = "http://" + ginCtx.Request.Host
-	} else {
-		host = "https://" + ginCtx.Request.Host
-	}
-	err := c.gormRecord(ginPostgresqlLog{
+	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
-		RequestUri:        host + ginCtx.Request.RequestURI,                                   //【请求】请求链接
 		RequestUrl:        ginCtx.Request.RequestURI,                                          //【请求】请求链接
 		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),       //【请求】请求接口
 		RequestMethod:     ginCtx.Request.Method,                                              //【请求】请求方式
 		RequestProto:      ginCtx.Request.Proto,                                               //【请求】请求协议
 		RequestUa:         ginCtx.Request.UserAgent(),                                         //【请求】请求UA
 		RequestReferer:    ginCtx.Request.Referer(),                                           //【请求】请求referer
-		RequestBody:       datatypes.JSON(dorm.JsonEncodeNoError(requestBody)),                //【请求】请求主体
 		RequestUrlQuery:   datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
 		RequestIp:         clientIp,                                                           //【请求】请求客户端Ip
 		RequestIpCountry:  requestClientIpCountry,                                             //【请求】请求客户端城市
@@ -149,32 +141,35 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
-	})
+	}
+	if ginCtx.Request.TLS == nil {
+		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+	} else {
+		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+	}
+
+	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
+		data.RequestBody = datatypes.JSON(dorm.JsonEncodeNoError(requestBody)) //【请求】请求主体
+	} else {
+		log.Printf("[log.gormRecordJson]：%s %s\n", data.RequestUri, requestBody)
+	}
+
+	err := c.gormRecord(data)
 	if err != nil {
-		if c.gormConfig.debug {
-			log.Printf("[golog.gormRecordJson] %s\n", err)
-		}
+		log.Printf("[golog.gormRecordJson]：%s\n", err)
 	}
 }
 
 func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
-	host := ""
-	if ginCtx.Request.TLS == nil {
-		host = "http://" + ginCtx.Request.Host
-	} else {
-		host = "https://" + ginCtx.Request.Host
-	}
-	err := c.gormRecord(ginPostgresqlLog{
+	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
-		RequestUri:        host + ginCtx.Request.RequestURI,                                   //【请求】请求链接
 		RequestUrl:        ginCtx.Request.RequestURI,                                          //【请求】请求链接
 		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI),       //【请求】请求接口
 		RequestMethod:     ginCtx.Request.Method,                                              //【请求】请求方式
 		RequestProto:      ginCtx.Request.Proto,                                               //【请求】请求协议
 		RequestUa:         ginCtx.Request.UserAgent(),                                         //【请求】请求UA
 		RequestReferer:    ginCtx.Request.Referer(),                                           //【请求】请求referer
-		RequestBody:       datatypes.JSON(dorm.JsonEncodeNoError(requestBody)),                //【请求】请求主体
 		RequestUrlQuery:   datatypes.JSON(dorm.JsonEncodeNoError(ginCtx.Request.URL.Query())), //【请求】请求URL参数
 		RequestIp:         clientIp,                                                           //【请求】请求客户端Ip
 		RequestIpCountry:  requestClientIpCountry,                                             //【请求】请求客户端城市
@@ -187,11 +182,22 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
-	})
+	}
+	if ginCtx.Request.TLS == nil {
+		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+	} else {
+		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+	}
+
+	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
+		data.RequestBody = datatypes.JSON(dorm.JsonEncodeNoError(requestBody)) //【请求】请求主体
+	} else {
+		log.Printf("[log.gormRecordXml]：%s %s\n", data.RequestUri, requestBody)
+	}
+
+	err := c.gormRecord(data)
 	if err != nil {
-		if c.gormConfig.debug {
-			log.Printf("[golog.gormRecordXml] %s\n", err)
-		}
+		log.Printf("[golog.gormRecordXml]：%s\n", err)
 	}
 }
 

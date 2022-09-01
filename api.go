@@ -6,10 +6,6 @@ import (
 	"go.dtapp.net/dorm"
 	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
-	"go.dtapp.net/gourl"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"gorm.io/datatypes"
-	"log"
 	"os"
 	"runtime"
 )
@@ -132,153 +128,30 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 // Middleware 中间件
 func (c *ApiClient) Middleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
 	if c.log.gorm {
-		err := c.gormRecord(ctx, apiPostgresqlLog{
-			RequestTime:           request.RequestTime,                                            //【请求】时间
-			RequestUri:            request.RequestUri,                                             //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
-			RequestApi:            gourl.UriParse(request.RequestUri).Path,                        //【请求】接口
-			RequestMethod:         request.RequestMethod,                                          //【请求】方式
-			RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
-			RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
-			ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
-			ResponseBody:          request.ResponseBody,                                           //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
-			ResponseTime:          request.ResponseTime,                                           //【返回】时间
-			SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.gormConfig.debug {
-				log.Printf("[log.Middleware]%s\n", err.Error())
-			}
-		}
+		c.GormMiddleware(ctx, request, sdkVersion)
 	}
 	if c.log.mongo {
-		err := c.mongoRecord(ctx, apiMongolLog{
-			RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
-			RequestUri:            request.RequestUri,                                  //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
-			RequestApi:            gourl.UriParse(request.RequestUri).Path,             //【请求】接口
-			RequestMethod:         request.RequestMethod,                               //【请求】方式
-			RequestParams:         request.RequestParams,                               //【请求】参数
-			RequestHeader:         request.RequestHeader,                               //【请求】头部
-			ResponseHeader:        request.ResponseHeader,                              //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-			ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody),        //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
-			ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
-			SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.mongoConfig.debug {
-				log.Printf("[log.Middleware]%s\n", err.Error())
-			}
-		}
+		c.MongoMiddleware(ctx, request, sdkVersion)
 	}
 }
 
 // MiddlewareXml 中间件
 func (c *ApiClient) MiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
 	if c.log.gorm {
-		err := c.gormRecord(ctx, apiPostgresqlLog{
-			RequestTime:           request.RequestTime,                                                                 //【请求】时间
-			RequestUri:            request.RequestUri,                                                                  //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,                                              //【请求】链接
-			RequestApi:            gourl.UriParse(request.RequestUri).Path,                                             //【请求】接口
-			RequestMethod:         request.RequestMethod,                                                               //【请求】方式
-			RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),                       //【请求】参数
-			RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),                       //【请求】头部
-			ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)),                      //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                                                          //【返回】状态码
-			ResponseBody:          datatypes.JSON(dorm.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))), //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                                                       //【返回】大小
-			ResponseTime:          request.ResponseTime,                                                                //【返回】时间
-			SdkVersion:            sdkVersion,                                                                          //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.gormConfig.debug {
-				log.Printf("[log.MiddlewareXml]%s\n", err.Error())
-			}
-		}
+		c.GormMiddlewareXml(ctx, request, sdkVersion)
 	}
 	if c.log.mongo {
-		err := c.mongoRecord(ctx, apiMongolLog{
-			RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
-			RequestUri:            request.RequestUri,                                  //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
-			RequestApi:            gourl.UriParse(request.RequestUri).Path,             //【请求】接口
-			RequestMethod:         request.RequestMethod,                               //【请求】方式
-			RequestParams:         request.RequestParams,                               //【请求】参数
-			RequestHeader:         request.RequestHeader,                               //【请求】头部
-			ResponseHeader:        request.ResponseHeader,                              //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-			ResponseBody:          dorm.XmlDecodeNoError(request.ResponseBody),         //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
-			ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
-			SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.mongoConfig.debug {
-				log.Printf("[log.MiddlewareXml]%s\n", err.Error())
-			}
-		}
+		c.MongoMiddlewareXml(ctx, request, sdkVersion)
 	}
 }
 
 // MiddlewareCustom 中间件
 func (c *ApiClient) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
 	if c.log.gorm {
-		err := c.gormRecord(ctx, apiPostgresqlLog{
-			RequestTime:           request.RequestTime,                                            //【请求】时间
-			RequestUri:            request.RequestUri,                                             //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,                         //【请求】链接
-			RequestApi:            api,                                                            //【请求】接口
-			RequestMethod:         request.RequestMethod,                                          //【请求】方式
-			RequestParams:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestParams)),  //【请求】参数
-			RequestHeader:         datatypes.JSON(dorm.JsonEncodeNoError(request.RequestHeader)),  //【请求】头部
-			ResponseHeader:        datatypes.JSON(dorm.JsonEncodeNoError(request.ResponseHeader)), //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                                     //【返回】状态码
-			ResponseBody:          request.ResponseBody,                                           //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                                  //【返回】大小
-			ResponseTime:          request.ResponseTime,                                           //【返回】时间
-			SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.gormConfig.debug {
-				log.Printf("[log.MiddlewareCustom]%s\n", err.Error())
-			}
-		}
+		c.GormMiddlewareCustom(ctx, api, request, sdkVersion)
 	}
 	if c.log.mongo {
-		err := c.mongoRecord(ctx, apiMongolLog{
-			RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
-			RequestUri:            request.RequestUri,                                  //【请求】链接
-			RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
-			RequestApi:            api,                                                 //【请求】接口
-			RequestMethod:         request.RequestMethod,                               //【请求】方式
-			RequestParams:         request.RequestParams,                               //【请求】参数
-			RequestHeader:         request.RequestHeader,                               //【请求】头部
-			ResponseHeader:        request.ResponseHeader,                              //【返回】头部
-			ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-			ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody),        //【返回】内容
-			ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
-			ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
-			SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-		})
-		if err != nil {
-			if c.mongoConfig.debug {
-				log.Printf("[log.MiddlewareCustom]%s\n", err.Error())
-			}
-		}
+		c.MongoMiddlewareCustom(ctx, api, request, sdkVersion)
 	}
 }
