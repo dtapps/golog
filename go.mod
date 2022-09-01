@@ -9,7 +9,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	go.dtapp.net/dorm v1.0.30
 	go.dtapp.net/goip v1.0.28
-	go.dtapp.net/gorequest v1.0.27
+	go.dtapp.net/gorequest v1.0.28
 	go.dtapp.net/gotime v1.0.5
 	go.dtapp.net/gotrace_id v1.0.6
 	go.dtapp.net/gourl v1.0.0

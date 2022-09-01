@@ -124,7 +124,7 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		ResponseTime:          request.ResponseTime,                                           //【返回】时间
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	if request.HeaderIsImg() {
 		log.Printf("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
@@ -155,7 +155,7 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		ResponseTime:          request.ResponseTime,                                           //【返回】时间
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	if request.HeaderIsImg() {
 		log.Printf("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.XmlDecodeNoError(request.ResponseBody)) > 0 {
@@ -186,7 +186,7 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		ResponseTime:          request.ResponseTime,                                           //【返回】时间
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	if request.HeaderIsImg() {
 		log.Printf("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
