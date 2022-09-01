@@ -71,27 +71,6 @@ func NewGinMongoClient(config *GinMongoClientConfig) (*GinClient, error) {
 	c.mongoConfig.insideIp = goip.GetInsideIp(ctx)
 	c.mongoConfig.goVersion = runtime.Version()
 
-	// 创建索引
-	name, err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
-		{"trace_id", 1},
-		{"request_time", -1},
-		{"request_method", 1},
-		{"request_proto", 1},
-		{"request_ip", 1},
-		{"request_ip_country", 1},
-		{"request_ip_region", 1},
-		{"request_ip_province", 1},
-		{"request_ip_city", 1},
-		{"request_ip_isp", 1},
-		{"response_time", -1},
-		{"response_code", 1},
-		{"system_host_name", 1},
-		{"system_inside_ip", 1},
-		{"go_version", -1},
-		{"sdk_version", -1},
-	}})
-	log.Println("创建索引：", name, err)
-
 	// 创建时间序列集合
 	var commandResult bson.M
 	commandErr := c.mongoClient.Db.Database(c.mongoConfig.databaseName).RunCommand(context.TODO(), bson.D{{
@@ -100,11 +79,77 @@ func NewGinMongoClient(config *GinMongoClientConfig) (*GinClient, error) {
 	if commandErr != nil {
 		log.Println("检查时间序列集合：", commandErr)
 	} else {
-		err = c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(context.TODO(), c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("request_time")))
+		err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(context.TODO(), c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("request_time")))
 		if err != nil {
 			log.Println("创建时间序列集合：", err)
 		}
 	}
+
+	// 创建索引
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"trace_id", 1},
+		}}))
+	log.Printf(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_time", -1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_method", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_proto", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip_country", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip_region", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip_province", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip_city", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"request_ip_isp", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"response_time", -1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"response_code", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"system_host_name", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"system_inside_ip", 1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"go_version", -1},
+		}}))
+	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+		Keys: bson.D{
+			{"sdk_version", -1},
+		}}))
 
 	return c, nil
 }
