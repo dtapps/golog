@@ -2,13 +2,62 @@ package golog
 
 import (
 	"context"
+	"errors"
 	"go.dtapp.net/dorm"
+	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
+	"os"
+	"runtime"
 )
+
+// ApiMongoClientConfig 接口实例配置
+type ApiMongoClientConfig struct {
+	MongoClientFun apiMongoClientFun // 日志配置
+	Debug          bool              // 日志开关
+}
+
+// NewApiMongoClient 创建接口实例化
+// client 数据库服务
+// databaseName 库名
+// collectionName 表名
+func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
+
+	var ctx = context.Background()
+
+	c := &ApiClient{}
+
+	client, databaseName, collectionName := config.MongoClientFun()
+
+	if client == nil || client.Db == nil {
+		return nil, errors.New("没有设置驱动")
+	}
+
+	c.mongoClient = client
+
+	if databaseName == "" {
+		return nil, errors.New("没有设置库名")
+	}
+	c.mongoConfig.databaseName = databaseName
+
+	if collectionName == "" {
+		return nil, errors.New("没有设置表名")
+	}
+	c.mongoConfig.collectionName = collectionName
+
+	c.mongoConfig.debug = config.Debug
+
+	hostname, _ := os.Hostname()
+
+	c.mongoConfig.hostname = hostname
+	c.mongoConfig.insideIp = goip.GetInsideIp(ctx)
+	c.mongoConfig.goVersion = runtime.Version()
+
+	return c, nil
+}
 
 // 模型结构体
 type apiMongolLog struct {
@@ -57,6 +106,9 @@ func (c *ApiClient) MongoQuery() *dorm.MongoClient {
 
 // MongoMiddleware 中间件
 func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
+	}
 	err := c.mongoRecord(ctx, apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
@@ -81,6 +133,9 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 
 // MongoMiddlewareXml 中间件
 func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
+	}
 	err := c.mongoRecord(ctx, apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
@@ -105,6 +160,9 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 
 // MongoMiddlewareCustom 中间件
 func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
+	}
 	err := c.mongoRecord(ctx, apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接

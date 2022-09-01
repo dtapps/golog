@@ -2,16 +2,64 @@ package golog
 
 import (
 	"context"
+	"errors"
 	"go.dtapp.net/dorm"
+	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"log"
+	"os"
+	"runtime"
 	"time"
 	"unicode/utf8"
 )
+
+// ApiGormClientConfig 接口实例配置
+type ApiGormClientConfig struct {
+	GormClientFun apiGormClientFun // 日志配置
+	Debug         bool             // 日志开关
+}
+
+// NewApiGormClient 创建接口实例化
+// client 数据库服务
+// tableName 表名
+func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
+
+	var ctx = context.Background()
+
+	c := &ApiClient{}
+
+	client, tableName := config.GormClientFun()
+
+	if client == nil || client.Db == nil {
+		return nil, errors.New("没有设置驱动")
+	}
+
+	c.gormClient = client
+
+	if tableName == "" {
+		return nil, errors.New("没有设置表名")
+	}
+	c.gormConfig.tableName = tableName
+
+	c.gormConfig.debug = config.Debug
+
+	err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+	if err != nil {
+		return nil, errors.New("创建表失败：" + err.Error())
+	}
+
+	hostname, _ := os.Hostname()
+
+	c.gormConfig.hostname = hostname
+	c.gormConfig.insideIp = goip.GetInsideIp(ctx)
+	c.gormConfig.goVersion = runtime.Version()
+
+	return c, nil
+}
 
 // 模型结构体
 type apiPostgresqlLog struct {
@@ -60,8 +108,8 @@ func (c *ApiClient) GormQuery() *gorm.DB {
 
 // GormMiddleware 中间件
 func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" {
-		return
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
 	}
 	err := c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                            //【请求】时间
@@ -87,6 +135,9 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 
 // GormMiddlewareXml 中间件
 func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
+	}
 	err := c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                                                 //【请求】时间
 		RequestUri:            request.RequestUri,                                                                  //【请求】链接
@@ -111,6 +162,9 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 
 // GormMiddlewareCustom 中间件
 func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+		request.ResponseBody = []byte{}
+	}
 	err := c.gormRecord(ctx, apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                                            //【请求】时间
 		RequestUri:            request.RequestUri,                                             //【请求】链接

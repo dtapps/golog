@@ -2,9 +2,12 @@ package golog
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
+	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
@@ -14,7 +17,59 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
+	"runtime"
+	"time"
 )
+
+// GinMongoClientConfig 框架实例配置
+type GinMongoClientConfig struct {
+	IpService      *goip.Client      // ip服务
+	MongoClientFun ginMongoClientFun // 日志配置
+	Debug          bool              // 日志开关
+}
+
+// NewGinMongoClient 创建框架实例化
+// client 数据库服务
+// databaseName 库名
+// collectionName 表名
+// ipService ip服务
+func NewGinMongoClient(config *GinMongoClientConfig) (*GinClient, error) {
+
+	var ctx = context.Background()
+
+	c := &GinClient{}
+
+	client, databaseName, collectionName := config.MongoClientFun()
+
+	if client == nil || client.Db == nil {
+		return nil, errors.New("没有设置驱动")
+	}
+
+	c.mongoClient = client
+
+	if databaseName == "" {
+		return nil, errors.New("没有设置库名")
+	}
+	c.mongoConfig.databaseName = databaseName
+
+	if collectionName == "" {
+		return nil, errors.New("没有设置表名")
+	}
+	c.mongoConfig.collectionName = collectionName
+
+	c.mongoConfig.debug = config.Debug
+
+	c.ipService = config.IpService
+
+	hostname, _ := os.Hostname()
+
+	c.mongoConfig.hostname = hostname
+	c.mongoConfig.insideIp = goip.GetInsideIp(ctx)
+	c.mongoConfig.goVersion = runtime.Version()
+
+	return c, nil
+}
 
 // 模型结构体
 type ginMongoLog struct {
@@ -64,6 +119,83 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) error {
 	_, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(mongoLog)
 
 	return err
+}
+
+func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]interface{}, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+	host := ""
+	if ginCtx.Request.TLS == nil {
+		host = "http://" + ginCtx.Request.Host
+	} else {
+		host = "https://" + ginCtx.Request.Host
+	}
+
+	err := c.mongoRecord(ginMongoLog{
+		TraceId:           traceId,                                                      //【系统】跟踪编号
+		RequestTime:       primitive.NewDateTimeFromTime(requestTime),                   //【请求】时间
+		RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
+		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
+		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
+		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
+		RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
+		RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
+		RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
+		RequestBody:       requestBody,                                                  //【请求】请求主体
+		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
+		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
+		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
+		RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
+		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
+		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
+		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
+		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
+		ResponseTime:      primitive.NewDateTimeFromTime(gotime.Current().Time),         //【返回】时间
+		ResponseCode:      responseCode,                                                 //【返回】状态码
+		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
+		CostTime:          endTime - startTime,                                          //【系统】花费时间
+	})
+	if err != nil {
+		if c.mongoConfig.debug {
+			log.Printf("[golog.mongoRecordJson] %s\n", err)
+		}
+	}
+}
+
+func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+	host := ""
+	if ginCtx.Request.TLS == nil {
+		host = "http://" + ginCtx.Request.Host
+	} else {
+		host = "https://" + ginCtx.Request.Host
+	}
+	err := c.mongoRecord(ginMongoLog{
+		TraceId:           traceId,                                                      //【系统】跟踪编号
+		RequestTime:       primitive.NewDateTimeFromTime(requestTime),                   //【请求】时间
+		RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
+		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
+		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
+		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
+		RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
+		RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
+		RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
+		RequestBody:       requestBody,                                                  //【请求】请求主体
+		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
+		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
+		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
+		RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
+		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
+		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
+		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
+		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
+		ResponseTime:      primitive.NewDateTimeFromTime(gotime.Current().Time),         //【返回】时间
+		ResponseCode:      responseCode,                                                 //【返回】状态码
+		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
+		CostTime:          endTime - startTime,                                          //【系统】花费时间
+	})
+	if err != nil {
+		if c.mongoConfig.debug {
+			log.Printf("[golog.mongoRecordXml] %s\n", err)
+		}
+	}
 }
 
 // MongoQuery 查询
@@ -162,78 +294,16 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 
 				var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
-				host := ""
-				if ginCtx.Request.TLS == nil {
-					host = "http://" + ginCtx.Request.Host
-				} else {
-					host = "https://" + ginCtx.Request.Host
-				}
 				if dataJson {
 					if c.mongoConfig.debug {
 						log.Printf("[golog.MongoMiddleware.mongoRecord.json.request_body] %s\n", jsonBody)
 					}
-					err := c.mongoRecord(ginMongoLog{
-						TraceId:           traceId,                                                      //【系统】跟踪编号
-						RequestTime:       primitive.NewDateTimeFromTime(requestTime),                   //【请求】时间
-						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
-						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
-						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
-						RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
-						RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
-						RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
-						RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
-						RequestBody:       jsonBody,                                                     //【请求】请求主体
-						RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
-						RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
-						RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
-						RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
-						RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
-						RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
-						RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
-						RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-						ResponseTime:      primitive.NewDateTimeFromTime(gotime.Current().Time),         //【返回】时间
-						ResponseCode:      responseCode,                                                 //【返回】状态码
-						ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
-						CostTime:          endTime - startTime,                                          //【系统】花费时间
-					})
-					if err != nil {
-						if c.mongoConfig.debug {
-							log.Printf("[golog.MongoMiddleware.mongoRecord.json] %s\n", err)
-						}
-					}
+					c.mongoRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.mongoConfig.debug {
 						log.Printf("[golog.MongoMiddleware.mongoRecord.xml.request_body] %s\n", xmlBody)
 					}
-					err := c.mongoRecord(ginMongoLog{
-						TraceId:           traceId,                                                      //【系统】跟踪编号
-						RequestTime:       primitive.NewDateTimeFromTime(requestTime),                   //【请求】时间
-						RequestUri:        host + ginCtx.Request.RequestURI,                             //【请求】请求链接
-						RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
-						RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
-						RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
-						RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
-						RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
-						RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
-						RequestBody:       xmlBody,                                                      //【请求】请求主体
-						RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
-						RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
-						RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
-						RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
-						RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
-						RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
-						RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
-						RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-						ResponseTime:      primitive.NewDateTimeFromTime(gotime.Current().Time),         //【返回】时间
-						ResponseCode:      responseCode,                                                 //【返回】状态码
-						ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
-						CostTime:          endTime - startTime,                                          //【系统】花费时间
-					})
-					if err != nil {
-						if c.mongoConfig.debug {
-							log.Printf("[golog.MongoMiddleware.mongoRecord.xml] %s\n", err)
-						}
-					}
+					c.mongoRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()
