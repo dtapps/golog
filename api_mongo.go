@@ -164,10 +164,7 @@ func (c *ApiClient) MongoQuery() *dorm.MongoClient {
 
 // MongoMiddleware 中间件
 func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
-	err := c.mongoRecord(ctx, apiMongolLog{
+	data := apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
@@ -177,24 +174,23 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 		RequestHeader:         request.RequestHeader,                               //【请求】头部
 		ResponseHeader:        request.ResponseHeader,                              //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-		ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody),        //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
 		ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-	})
+	}
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	} else {
+		data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
+	}
+	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		if c.mongoConfig.debug {
-			log.Printf("[log.MongoMiddleware]%s\n", err.Error())
-		}
+		log.Printf("[log.MongoMiddleware]：%s\n", err.Error())
 	}
 }
 
 // MongoMiddlewareXml 中间件
 func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
-	err := c.mongoRecord(ctx, apiMongolLog{
+	data := apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
@@ -204,24 +200,23 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		RequestHeader:         request.RequestHeader,                               //【请求】头部
 		ResponseHeader:        request.ResponseHeader,                              //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-		ResponseBody:          dorm.XmlDecodeNoError(request.ResponseBody),         //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
 		ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-	})
+	}
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	} else {
+		data.ResponseBody = dorm.XmlDecodeNoError(request.ResponseBody) //【返回】内容
+	}
+	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		if c.mongoConfig.debug {
-			log.Printf("[log.MongoMiddlewareXml]%s\n", err.Error())
-		}
+		log.Printf("[log.MongoMiddlewareXml]：%s\n", err.Error())
 	}
 }
 
 // MongoMiddlewareCustom 中间件
 func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
-	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		request.ResponseBody = []byte{}
-	}
-	err := c.mongoRecord(ctx, apiMongolLog{
+	data := apiMongolLog{
 		RequestTime:           primitive.NewDateTimeFromTime(request.RequestTime),  //【请求】时间
 		RequestUri:            request.RequestUri,                                  //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,              //【请求】链接
@@ -231,14 +226,16 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 		RequestHeader:         request.RequestHeader,                               //【请求】头部
 		ResponseHeader:        request.ResponseHeader,                              //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                          //【返回】状态码
-		ResponseBody:          dorm.JsonDecodeNoError(request.ResponseBody),        //【返回】内容
 		ResponseContentLength: request.ResponseContentLength,                       //【返回】大小
 		ResponseTime:          primitive.NewDateTimeFromTime(request.ResponseTime), //【返回】时间
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
-	})
+	}
+	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
+	} else {
+		data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
+	}
+	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		if c.mongoConfig.debug {
-			log.Printf("[log.MongoMiddlewareCustom]%s\n", err.Error())
-		}
+		log.Printf("[log.MongoMiddlewareCustom]：%s\n", err.Error())
 	}
 }
