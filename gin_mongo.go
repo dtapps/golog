@@ -13,7 +13,10 @@ import (
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"go.dtapp.net/goxml"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io/ioutil"
 	"log"
 	"net"
@@ -67,6 +70,41 @@ func NewGinMongoClient(config *GinMongoClientConfig) (*GinClient, error) {
 	c.mongoConfig.hostname = hostname
 	c.mongoConfig.insideIp = goip.GetInsideIp(ctx)
 	c.mongoConfig.goVersion = runtime.Version()
+
+	// 创建索引
+	name, err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+		{"trace_id", 1},
+		{"request_time", -1},
+		{"request_method", 1},
+		{"request_proto", 1},
+		{"request_ip", 1},
+		{"request_ip_country", 1},
+		{"request_ip_region", 1},
+		{"request_ip_province", 1},
+		{"request_ip_city", 1},
+		{"request_ip_isp", 1},
+		{"response_time", -1},
+		{"response_code", 1},
+		{"system_host_name", 1},
+		{"system_inside_ip", 1},
+		{"go_version", -1},
+		{"sdk_version", -1},
+	}})
+	log.Println("创建索引：", name, err)
+
+	// 创建时间序列集合
+	var commandResult bson.M
+	commandErr := c.mongoClient.Db.Database(c.mongoConfig.databaseName).RunCommand(context.TODO(), bson.D{{
+		"listCollections", 1,
+	}}).Decode(&commandResult)
+	if commandErr != nil {
+		log.Println("检查时间序列集合：", commandErr)
+	} else {
+		err = c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(context.TODO(), c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("request_time")))
+		if err != nil {
+			log.Println("创建时间序列集合：", err)
+		}
+	}
 
 	return c, nil
 }
