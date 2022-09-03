@@ -10,7 +10,6 @@ import (
 	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
-	"log"
 	"os"
 	"runtime"
 	"time"
@@ -21,6 +20,7 @@ import (
 type ApiGormClientConfig struct {
 	GormClientFun apiGormClientFun // 日志配置
 	Debug         bool             // 日志开关
+	ZapLog        ZapLog           // 日志服务
 }
 
 // NewApiGormClient 创建接口实例化
@@ -31,6 +31,8 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 	var ctx = context.Background()
 
 	c := &ApiClient{}
+
+	c.zapLog = config.ZapLog
 
 	client, tableName := config.GormClientFun()
 
@@ -47,7 +49,7 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 
 	c.gormConfig.debug = config.Debug
 
-	err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+	err := c.gormAutoMigrate()
 	if err != nil {
 		return nil, errors.New("创建表失败：" + err.Error())
 	}
@@ -61,6 +63,11 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 	c.log.gorm = true
 
 	return c, nil
+}
+
+// 创建模型
+func (c *ApiClient) gormAutoMigrate() error {
+	return c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
 }
 
 // 模型结构体
@@ -125,17 +132,17 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		log.Printf("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = request.ResponseBody //【返回】内容
 		} else {
-			log.Printf("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddleware]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.GormMiddleware]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.GormMiddleware]：%s\n", err.Error())
 	}
 }
 
@@ -156,17 +163,17 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		log.Printf("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.XmlDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = datatypes.JSON(dorm.JsonEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody))) //【返回】内容
 		} else {
-			log.Printf("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.GormMiddlewareXml]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.GormMiddlewareXml]：%s\n", err.Error())
 	}
 }
 
@@ -187,16 +194,16 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		log.Printf("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = request.ResponseBody //【返回】内容
 		} else {
-			log.Printf("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.GormMiddlewareCustom]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.GormMiddlewareCustom]：%s\n", err.Error())
 	}
 }

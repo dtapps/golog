@@ -21,6 +21,7 @@ import (
 type ApiMongoClientConfig struct {
 	MongoClientFun apiMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
+	ZapLog         ZapLog            // 日志服务
 }
 
 // NewApiMongoClient 创建接口实例化
@@ -32,6 +33,8 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 	var ctx = context.Background()
 
 	c := &ApiClient{}
+
+	c.zapLog = config.ZapLog
 
 	client, databaseName, collectionName := config.MongoClientFun()
 
@@ -179,17 +182,17 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		log.Printf("[log.MongoMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddleware]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			log.Printf("[log.MongoMiddleware]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddleware]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.MongoMiddleware]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.MongoMiddleware]：%s\n", err.Error())
 	}
 }
 
@@ -210,17 +213,17 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		log.Printf("[log.MongoMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.XmlDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = dorm.XmlDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			log.Printf("[log.MongoMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.MongoMiddlewareXml]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.MongoMiddlewareXml]：%s\n", err.Error())
 	}
 }
 
@@ -241,16 +244,16 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 		SdkVersion:            sdkVersion,                                          //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
-		log.Printf("[log.MongoMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			log.Printf("[log.MongoMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.MongoMiddlewareCustom]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		log.Printf("[log.MongoMiddlewareCustom]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[log.MongoMiddlewareCustom]：%s\n", err.Error())
 	}
 }

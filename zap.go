@@ -3,6 +3,8 @@ package golog
 import (
 	"context"
 	"github.com/natefinch/lumberjack"
+	"go.dtapp.net/gotime"
+	"go.dtapp.net/gotrace_id"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -12,63 +14,39 @@ import (
 type ZapLogConfig struct {
 	LogPath      string // 日志文件路径
 	LogName      string // 日志文件名
-	LogLevel     string // 日志级别 debug/info/warn/error，debug输出：debug/info/warn/error日志。 info输出：info/warn/error日志。 warn输出：warn/error日志。 error输出：error日志。
-	MaxSize      int    // 单个文件大小,MB
-	MaxBackups   int    // 保存的文件个数
-	MaxAge       int    // 保存的天数 0=不删除
-	Compress     bool   // 压缩
+	MaxSize      int    // 单位为MB,默认为512MB
+	MaxBackups   int    // 保留旧文件的最大个数
+	MaxAge       int    // 文件最多保存多少天 0=不删除
+	LocalTime    bool   // 采用本地时间
+	Compress     bool   // 是否压缩日志
+	EnableColor  bool   // level大写染色编码器
 	JsonFormat   bool   // 是否输出为json格式
 	ShowLine     bool   // 显示代码行
 	LogInConsole bool   // 是否同时输出到控制台
 }
 
 type ZapLog struct {
-	config *ZapLogConfig
-	logger *zap.Logger
+	config  *ZapLogConfig
+	logger  *zap.Logger
+	zapCore zapcore.Core
 }
 
 func NewZapLog(config *ZapLogConfig) *ZapLog {
 
 	zl := &ZapLog{config: config}
 
-	// 设置日志级别
-	var level zapcore.Level
-	switch zl.config.LogLevel {
-	case "debug":
-		level = zap.DebugLevel
-	case "info":
-		level = zap.InfoLevel
-	case "warn":
-		level = zap.WarnLevel
-	case "error":
-		level = zap.ErrorLevel
-	default:
-		level = zap.InfoLevel
-	}
-
-	var (
-		syncer zapcore.WriteSyncer
-
-		// 自定义时间输出格式
-		customTimeEncoder = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
-		}
-
-		// 自定义日志级别显示
-		customLevelEncoder = func(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(level.CapitalString())
-		}
-	)
+	var syncer zapcore.WriteSyncer
 
 	// 定义日志切割配置
 	hook := lumberjack.Logger{
-		Filename:   zl.config.LogPath + zl.config.LogName, // 日志文件的位置
-		MaxSize:    zl.config.MaxSize,                     // 在进行切割之前，日志文件的最大大小（以MB为单位）
+		Filename:   zl.config.LogPath + zl.config.LogName, // ⽇志⽂件路径
+		MaxSize:    zl.config.MaxSize,                     // 单位为MB,默认为512MB
 		MaxBackups: zl.config.MaxBackups,                  // 保留旧文件的最大个数
-		Compress:   zl.config.Compress,                    // 是否压缩 disabled by default
+		LocalTime:  zl.config.LocalTime,                   // 采用本地时间
+		Compress:   zl.config.Compress,                    // 是否压缩日志
 	}
 	if zl.config.MaxAge > 0 {
-		hook.MaxAge = zl.config.MaxAge // days
+		hook.MaxAge = zl.config.MaxAge // 文件最多保存多少天
 	}
 
 	// 判断是否控制台输出日志
@@ -78,13 +56,23 @@ func NewZapLog(config *ZapLogConfig) *ZapLog {
 		syncer = zapcore.AddSync(&hook)
 	}
 
+	// 自定义时间输出格式
+	customTimeEncoder := func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+		enc.AppendString(t.Format(gotime.DateTimeFormat))
+	}
+
+	// 自定义日志级别显示
+	customLevelEncoder := func(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+		enc.AppendString(level.CapitalString())
+	}
+
 	// 定义zap配置信息
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "line",
+	encoderConf := zapcore.EncoderConfig{
+		CallerKey:      "caller_line", // 打印文件名和行数
+		LevelKey:       "level_name",
 		MessageKey:     "msg",
+		TimeKey:        "time",
+		NameKey:        "logger",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeTime:     customTimeEncoder,          // 自定义时间格式
@@ -94,92 +82,51 @@ func NewZapLog(config *ZapLogConfig) *ZapLog {
 		EncodeName:     zapcore.FullNameEncoder,
 	}
 
-	var encoder zapcore.Encoder
-
 	// 判断是否json格式输出
 	if zl.config.JsonFormat {
-		encoder = zapcore.NewJSONEncoder(encoderConfig)
+		zl.zapCore = zapcore.NewCore(zapcore.NewJSONEncoder(encoderConf),
+			syncer, zap.NewAtomicLevelAt(zapcore.InfoLevel))
 	} else {
-		encoder = zapcore.NewConsoleEncoder(encoderConfig)
+		zl.zapCore = zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConf),
+			syncer, zap.NewAtomicLevelAt(zapcore.InfoLevel))
 	}
 
-	core := zapcore.NewCore(
-		encoder,
-		syncer,
-		level,
-	)
-
-	zl.logger = zap.New(core)
-
-	// 判断是否显示代码行号
-	if zl.config.ShowLine {
-		zl.logger = zl.logger.WithOptions(zap.AddCaller())
-	}
+	zl.logger = zl.withShowLine(zap.New(zl.zapCore))
 
 	return zl
 }
 
-// Panic 记录日志，然后panic
-func (zl *ZapLog) Panic(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Panic(args...)
+// 判断是否显示代码行号
+func (zl *ZapLog) withShowLine(logger *zap.Logger) *zap.Logger {
+	if zl.config.ShowLine {
+		logger = logger.WithOptions(zap.AddCaller())
+	}
+	return logger
 }
 
-// Panicf 记录日志，然后panic
-func (zl *ZapLog) Panicf(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Panicf(template, args...)
+// WithLogger 跟踪编号
+func (zl *ZapLog) WithLogger() *zap.Logger {
+	return zl.logger
 }
 
-// Fatal 有致命性错误，导致程序崩溃，记录日志，然后退出
-func (zl *ZapLog) Fatal(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Fatal(args...)
+// WithTraceId 跟踪编号
+func (zl *ZapLog) WithTraceId(ctx context.Context) *zap.Logger {
+	logger := zl.logger
+	logger = logger.With(zapcore.Field{
+		Key:    "trace_id",
+		Type:   zapcore.StringType,
+		String: gotrace_id.GetTraceIdContext(ctx),
+	})
+	return logger
 }
 
-// Fatalf 有致命性错误，导致程序崩溃，记录日志，然后退出
-func (zl *ZapLog) Fatalf(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Fatalf(template, args...)
-}
-
-// Error 错误日志
-func (zl *ZapLog) Error(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Error(args...)
-}
-
-// Errorf 错误日志
-func (zl *ZapLog) Errorf(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Errorf(template, args...)
-}
-
-// Warn 警告日志
-func (zl *ZapLog) Warn(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Warn(args...)
-}
-
-// Warnf 警告日志
-func (zl *ZapLog) Warnf(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Warnf(template, args...)
-}
-
-// Info 核心流程日志
-func (zl *ZapLog) Info(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Info(args...)
-}
-
-// Infof 核心流程日志
-func (zl *ZapLog) Infof(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Infof(template, args...)
-}
-
-// Debug debug日志（调试日志）
-func (zl *ZapLog) Debug(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Debug(args...)
-}
-
-// Debugf debug日志（调试日志）
-func (zl *ZapLog) Debugf(ctx context.Context, template string, args ...interface{}) {
-	zl.logger.Sugar().Debugf(template, args...)
-}
-
-// Trace 粒度超细的，一般情况下我们使用不上
-func (zl *ZapLog) Trace(ctx context.Context, args ...interface{}) {
-	zl.logger.Sugar().Debug(args...)
+// WithTraceIdStr 跟踪编号
+func (zl *ZapLog) WithTraceIdStr(traceId string) *zap.Logger {
+	logger := zl.logger
+	logger = logger.With(zapcore.Field{
+		Key:    "trace_id",
+		Type:   zapcore.StringType,
+		String: traceId,
+	})
+	return logger
 }

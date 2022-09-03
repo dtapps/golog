@@ -18,7 +18,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io/ioutil"
-	"log"
 	"net"
 	"os"
 	"runtime"
@@ -30,6 +29,7 @@ type GinMongoClientConfig struct {
 	IpService      *goip.Client      // ip服务
 	MongoClientFun ginMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
+	ZapLog         ZapLog            // 日志服务
 }
 
 // NewGinMongoClient 创建框架实例化
@@ -42,6 +42,8 @@ func NewGinMongoClient(config *GinMongoClientConfig) (*GinClient, error) {
 	var ctx = context.Background()
 
 	c := &GinClient{}
+
+	c.zapLog = config.ZapLog
 
 	client, databaseName, collectionName := config.MongoClientFun()
 
@@ -89,78 +91,78 @@ func (c *GinClient) mongoCreateCollection() {
 		"listCollections", 1,
 	}}).Decode(&commandResult)
 	if commandErr != nil {
-		log.Println("检查时间序列集合：", commandErr)
+		c.zapLog.WithLogger().Sugar().Error("检查时间序列集合：", commandErr)
 	} else {
 		err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(context.TODO(), c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("request_time")))
 		if err != nil {
-			log.Println("创建时间序列集合：", err)
+			c.zapLog.WithLogger().Sugar().Error("创建时间序列集合：", err)
 		}
 	}
 }
 
 // 创建索引
 func (c *GinClient) mongoCreateIndexes() {
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"trace_id", 1},
 		}}))
-	log.Printf(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_time", -1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_method", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_proto", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip_country", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip_region", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip_province", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip_city", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"request_ip_isp", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"response_time", -1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"response_code", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"system_host_name", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"system_inside_ip", 1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"go_version", -1},
 		}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{
 		Keys: bson.D{
 			{"sdk_version", -1},
 		}}))
@@ -248,12 +250,12 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
 		data.RequestBody = requestBody //【请求】请求主体
 	} else {
-		log.Printf("[log.mongoRecordJson]：%s %s\n", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.mongoRecordJson]：%s %s\n", data.RequestUri, requestBody)
 	}
 
 	err := c.mongoRecord(data)
 	if err != nil {
-		log.Printf("[golog.mongoRecordJson]：%s\n", err)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.mongoRecordJson]：%s\n", err)
 	}
 }
 
@@ -289,12 +291,12 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
 		data.RequestBody = requestBody //【请求】请求主体
 	} else {
-		log.Printf("[log.mongoRecordXml]：%s %s\n", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.mongoRecordXml]：%s %s\n", data.RequestUri, requestBody)
 	}
 
 	err := c.mongoRecord(data)
 	if err != nil {
-		log.Printf("[golog.mongoRecordXml]：%s\n", err)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.mongoRecordXml]：%s\n", err)
 	}
 }
 
@@ -315,7 +317,7 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 		data, _ := ioutil.ReadAll(ginCtx.Request.Body)
 
 		if c.mongoConfig.debug {
-			log.Printf("[golog.MongoMiddleware] %s\n", data)
+			c.zapLog.WithLogger().Sugar().Infof("[golog.MongoMiddleware] %s\n", data)
 		}
 
 		// 复用
@@ -351,12 +353,12 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 				}
 
 				if c.mongoConfig.debug {
-					log.Printf("[golog.MongoMiddleware.len(jsonBody)] %v\n", len(jsonBody))
+					c.zapLog.WithLogger().Sugar().Infof("[golog.MongoMiddleware.len(jsonBody)] %v\n", len(jsonBody))
 				}
 
 				if err != nil {
 					if c.mongoConfig.debug {
-						log.Printf("[golog.MongoMiddleware.json.Unmarshal] %s %s\n", jsonBody, err)
+						c.zapLog.WithLogger().Sugar().Infof("[golog.MongoMiddleware.json.Unmarshal] %s %s\n", jsonBody, err)
 					}
 					dataJson = false
 					xmlBody = goxml.XmlDecode(string(data))
@@ -364,8 +366,8 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 			}
 
 			if c.mongoConfig.debug {
-				log.Printf("[golog.MongoMiddleware.xmlBody] %s\n", xmlBody)
-				log.Printf("[golog.MongoMiddleware.jsonBody] %s\n", jsonBody)
+				c.zapLog.WithLogger().Sugar().Infof("[golog.MongoMiddleware.xmlBody] %s\n", xmlBody)
+				c.zapLog.WithLogger().Sugar().Infof("[golog.MongoMiddleware.jsonBody] %s\n", jsonBody)
 			}
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
@@ -396,12 +398,12 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 
 				if dataJson {
 					if c.mongoConfig.debug {
-						log.Printf("[golog.MongoMiddleware.mongoRecord.json.request_body] %s\n", jsonBody)
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.MongoMiddleware.mongoRecord.json.request_body] %s\n", jsonBody)
 					}
 					c.mongoRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.mongoConfig.debug {
-						log.Printf("[golog.MongoMiddleware.mongoRecord.xml.request_body] %s\n", xmlBody)
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.MongoMiddleware.mongoRecord.xml.request_body] %s\n", xmlBody)
 					}
 					c.mongoRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}

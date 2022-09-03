@@ -23,6 +23,7 @@ type GinClient struct {
 	gormClient  *dorm.GormClient  // 数据库驱动
 	mongoClient *dorm.MongoClient // 数据库驱动
 	ipService   *goip.Client      // ip服务
+	zapLog      ZapLog            // 日志服务
 	gormConfig  struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
@@ -59,6 +60,7 @@ type GinClientConfig struct {
 	GormClientFun  ginGormClientFun  // 日志配置
 	MongoClientFun apiMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
+	ZapLog         ZapLog            // 日志服务
 }
 
 // NewGinClient 创建框架实例化
@@ -70,6 +72,8 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	var ctx = context.Background()
 
 	c := &GinClient{}
+
+	c.zapLog = config.ZapLog
 
 	gormClient, gormTableName := config.GormClientFun()
 	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()
