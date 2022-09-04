@@ -19,7 +19,6 @@ type ZapLogConfig struct {
 	MaxAge       int    // 文件最多保存多少天 0=不删除
 	LocalTime    bool   // 采用本地时间
 	Compress     bool   // 是否压缩日志
-	EnableColor  bool   // level大写染色编码器
 	JsonFormat   bool   // 是否输出为json格式
 	ShowLine     bool   // 显示代码行
 	LogInConsole bool   // 是否同时输出到控制台
@@ -37,23 +36,29 @@ func NewZapLog(config *ZapLogConfig) *ZapLog {
 
 	var syncer zapcore.WriteSyncer
 
-	// 定义日志切割配置
-	hook := lumberjack.Logger{
-		Filename:   zl.config.LogPath + zl.config.LogName, // ⽇志⽂件路径
-		MaxSize:    zl.config.MaxSize,                     // 单位为MB,默认为512MB
-		MaxBackups: zl.config.MaxBackups,                  // 保留旧文件的最大个数
-		LocalTime:  zl.config.LocalTime,                   // 采用本地时间
-		Compress:   zl.config.Compress,                    // 是否压缩日志
-	}
-	if zl.config.MaxAge > 0 {
-		hook.MaxAge = zl.config.MaxAge // 文件最多保存多少天
-	}
-
-	// 判断是否控制台输出日志
-	if zl.config.LogInConsole {
-		syncer = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook))
+	if zl.config.LogPath != "" && zl.config.LogName != "" {
+		// 定义日志切割配置
+		hook := lumberjack.Logger{
+			Filename:   zl.config.LogPath + zl.config.LogName, // ⽇志⽂件路径
+			MaxSize:    zl.config.MaxSize,                     // 单位为MB,默认为512MB
+			MaxBackups: zl.config.MaxBackups,                  // 保留旧文件的最大个数
+			LocalTime:  zl.config.LocalTime,                   // 采用本地时间
+			Compress:   zl.config.Compress,                    // 是否压缩日志
+		}
+		if zl.config.MaxAge > 0 {
+			// 文件最多保存多少天
+			hook.MaxAge = zl.config.MaxAge
+		}
+		if zl.config.LogInConsole {
+			// 在控制台和文件输出日志
+			syncer = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook))
+		} else {
+			// 在文件输出日志
+			syncer = zapcore.AddSync(&hook)
+		}
 	} else {
-		syncer = zapcore.AddSync(&hook)
+		// 在控制台输出日志
+		syncer = zapcore.NewMultiWriteSyncer()
 	}
 
 	// 自定义时间输出格式
