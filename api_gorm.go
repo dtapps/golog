@@ -20,7 +20,7 @@ import (
 type ApiGormClientConfig struct {
 	GormClientFun apiGormClientFun // 日志配置
 	Debug         bool             // 日志开关
-	ZapLog        ZapLog           // 日志服务
+	ZapLog        *ZapLog          // 日志服务
 }
 
 // NewApiGormClient 创建接口实例化

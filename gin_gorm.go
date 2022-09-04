@@ -27,7 +27,7 @@ type GinGormClientConfig struct {
 	IpService     *goip.Client     // ip服务
 	GormClientFun ginGormClientFun // 日志配置
 	Debug         bool             // 日志开关
-	ZapLog        ZapLog           // 日志服务
+	ZapLog        *ZapLog          // 日志服务
 }
 
 // NewGinGormClient 创建框架实例化

@@ -14,7 +14,7 @@ import (
 type ApiClient struct {
 	gormClient  *dorm.GormClient  // 数据库驱动
 	mongoClient *dorm.MongoClient // 数据库驱动
-	zapLog      ZapLog            // 日志服务
+	zapLog      *ZapLog           // 日志服务
 	gormConfig  struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
@@ -50,7 +50,7 @@ type ApiClientConfig struct {
 	GormClientFun  apiGormClientFun  // 日志配置
 	MongoClientFun apiMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
-	ZapLog         ZapLog            // 日志服务
+	ZapLog         *ZapLog           // 日志服务
 }
 
 // NewApiClient 创建接口实例化

@@ -21,7 +21,7 @@ import (
 type ApiMongoClientConfig struct {
 	MongoClientFun apiMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
-	ZapLog         ZapLog            // 日志服务
+	ZapLog         *ZapLog           // 日志服务
 }
 
 // NewApiMongoClient 创建接口实例化
