@@ -12,7 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"os"
 	"runtime"
 )
@@ -80,42 +79,42 @@ func (c *ApiClient) mongoCreateCollection() {
 		"listCollections", 1,
 	}}).Decode(&commandResult)
 	if commandErr != nil {
-		log.Println("检查时间序列集合：", commandErr)
+		c.zapLog.WithLogger().Sugar().Errorf("检查时间序列集合：%s", commandErr)
 	} else {
 		err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(context.TODO(), c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("request_time")))
 		if err != nil {
-			log.Println("创建时间序列集合：", err)
+			c.zapLog.WithLogger().Sugar().Errorf("创建时间序列集合：%s", err)
 		}
 	}
 }
 
 // 创建索引
 func (c *ApiClient) mongoCreateIndexes() {
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"trace_id", 1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"request_time", -1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"request_method", 1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"response_status_code", 1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"response_time", -1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"system_host_name", 1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"system_inside_ip", 1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"go_version", -1},
 	}}))
-	log.Println(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
+	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{
 		{"sdk_version", -1},
 	}}))
 }
