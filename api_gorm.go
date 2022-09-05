@@ -66,8 +66,10 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 }
 
 // 创建模型
-func (c *ApiClient) gormAutoMigrate() error {
-	return c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+func (c *ApiClient) gormAutoMigrate() (err error) {
+	err = c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+	c.zapLog.WithLogger().Sugar().Info(err)
+	return
 }
 
 // 模型结构体

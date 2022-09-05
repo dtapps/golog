@@ -76,8 +76,10 @@ func NewGinGormClient(config *GinGormClientConfig) (*GinClient, error) {
 }
 
 // 创建模型
-func (c *GinClient) gormAutoMigrate() error {
-	return c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
+func (c *GinClient) gormAutoMigrate() (err error) {
+	err = c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
+	c.zapLog.WithLogger().Sugar().Info(err)
+	return err
 }
 
 // 模型结构体

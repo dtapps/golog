@@ -97,7 +97,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 
 		c.ipService = config.IpService
 
-		err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
+		err := c.gormAutoMigrate()
 		if err != nil {
 			return nil, errors.New("创建表失败：" + err.Error())
 		}

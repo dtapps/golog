@@ -84,7 +84,7 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 		c.gormConfig.debug = config.Debug
 
-		err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+		err := c.gormAutoMigrate()
 		if err != nil {
 			return nil, errors.New("创建表失败：" + err.Error())
 		}
