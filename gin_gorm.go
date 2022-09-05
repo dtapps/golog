@@ -93,6 +93,7 @@ type ginPostgresqlLog struct {
 	RequestUa         string         `gorm:"comment:【请求】请求UA" json:"request_ua,omitempty"`                      //【请求】请求UA
 	RequestReferer    string         `gorm:"comment:【请求】请求referer" json:"request_referer,omitempty"`            //【请求】请求referer
 	RequestBody       datatypes.JSON `gorm:"type:jsonb;comment:【请求】请求主体" json:"request_body,omitempty"`         //【请求】请求主体
+	RequestBodyXml    string         `gorm:"type:xml;comment:【请求】请求主体 Xml格式" json:"request_body_xml,omitempty"` //【请求】请求主体 Xml格式
 	RequestUrlQuery   datatypes.JSON `gorm:"type:jsonb;comment:【请求】请求URL参数" json:"request_url_query,omitempty"` //【请求】请求URL参数
 	RequestIp         string         `gorm:"index;comment:【请求】请求客户端Ip" json:"request_ip,omitempty"`             //【请求】请求客户端Ip
 	RequestIpCountry  string         `gorm:"index;comment:【请求】请求客户端城市" json:"request_ip_country,omitempty"`     //【请求】请求客户端城市
@@ -167,7 +168,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 	}
 }
 
-func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
@@ -196,8 +197,8 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
 	}
 
-	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
-		data.RequestBody = datatypes.JSON(dorm.JsonEncodeNoError(requestBody)) //【请求】请求主体
+	if len(requestBody) > 0 {
+		data.RequestBodyXml = requestBody //【请求】请求主体  Xml格式
 	} else {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.gormRecordXml]：%s %s\n", data.RequestUri, requestBody)
 	}
@@ -317,7 +318,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", dorm.JsonEncodeNoError(xmlBody))
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)))
 					}
-					c.gormRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()
