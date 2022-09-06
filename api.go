@@ -15,12 +15,12 @@ type ApiClient struct {
 	gormClient  *dorm.GormClient  // 数据库驱动
 	mongoClient *dorm.MongoClient // 数据库驱动
 	zapLog      *ZapLog           // 日志服务
+	logDebug    bool              // 日志开关
 	gormConfig  struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
 		hostname  string // 主机名
 		goVersion string // go版本
-		debug     bool   // 日志开关
 	}
 	mongoConfig struct {
 		databaseName   string // 库名
@@ -28,7 +28,6 @@ type ApiClient struct {
 		insideIp       string // 内网ip
 		hostname       string // 主机名
 		goVersion      string // go版本
-		debug          bool   // 日志开关
 	}
 	log struct {
 		gorm  bool // 日志开关
@@ -64,6 +63,8 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 	c.zapLog = config.ZapLog
 
+	c.logDebug = config.Debug
+
 	gormClient, gormTableName := config.GormClientFun()
 	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()
 
@@ -81,8 +82,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 			return nil, errors.New("没有设置表名")
 		}
 		c.gormConfig.tableName = gormTableName
-
-		c.gormConfig.debug = config.Debug
 
 		err := c.gormAutoMigrate()
 		if err != nil {
@@ -110,8 +109,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 			return nil, errors.New("没有设置表名")
 		}
 		c.mongoConfig.collectionName = mongoCollectionName
-
-		c.mongoConfig.debug = config.Debug
 
 		c.mongoConfig.hostname = hostname
 		c.mongoConfig.insideIp = goip.GetInsideIp(ctx)

@@ -128,13 +128,13 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) (err error) {
 
 	err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&postgresqlLog).Error
 	if err != nil {
-		c.zapLog.WithLogger().Sugar().Errorf("[golog.gin.gormRecord]：%s", err)
+		c.zapLog.WithTraceIdStr(postgresqlLog.TraceId).Sugar().Errorf("[golog.gin.gormRecord]：%s", err)
 	}
 
 	return
 }
 
-func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordJson]收到保存数据要求：%s", c.gormConfig.tableName)
@@ -170,10 +170,14 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestBody = datatypes.JSON(requestBody)            //【请求】请求主体
+		data.RequestBody = requestBody                            //【请求】请求主体
 		data.RequestContent = dorm.JsonEncodeNoError(requestBody) //【请求】请求内容
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.len]：%s %s", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.len]：%s，%s", data.RequestUri, requestBody)
+	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.data]：%+v", data)
 	}
 
 	err := c.gormRecord(data)
@@ -186,7 +190,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 	}
 }
 
-func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordXml]收到保存数据要求：%s", c.gormConfig.tableName)
@@ -222,9 +226,13 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestContent = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))) //【请求】请求内容
+		data.RequestContent = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)) //【请求】请求内容
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s %s", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s，%s", data.RequestUri, requestBody)
+	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.data]：%+v", data)
 	}
 
 	err := c.gormRecord(data)
@@ -232,10 +240,10 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml]：%s", err)
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.string]：%s", requestBody)
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.value]：%+v", requestBody)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.string]：%s", dorm.XmlDecodeNoError([]byte(requestBody)))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.value]：%+v", dorm.XmlDecodeNoError([]byte(requestBody)))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.string]：%s", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.value]：%+v", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.string]：%s", dorm.XmlDecodeNoError(requestBody))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.value]：%+v", dorm.XmlDecodeNoError(requestBody))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.string]：%s", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.value]：%+v", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)))
 	}
 }
 
@@ -320,12 +328,12 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware]准备使用{gormRecordJson}保存数据：%s", data)
 					}
-					c.gormRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware]准备使用{gormRecordXml}保存数据：%s", data)
 					}
-					c.gormRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()

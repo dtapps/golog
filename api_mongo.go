@@ -35,6 +35,8 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 
 	c.zapLog = config.ZapLog
 
+	c.logDebug = config.Debug
+
 	client, databaseName, collectionName := config.MongoClientFun()
 
 	if client == nil || client.Db == nil {
@@ -52,8 +54,6 @@ func NewApiMongoClient(config *ApiMongoClientConfig) (*ApiClient, error) {
 		return nil, errors.New("没有设置表名")
 	}
 	c.mongoConfig.collectionName = collectionName
-
-	c.mongoConfig.debug = config.Debug
 
 	hostname, _ := os.Hostname()
 
@@ -154,7 +154,7 @@ func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err
 
 	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(mongoLog)
 	if err != nil {
-		c.zapLog.WithLogger().Sugar().Errorf("[golog.api.mongoRecord]：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.mongoRecord]：%s", err)
 	}
 
 	return err
@@ -190,6 +190,11 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddleware.data]：%+v", data)
+	}
+
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.MongoMiddleware]：%s", err.Error())
@@ -221,6 +226,11 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareXml]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareXml.data]：%+v", data)
+	}
+
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.MongoMiddlewareXml]：%s", err.Error())
@@ -252,6 +262,11 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareCustom]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoRecordJson.data]：%+v", data)
+	}
+
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.MongoMiddlewareCustom]：%s", err.Error())

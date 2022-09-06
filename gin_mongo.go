@@ -212,13 +212,13 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
 
 	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(mongoLog)
 	if err != nil {
-		c.zapLog.WithLogger().Sugar().Errorf("[golog.gin.mongoRecord]：%s", err)
+		c.zapLog.WithTraceIdStr(mongoLog.TraceId).Sugar().Errorf("[golog.gin.mongoRecord]：%s", err)
 	}
 
 	return err
 }
 
-func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordJson]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
@@ -253,9 +253,13 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestBody = dorm.JsonDecodeNoError([]byte(requestBody)) //【请求】请求主体
+		data.RequestBody = dorm.JsonDecodeNoError(requestBody) //【请求】请求主体
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.len]：%s %s", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.len]：%s，%s", data.RequestUri, requestBody)
+	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.data]：%+v", data)
 	}
 
 	err := c.mongoRecord(data)
@@ -264,7 +268,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	}
 }
 
-func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordXml]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
@@ -299,9 +303,13 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestBody = dorm.XmlDecodeNoError([]byte(requestBody)) //【请求】请求主体
+		data.RequestBody = dorm.XmlDecodeNoError(requestBody) //【请求】请求主体
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.len]：%s %s", data.RequestUri, requestBody)
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.len]：%s，%s", data.RequestUri, requestBody)
+	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.data]：%+v", data)
 	}
 
 	err := c.mongoRecord(data)
@@ -391,12 +399,12 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.MongoMiddleware]准备使用{mongoRecordJson}保存数据：%s", data)
 					}
-					c.mongoRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.MongoMiddleware]准备使用{mongoRecordXml}保存数据：%s", data)
 					}
-					c.mongoRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()

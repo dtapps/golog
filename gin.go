@@ -232,12 +232,12 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordJson}保存数据：%s", data)
 					}
-					c.gormRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordXml}保存数据：%s", data)
 					}
-					c.gormRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 			// 记录
@@ -246,12 +246,12 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据：%s", data)
 					}
-					c.mongoRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据：%s", data)
 					}
-					c.mongoRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()

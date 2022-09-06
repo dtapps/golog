@@ -34,6 +34,8 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 
 	c.zapLog = config.ZapLog
 
+	c.logDebug = config.Debug
+
 	client, tableName := config.GormClientFun()
 
 	if client == nil || client.Db == nil {
@@ -46,8 +48,6 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 		return nil, errors.New("没有设置表名")
 	}
 	c.gormConfig.tableName = tableName
-
-	c.gormConfig.debug = config.Debug
 
 	err := c.gormAutoMigrate()
 	if err != nil {
@@ -112,7 +112,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 
 	err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&postgresqlLog).Error
 	if err != nil {
-		c.zapLog.WithLogger().Sugar().Errorf("[golog.api.gormRecord]：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.gormRecord]：%s", err)
 	}
 
 	return
@@ -149,6 +149,11 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.data]：%+v", data)
+	}
+
 	err := c.gormRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddleware]：%s", err.Error())
@@ -180,6 +185,11 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.data]：%+v", data)
+	}
+
 	err := c.gormRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareXml]：%s", err.Error())
@@ -212,6 +222,11 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
+
+	if c.logDebug {
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.data]：%+v", data)
+	}
+
 	err := c.gormRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareCustom]：%s", err.Error())
