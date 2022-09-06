@@ -13,7 +13,6 @@ require (
 	go.dtapp.net/gourl v1.0.0
 	go.mongodb.org/mongo-driver v1.10.1
 	go.uber.org/zap v1.23.0
-	gorm.io/datatypes v1.0.7
 	gorm.io/gorm v1.23.8
 )
 
@@ -21,7 +20,6 @@ require (
 	github.com/basgys/goxml2json v1.1.0 // indirect
 	github.com/beego/beego/v2 v2.0.5 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/denisenkom/go-mssqldb v0.12.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -87,8 +85,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.3.6 // indirect
 	gorm.io/driver/postgres v1.3.9 // indirect
-	gorm.io/driver/sqlite v1.3.6 // indirect
-	gorm.io/driver/sqlserver v1.3.2 // indirect
 	mellium.im/sasl v0.3.0 // indirect
 	modernc.org/libc v1.16.19 // indirect
 	modernc.org/sqlite v1.18.0 // indirect
