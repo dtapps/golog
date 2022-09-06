@@ -161,7 +161,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		ResponseTime:      gotime.Current().Time,                                              //【返回】时间
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
-		ResponseContent:   dorm.JsonEncodeNoError(responseBody),                               //【返回】内容
+		ResponseContent:   responseBody,                                                       //【返回】内容
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
@@ -209,7 +209,7 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		ResponseTime:      gotime.Current().Time,                                              //【返回】时间
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
-		ResponseContent:   dorm.JsonEncodeNoError(responseBody),                               //【返回】内容
+		ResponseContent:   responseBody,                                                       //【返回】内容
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
