@@ -138,7 +138,7 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) (err error) {
 func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]interface{}, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Info("[golog.gin.gormRecordJson]收到保存数据要求")
+		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordJson]收到保存数据要求：%s", c.gormConfig.tableName)
 	}
 
 	data := ginPostgresqlLog{
@@ -186,7 +186,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Info("[golog.gin.gormRecordXml]收到保存数据要求")
+		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordXml]收到保存数据要求：%s", c.gormConfig.tableName)
 	}
 
 	data := ginPostgresqlLog{

@@ -222,7 +222,7 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
 func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]interface{}, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Info("[golog.gin.mongoRecordJson]收到保存数据要求")
+		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordJson]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
 	}
 
 	data := ginMongoLog{
@@ -268,7 +268,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Info("[golog.gin.mongoRecordXml]收到保存数据要求")
+		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordXml]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
 	}
 
 	data := ginMongoLog{
