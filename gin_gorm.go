@@ -173,7 +173,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 	}
 }
 
-func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
@@ -203,8 +203,8 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
 	}
 
-	if len(requestBody) > 0 {
-		data.RequestContent = requestBody //【请求】请求内容
+	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
+		data.RequestContent = dorm.JsonEncodeNoError(requestBody) //【请求】请求内容
 	} else {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.gormRecordXml]：%s %s\n", data.RequestUri, requestBody)
 	}
@@ -324,7 +324,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", dorm.JsonEncodeNoError(xmlBody))
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)))
 					}
-					c.gormRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()

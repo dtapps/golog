@@ -169,8 +169,8 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 	if request.HeaderIsImg() {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(string(request.ResponseBody)) > 0 {
-			data.ResponseContent = string(request.ResponseBody) //【返回】内容
+		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
+			data.ResponseContent = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】内容
 		} else {
 			c.zapLog.WithTraceId(ctx).Sugar().Infof("[log.GormMiddlewareXml]：%s %s\n", data.RequestUri, request.ResponseBody)
 		}
