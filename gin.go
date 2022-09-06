@@ -11,7 +11,6 @@ import (
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
-	"go.dtapp.net/goxml"
 	"io/ioutil"
 	"net"
 	"os"
@@ -194,7 +193,6 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			var dataJson = true
 
 			// 解析请求内容
-			var xmlBody map[string]string
 			var jsonBody map[string]interface{}
 
 			// 判断是否有内容
@@ -202,12 +200,10 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 				err := json.Unmarshal(data, &jsonBody)
 				if len(jsonBody) <= 0 {
 					dataJson = false
-					xmlBody = goxml.XmlDecode(string(data))
 				}
 
 				if err != nil {
 					dataJson = false
-					xmlBody = goxml.XmlDecode(string(data))
 				}
 			}
 
@@ -238,28 +234,28 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			if c.log.gorm {
 				if dataJson {
 					if c.logDebug {
-						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{gormRecordJson}保存数据")
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordJson}保存数据：%s", data)
 					}
-					c.gormRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
-						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{gormRecordXml}保存数据")
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordXml}保存数据：%s", data)
 					}
-					c.gormRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.gormRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 			// 记录
 			if c.log.mongo {
 				if dataJson {
 					if c.logDebug {
-						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据")
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据：%s", data)
 					}
-					c.mongoRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
-						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据")
+						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据：%s", data)
 					}
-					c.mongoRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()
