@@ -140,18 +140,18 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.isimg]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.isimg]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = request.ResponseBody                            //【返回】数据
 			data.ResponseContent = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddleware]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddleware]：%s", err.Error())
 	}
 }
 
@@ -172,17 +172,17 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.isimg]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.isimg]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseContent = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.len]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareXml]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareXml]：%s", err.Error())
 	}
 }
 
@@ -203,17 +203,17 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		SdkVersion:            sdkVersion,                                                     //【程序】Sdk版本
 	}
 	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.isimg]：%s %s\n", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
+		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.isimg]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
 			data.ResponseBody = request.ResponseBody                            //【返回】数据
 			data.ResponseContent = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s %s\n", data.RequestUri, request.ResponseBody)
+			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s %s", data.RequestUri, request.ResponseBody)
 		}
 	}
 	err := c.gormRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareCustom]：%s\n", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.GormMiddlewareCustom]：%s", err.Error())
 	}
 }
