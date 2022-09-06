@@ -95,7 +95,7 @@ type ginPostgresqlLog struct {
 	RequestUa         string         `gorm:"comment:【请求】请求UA" json:"request_ua,omitempty"`                      //【请求】请求UA
 	RequestReferer    string         `gorm:"comment:【请求】请求referer" json:"request_referer,omitempty"`            //【请求】请求referer
 	RequestBody       datatypes.JSON `gorm:"type:jsonb;comment:【请求】请求主体" json:"request_body,omitempty"`         //【请求】请求主体
-	RequestBodyXml    string         `gorm:"type:xml;comment:【请求】请求主体 Xml格式" json:"request_body_xml,omitempty"` //【请求】请求主体 Xml格式
+	RequestContent    string         `gorm:"comment:【请求】请求内容" json:"request_content,omitempty"`                 //【请求】请求内容
 	RequestUrlQuery   datatypes.JSON `gorm:"type:jsonb;comment:【请求】请求URL参数" json:"request_url_query,omitempty"` //【请求】请求URL参数
 	RequestIp         string         `gorm:"index;comment:【请求】请求客户端Ip" json:"request_ip,omitempty"`             //【请求】请求客户端Ip
 	RequestIpCountry  string         `gorm:"index;comment:【请求】请求客户端城市" json:"request_ip_country,omitempty"`     //【请求】请求客户端城市
@@ -108,6 +108,7 @@ type ginPostgresqlLog struct {
 	ResponseCode      int            `gorm:"index;comment:【返回】状态码" json:"response_code,omitempty"`              //【返回】状态码
 	ResponseMsg       string         `gorm:"comment:【返回】描述" json:"response_msg,omitempty"`                      //【返回】描述
 	ResponseData      datatypes.JSON `gorm:"type:jsonb;comment:【返回】数据" json:"response_data,omitempty"`          //【返回】数据
+	ResponseContent   string         `gorm:"comment:【返回】内容" json:"response_content,omitempty"`                  //【返回】内容
 	CostTime          int64          `gorm:"comment:【系统】花费时间" json:"cost_time,omitempty"`                       //【系统】花费时间
 	SystemHostName    string         `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"`           //【系统】主机名
 	SystemInsideIp    string         `gorm:"index;comment:【系统】内网ip" json:"system_inside_ip,omitempty"`          //【系统】内网ip
@@ -150,6 +151,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		ResponseTime:      gotime.Current().Time,                                              //【返回】时间
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
+		ResponseContent:   dorm.JsonEncodeNoError(responseBody),                               //【返回】内容
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
@@ -160,6 +162,7 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 
 	if len(dorm.JsonEncodeNoError(requestBody)) > 0 {
 		data.RequestBody = datatypes.JSON(dorm.JsonEncodeNoError(requestBody)) //【请求】请求主体
+		data.RequestContent = dorm.JsonEncodeNoError(requestBody)              //【请求】请求内容
 	} else {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.gormRecordJson]：%s %s\n", data.RequestUri, requestBody)
 	}
@@ -191,6 +194,7 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		ResponseTime:      gotime.Current().Time,                                              //【返回】时间
 		ResponseCode:      responseCode,                                                       //【返回】状态码
 		ResponseData:      datatypes.JSON(responseBody),                                       //【返回】数据
+		ResponseContent:   dorm.JsonEncodeNoError(responseBody),                               //【返回】内容
 		CostTime:          endTime - startTime,                                                //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
@@ -200,7 +204,7 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestBodyXml = requestBody //【请求】请求主体  Xml格式
+		data.RequestContent = requestBody //【请求】请求内容
 	} else {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[log.gormRecordXml]：%s %s\n", data.RequestUri, requestBody)
 	}
