@@ -12,7 +12,6 @@ import (
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
-	"go.dtapp.net/goxml"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -223,7 +222,7 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 	}
 
 	if len(requestBody) > 0 {
-		data.RequestContent = dorm.JsonEncodeNoError(goxml.XmlDecode(requestBody)) //【请求】请求内容
+		data.RequestContent = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))) //【请求】请求内容
 	} else {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s %s", data.RequestUri, requestBody)
 	}
@@ -233,10 +232,10 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml]：%s", err)
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.string]：%s", requestBody)
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.value]：%+v", requestBody)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecode.string]：%s", goxml.XmlDecode(requestBody))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecode.value]：%+v", goxml.XmlDecode(requestBody))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.JsonEncodeNoError.string]：%s", dorm.JsonEncodeNoError(goxml.XmlDecode(requestBody)))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.JsonEncodeNoError.value]：%+v", dorm.JsonEncodeNoError(goxml.XmlDecode(requestBody)))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.string]：%s", dorm.XmlDecodeNoError([]byte(requestBody)))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.value]：%+v", dorm.XmlDecodeNoError([]byte(requestBody)))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.string]：%s", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.value]：%+v", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError([]byte(requestBody))))
 	}
 }
 
@@ -281,33 +280,14 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 			var dataJson = true
 
 			// 解析请求内容
-			var xmlBody map[string]string
 			var jsonBody map[string]interface{}
 
 			// 判断是否有内容
 			if len(data) > 0 {
 				err := json.Unmarshal(data, &jsonBody)
-				if len(jsonBody) <= 0 {
-					dataJson = false
-					xmlBody = goxml.XmlDecode(string(data))
-				}
-
-				if c.logDebug {
-					c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.len(jsonBody)] %v", len(jsonBody))
-				}
-
 				if err != nil {
-					if c.logDebug {
-						c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.json.Unmarshal] %s %s", jsonBody, err)
-					}
 					dataJson = false
-					xmlBody = goxml.XmlDecode(string(data))
 				}
-			}
-
-			if c.logDebug {
-				c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.xmlBody] %s", xmlBody)
-				c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.jsonBody] %s", jsonBody)
 			}
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
@@ -338,20 +318,10 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 
 				if dataJson {
 					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body]：%s", jsonBody)
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body]：%s", dorm.JsonEncodeNoError(jsonBody))
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body]：%s", datatypes.JSON(dorm.JsonEncodeNoError(jsonBody)))
-					}
-					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware]准备使用{gormRecordJson}保存数据：%s", data)
 					}
 					c.gormRecordJson(ginCtx, traceId, requestTime, string(data), responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
-					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body]：%s", xmlBody)
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body]：%s", dorm.JsonEncodeNoError(xmlBody))
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body]：%s", datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)))
-					}
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware]准备使用{gormRecordXml}保存数据：%s", data)
 					}

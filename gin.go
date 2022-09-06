@@ -198,10 +198,6 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			// 判断是否有内容
 			if len(data) > 0 {
 				err := json.Unmarshal(data, &jsonBody)
-				if len(jsonBody) <= 0 {
-					dataJson = false
-				}
-
 				if err != nil {
 					dataJson = false
 				}

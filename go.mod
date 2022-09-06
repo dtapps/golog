@@ -5,13 +5,12 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
-	go.dtapp.net/dorm v1.0.30
+	go.dtapp.net/dorm v1.0.31
 	go.dtapp.net/goip v1.0.28
 	go.dtapp.net/gorequest v1.0.28
 	go.dtapp.net/gotime v1.0.5
 	go.dtapp.net/gotrace_id v1.0.6
 	go.dtapp.net/gourl v1.0.0
-	go.dtapp.net/goxml v1.0.1
 	go.mongodb.org/mongo-driver v1.10.1
 	go.uber.org/zap v1.23.0
 	gorm.io/datatypes v1.0.7
