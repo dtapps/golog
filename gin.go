@@ -24,12 +24,12 @@ type GinClient struct {
 	mongoClient *dorm.MongoClient // 数据库驱动
 	ipService   *goip.Client      // ip服务
 	zapLog      *ZapLog           // 日志服务
+	logDebug    bool              // 日志开关
 	gormConfig  struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
 		hostname  string // 主机名
 		goVersion string // go版本
-		debug     bool   // 日志开关
 	}
 	mongoConfig struct {
 		databaseName   string // 库名
@@ -37,7 +37,6 @@ type GinClient struct {
 		insideIp       string // 内网ip
 		hostname       string // 主机名
 		goVersion      string // go版本
-		debug          bool   // 日志开关
 	}
 	log struct {
 		gorm  bool // 日志开关
@@ -75,6 +74,8 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 
 	c.zapLog = config.ZapLog
 
+	c.logDebug = config.Debug
+
 	gormClient, gormTableName := config.GormClientFun()
 	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()
 
@@ -92,8 +93,6 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 			return nil, errors.New("没有设置表名")
 		}
 		c.gormConfig.tableName = gormTableName
-
-		c.gormConfig.debug = config.Debug
 
 		c.ipService = config.IpService
 
@@ -123,8 +122,6 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 			return nil, errors.New("没有设置表名")
 		}
 		c.mongoConfig.collectionName = mongoCollectionName
-
-		c.mongoConfig.debug = config.Debug
 
 		c.ipService = config.IpService
 
@@ -240,16 +237,28 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			// 记录
 			if c.log.gorm {
 				if dataJson {
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{gormRecordJson}保存数据")
+					}
 					c.gormRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{gormRecordXml}保存数据")
+					}
 					c.gormRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 			// 记录
 			if c.log.mongo {
 				if dataJson {
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据")
+					}
 					c.mongoRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据")
+					}
 					c.mongoRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}

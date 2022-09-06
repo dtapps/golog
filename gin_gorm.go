@@ -42,6 +42,8 @@ func NewGinGormClient(config *GinGormClientConfig) (*GinClient, error) {
 
 	c.zapLog = config.ZapLog
 
+	c.logDebug = config.Debug
+
 	client, tableName := config.GormClientFun()
 
 	if client == nil || client.Db == nil {
@@ -54,8 +56,6 @@ func NewGinGormClient(config *GinGormClientConfig) (*GinClient, error) {
 		return nil, errors.New("没有设置表名")
 	}
 	c.gormConfig.tableName = tableName
-
-	c.gormConfig.debug = config.Debug
 
 	c.ipService = config.IpService
 
@@ -136,6 +136,11 @@ func (c *GinClient) gormRecord(postgresqlLog ginPostgresqlLog) (err error) {
 }
 
 func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]interface{}, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+
+	if c.logDebug {
+		c.zapLog.WithLogger().Sugar().Info("[golog.gin.gormRecordJson]收到保存数据要求")
+	}
+
 	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
@@ -179,6 +184,11 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 }
 
 func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody map[string]string, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+
+	if c.logDebug {
+		c.zapLog.WithLogger().Sugar().Info("[golog.gin.gormRecordXml]收到保存数据要求")
+	}
+
 	data := ginPostgresqlLog{
 		TraceId:           traceId,                                                            //【系统】跟踪编号
 		RequestTime:       requestTime,                                                        //【请求】时间
@@ -236,8 +246,8 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 		// 获取
 		data, _ := ioutil.ReadAll(ginCtx.Request.Body)
 
-		if c.gormConfig.debug {
-			c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware] %s\n", data)
+		if c.logDebug {
+			c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware]：%s", data)
 		}
 
 		// 复用
@@ -272,12 +282,12 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 					xmlBody = goxml.XmlDecode(string(data))
 				}
 
-				if c.gormConfig.debug {
+				if c.logDebug {
 					c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.len(jsonBody)] %v\n", len(jsonBody))
 				}
 
 				if err != nil {
-					if c.gormConfig.debug {
+					if c.logDebug {
 						c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.json.Unmarshal] %s %s\n", jsonBody, err)
 					}
 					dataJson = false
@@ -285,7 +295,7 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				}
 			}
 
-			if c.gormConfig.debug {
+			if c.logDebug {
 				c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.xmlBody] %s\n", xmlBody)
 				c.zapLog.WithLogger().Sugar().Infof("[golog.gin.GormMiddleware.jsonBody] %s\n", jsonBody)
 			}
@@ -317,17 +327,23 @@ func (c *GinClient) GormMiddleware() gin.HandlerFunc {
 				var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
 				if dataJson {
-					if c.gormConfig.debug {
+					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body] %s\n", jsonBody)
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body] %s\n", dorm.JsonEncodeNoError(jsonBody))
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.json.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(jsonBody)))
 					}
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.GormMiddleware]准备使用{gormRecordJson}保存数据")
+					}
 					c.gormRecordJson(ginCtx, traceId, requestTime, jsonBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
-					if c.gormConfig.debug {
+					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body] %s\n", xmlBody)
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body] %s\n", dorm.JsonEncodeNoError(xmlBody))
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.GormMiddleware.gormRecord.xml.request_body] %s\n", datatypes.JSON(dorm.JsonEncodeNoError(xmlBody)))
+					}
+					if c.logDebug {
+						c.zapLog.WithLogger().Sugar().Info("[golog.gin.GormMiddleware]准备使用{gormRecordXml}保存数据")
 					}
 					c.gormRecordXml(ginCtx, traceId, requestTime, xmlBody, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
