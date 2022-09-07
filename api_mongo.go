@@ -184,10 +184,12 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddleware.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
+		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 
@@ -220,10 +222,12 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareXml.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(dorm.XmlDecodeNoError(request.ResponseBody)) > 0 {
+		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.XmlDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareXml]：%s %s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareXml]：%s %s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 
@@ -256,10 +260,12 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareCustom.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(dorm.JsonDecodeNoError(request.ResponseBody)) > 0 {
+		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareCustom]：%s %s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.MongoMiddlewareCustom]：%s %s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 

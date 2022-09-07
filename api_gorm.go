@@ -143,7 +143,9 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 
@@ -176,10 +178,12 @@ func (c *ApiClient) GormMiddlewareXml(ctx context.Context, request gorequest.Res
 	if request.HeaderIsImg() {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.isimg]：%s，%s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
+		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】内容
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareXml.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 
@@ -212,10 +216,12 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 	if request.HeaderIsImg() {
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.isimg]：%s，%s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
-		if len(dorm.JsonEncodeNoError(request.ResponseBody)) > 0 {
+		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
 		} else {
-			c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			if c.logDebug {
+				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s，%s", data.RequestUri, request.ResponseBody)
+			}
 		}
 	}
 

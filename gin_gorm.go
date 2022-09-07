@@ -168,7 +168,9 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.JsonEncodeNoError(requestBody) //【请求】请求主体
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.len]：%s，%s", data.RequestUri, requestBody)
+		if c.logDebug {
+			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.len]：%s，%s", data.RequestUri, requestBody)
+		}
 	}
 
 	if c.logDebug {
@@ -220,7 +222,9 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)) //【请求】请求内容
 	} else {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s，%s", data.RequestUri, requestBody)
+		if c.logDebug {
+			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s，%s", data.RequestUri, requestBody)
+		}
 	}
 
 	if c.logDebug {
