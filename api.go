@@ -16,6 +16,7 @@ type ApiClient struct {
 	mongoClient *dorm.MongoClient // 数据库驱动
 	zapLog      *ZapLog           // 日志服务
 	logDebug    bool              // 日志开关
+	currentIp   string            // 当前ip
 	gormConfig  struct {
 		tableName string // 表名
 		insideIp  string // 内网ip
@@ -50,6 +51,7 @@ type ApiClientConfig struct {
 	MongoClientFun apiMongoClientFun // 日志配置
 	Debug          bool              // 日志开关
 	ZapLog         *ZapLog           // 日志服务
+	CurrentIp      string            // 当前ip
 }
 
 // NewApiClient 创建接口实例化
@@ -64,6 +66,13 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 	c.zapLog = config.ZapLog
 
 	c.logDebug = config.Debug
+
+	if config.CurrentIp == "" {
+		config.CurrentIp = goip.GetOutsideIp(ctx)
+	}
+	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
+		c.currentIp = config.CurrentIp
+	}
 
 	gormClient, gormTableName := config.GormClientFun()
 	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()

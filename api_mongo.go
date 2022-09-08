@@ -130,6 +130,7 @@ type apiMongolLog struct {
 	RequestMethod         string             `json:"request_method,omitempty" bson:"request_method,omitempty"`                   //【请求】方式
 	RequestParams         interface{}        `json:"request_params,omitempty" bson:"request_params,omitempty"`                   //【请求】参数
 	RequestHeader         interface{}        `json:"request_header,omitempty" bson:"request_header,omitempty"`                   //【请求】头部
+	RequestIp             string             `json:"request_ip,omitempty" bson:"request_ip,omitempty"`                           //【请求】请求Ip
 	ResponseHeader        interface{}        `json:"response_header,omitempty" bson:"response_header,omitempty"`                 //【返回】头部
 	ResponseStatusCode    int                `json:"response_status_code,omitempty" bson:"response_status_code,omitempty"`       //【返回】状态码
 	ResponseBody          interface{}        `json:"response_body,omitempty" bson:"response_body,omitempty"`                     //【返回】内容
@@ -151,6 +152,8 @@ func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err
 	mongoLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
 
 	mongoLog.LogId = primitive.NewObjectID()
+
+	mongoLog.RequestIp = c.currentIp
 
 	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(mongoLog)
 	if err != nil {

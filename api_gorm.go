@@ -84,6 +84,7 @@ type apiPostgresqlLog struct {
 	RequestMethod         string    `gorm:"index;comment:【请求】方式" json:"request_method,omitempty"`        //【请求】方式
 	RequestParams         string    `gorm:"comment:【请求】参数" json:"request_params,omitempty"`              //【请求】参数
 	RequestHeader         string    `gorm:"comment:【请求】头部" json:"request_header,omitempty"`              //【请求】头部
+	RequestIp             string    `gorm:"index;comment:【请求】请求Ip" json:"request_ip,omitempty"`          //【请求】请求Ip
 	ResponseHeader        string    `gorm:"comment:【返回】头部" json:"response_header,omitempty"`             //【返回】头部
 	ResponseStatusCode    int       `gorm:"index;comment:【返回】状态码" json:"response_status_code,omitempty"` //【返回】状态码
 	ResponseBody          string    `gorm:"comment:【返回】数据" json:"response_content,omitempty"`            //【返回】数据
@@ -107,6 +108,8 @@ func (c *ApiClient) gormRecord(ctx context.Context, postgresqlLog apiPostgresqlL
 	postgresqlLog.GoVersion = c.gormConfig.goVersion
 
 	postgresqlLog.TraceId = gotrace_id.GetTraceIdContext(ctx)
+
+	postgresqlLog.RequestIp = c.currentIp
 
 	err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&postgresqlLog).Error
 	if err != nil {
