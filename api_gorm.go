@@ -141,7 +141,7 @@ func (c *ApiClient) GormMiddleware(ctx context.Context, request gorequest.Respon
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.isimg]：%s，%s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(request.ResponseBody) > 0 {
-			data.ResponseBody = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
+			data.ResponseBody = dorm.JsonEncodeNoError(dorm.JsonDecodeNoError(request.ResponseBody)) //【返回】数据
 		} else {
 			if c.logDebug {
 				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddleware.len]：%s，%s", data.RequestUri, request.ResponseBody)
@@ -217,7 +217,7 @@ func (c *ApiClient) GormMiddlewareCustom(ctx context.Context, api string, reques
 		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.isimg]：%s，%s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
 	} else {
 		if len(request.ResponseBody) > 0 {
-			data.ResponseBody = dorm.JsonEncodeNoError(request.ResponseBody) //【返回】数据
+			data.ResponseBody = dorm.JsonEncodeNoError(dorm.JsonDecodeNoError(request.ResponseBody)) //【返回】数据
 		} else {
 			if c.logDebug {
 				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.GormMiddlewareCustom.len]：%s，%s", data.RequestUri, request.ResponseBody)
