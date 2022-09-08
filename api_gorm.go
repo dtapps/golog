@@ -20,6 +20,7 @@ type ApiGormClientConfig struct {
 	GormClientFun apiGormClientFun // 日志配置
 	Debug         bool             // 日志开关
 	ZapLog        *ZapLog          // 日志服务
+	CurrentIp     string           // 当前ip
 }
 
 // NewApiGormClient 创建接口实例化
@@ -34,6 +35,13 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 	c.zapLog = config.ZapLog
 
 	c.logDebug = config.Debug
+
+	if config.CurrentIp == "" {
+		config.CurrentIp = goip.GetOutsideIp(ctx)
+	}
+	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
+		c.currentIp = config.CurrentIp
+	}
 
 	client, tableName := config.GormClientFun()
 
