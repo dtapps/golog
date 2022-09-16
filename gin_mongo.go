@@ -131,10 +131,6 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 		}}))
 	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{
-			{"request_ip_region", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
 			{"request_ip_province", 1},
 		}}))
 	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
@@ -200,7 +196,6 @@ type ginMongoLog struct {
 	RequestUrlQuery   interface{}        `json:"request_url_query,omitempty" bson:"request_url_query,omitempty"`     //【请求】请求URL参数
 	RequestIp         string             `json:"request_ip,omitempty" bson:"request_ip,omitempty"`                   //【请求】请求客户端Ip
 	RequestIpCountry  string             `json:"request_ip_country,omitempty" bson:"request_ip_country,omitempty"`   //【请求】请求客户端城市
-	RequestIpRegion   string             `json:"request_ip_region,omitempty" bson:"request_ip_region,omitempty"`     //【请求】请求客户端区域
 	RequestIpProvince string             `json:"request_ip_province,omitempty" bson:"request_ip_province,omitempty"` //【请求】请求客户端省份
 	RequestIpCity     string             `json:"request_ip_city,omitempty" bson:"request_ip_city,omitempty"`         //【请求】请求客户端城市
 	RequestIpIsp      string             `json:"request_ip_isp,omitempty" bson:"request_ip_isp,omitempty"`           //【请求】请求客户端运营商
@@ -239,7 +234,7 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
 	return err
 }
 
-func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordJson]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
@@ -258,7 +253,6 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
 		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
 		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
-		RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
 		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
 		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
@@ -292,7 +286,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	}
 }
 
-func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
+func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string) {
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordXml]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
@@ -311,7 +305,6 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
 		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
 		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端城市
-		RequestIpRegion:   requestClientIpRegion,                                        //【请求】请求客户端区域
 		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
 		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
@@ -404,22 +397,21 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
 
-			requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", "", ""
+			requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", ""
 			if c.ipService != nil {
 				if net.ParseIP(clientIp).To4() != nil {
 					// IPv4
-					_, info := c.ipService.Ipv4(clientIp)
-					requestClientIpCountry = info.Country
-					requestClientIpRegion = info.Region
-					requestClientIpProvince = info.Province
-					requestClientIpCity = info.City
-					requestClientIpIsp = info.ISP
+					info := c.ipService.Analyse(clientIp)
+					requestClientIpCountry = info.Ip2regionV2info.Country
+					requestClientIpProvince = info.Ip2regionV2info.Province
+					requestClientIpCity = info.Ip2regionV2info.City
+					requestClientIpIsp = info.Ip2regionV2info.Operator
 				} else if net.ParseIP(clientIp).To16() != nil {
 					// IPv6
-					info := c.ipService.Ipv6(clientIp)
-					requestClientIpCountry = info.Country
-					requestClientIpProvince = info.Province
-					requestClientIpCity = info.City
+					info := c.ipService.Analyse(clientIp)
+					requestClientIpCountry = info.Ipv6wryInfo.Country
+					requestClientIpProvince = info.Ipv6wryInfo.Province
+					requestClientIpCity = info.Ipv6wryInfo.City
 				}
 			}
 
@@ -432,12 +424,12 @@ func (c *GinClient) MongoMiddleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.MongoMiddleware]准备使用{mongoRecordJson}保存数据：%s", data)
 					}
-					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.MongoMiddleware]准备使用{mongoRecordXml}保存数据：%s", data)
 					}
-					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpRegion, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
 				}
 			}
 		}()
