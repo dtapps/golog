@@ -22,7 +22,7 @@ type apiMongolLog struct {
 	LogId                 primitive.ObjectID `json:"log_id,omitempty" bson:"_id,omitempty"`                                      //【记录】编号
 	LogTime               primitive.DateTime `json:"log_time,omitempty" bson:"log_time,omitempty"`                               //【记录】时间
 	TraceId               string             `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                               //【记录】跟踪编号
-	RequestTime           dorm.BsonTime      `json:"request_time,omitempty" bson:"request_time,omitempty"`                       //【请求】时间
+	RequestTime           string             `json:"request_time,omitempty" bson:"request_time,omitempty"`                       //【请求】时间
 	RequestUri            string             `json:"request_uri,omitempty" bson:"request_uri,omitempty"`                         //【请求】链接
 	RequestUrl            string             `json:"request_url,omitempty" bson:"request_url,omitempty"`                         //【请求】链接
 	RequestApi            string             `json:"request_api,omitempty" bson:"request_api,omitempty"`                         //【请求】接口
@@ -34,7 +34,7 @@ type apiMongolLog struct {
 	ResponseStatusCode    int                `json:"response_status_code,omitempty" bson:"response_status_code,omitempty"`       //【返回】状态码
 	ResponseBody          interface{}        `json:"response_body,omitempty" bson:"response_body,omitempty"`                     //【返回】内容
 	ResponseContentLength int64              `json:"response_content_length,omitempty" bson:"response_content_length,omitempty"` //【返回】大小
-	ResponseTime          dorm.BsonTime      `json:"response_time,omitempty" bson:"response_time,omitempty"`                     //【返回】时间
+	ResponseTime          string             `json:"response_time,omitempty" bson:"response_time,omitempty"`                     //【返回】时间
 	SystemHostName        string             `json:"system_host_name,omitempty" bson:"system_host_name,omitempty"`               //【系统】主机名
 	SystemInsideIp        string             `json:"system_inside_ip,omitempty" bson:"system_inside_ip,omitempty"`               //【系统】内网ip
 	SystemOs              string             `json:"system_os,omitempty" bson:"system_os,omitempty"`                             //【系统】系统类型
@@ -130,9 +130,6 @@ func (c *ApiClient) mongoCreateIndexes(ctx context.Context) {
 		{"trace_id", 1},
 	}}))
 	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{Keys: bson.D{
-		{"log_time", -1},
-	}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{Keys: bson.D{
 		{"request_time", -1},
 	}}))
 	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{Keys: bson.D{
@@ -203,7 +200,7 @@ func (c *ApiClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteR
 func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
 	data := apiMongolLog{
 		LogTime:               primitive.NewDateTimeFromTime(request.RequestTime), //【记录】时间
-		RequestTime:           dorm.BsonTime(request.RequestTime),                 //【请求】时间
+		RequestTime:           gotime.SetCurrent(request.RequestTime).Bson(),      //【请求】时间
 		RequestUri:            request.RequestUri,                                 //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,             //【请求】链接
 		RequestApi:            gourl.UriParse(request.RequestUri).Path,            //【请求】接口
@@ -213,7 +210,7 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 		ResponseHeader:        request.ResponseHeader,                             //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
-		ResponseTime:          dorm.BsonTime(request.ResponseTime),                //【返回】时间
+		ResponseTime:          gotime.SetCurrent(request.ResponseTime).Bson(),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
@@ -242,7 +239,7 @@ func (c *ApiClient) MongoMiddleware(ctx context.Context, request gorequest.Respo
 func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
 	data := apiMongolLog{
 		LogTime:               primitive.NewDateTimeFromTime(request.RequestTime), //【记录】时间
-		RequestTime:           dorm.BsonTime(request.RequestTime),                 //【请求】时间
+		RequestTime:           gotime.SetCurrent(request.RequestTime).Bson(),      //【请求】时间
 		RequestUri:            request.RequestUri,                                 //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,             //【请求】链接
 		RequestApi:            gourl.UriParse(request.RequestUri).Path,            //【请求】接口
@@ -252,7 +249,7 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		ResponseHeader:        request.ResponseHeader,                             //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
-		ResponseTime:          dorm.BsonTime(request.ResponseTime),                //【返回】时间
+		ResponseTime:          gotime.SetCurrent(request.ResponseTime).Bson(),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {
@@ -281,7 +278,7 @@ func (c *ApiClient) MongoMiddlewareXml(ctx context.Context, request gorequest.Re
 func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
 	data := apiMongolLog{
 		LogTime:               primitive.NewDateTimeFromTime(request.RequestTime), //【记录】时间
-		RequestTime:           dorm.BsonTime(request.RequestTime),                 //【请求】时间
+		RequestTime:           gotime.SetCurrent(request.RequestTime).Bson(),      //【请求】时间
 		RequestUri:            request.RequestUri,                                 //【请求】链接
 		RequestUrl:            gourl.UriParse(request.RequestUri).Url,             //【请求】链接
 		RequestApi:            api,                                                //【请求】接口
@@ -291,7 +288,7 @@ func (c *ApiClient) MongoMiddlewareCustom(ctx context.Context, api string, reque
 		ResponseHeader:        request.ResponseHeader,                             //【返回】头部
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
-		ResponseTime:          dorm.BsonTime(request.ResponseTime),                //【返回】时间
+		ResponseTime:          gotime.SetCurrent(request.ResponseTime).Bson(),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if request.ResponseHeader.Get("Content-Type") == "image/jpeg" || request.ResponseHeader.Get("Content-Type") == "image/png" || request.ResponseHeader.Get("Content-Type") == "image/jpg" {

@@ -32,6 +32,9 @@ func (c *Client) Query(ipAddress net.IP) (result QueryResult, err error) {
 	result.Ip = ipAddress.String()
 
 	result.Country = split[0]
+	if result.Country == "0" {
+		result.Country = ""
+	}
 	result.Province = split[2]
 	if result.Province == "0" {
 		result.Province = ""

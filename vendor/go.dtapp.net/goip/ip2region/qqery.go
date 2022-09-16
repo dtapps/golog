@@ -29,7 +29,7 @@ func (c *Client) Query(ipAddress net.IP) (result QueryResult, err error) {
 
 		if err != nil {
 
-			return result, err
+			return QueryResult{}, err
 		}
 
 		c.firstIndexPtr = getLong(dbBuff, 0)
@@ -39,7 +39,7 @@ func (c *Client) Query(ipAddress net.IP) (result QueryResult, err error) {
 
 	ip, err := ip2long(result.Ip)
 	if err != nil {
-		return result, err
+		return QueryResult{}, err
 	}
 
 	h := c.totalBlocks
@@ -62,12 +62,12 @@ func (c *Client) Query(ipAddress net.IP) (result QueryResult, err error) {
 		}
 	}
 	if dataPtr == 0 {
-		return result, errors.New("not found")
+		return QueryResult{}, errors.New("not found")
 	}
 
 	dataLen := (dataPtr >> 24) & 0xFF
 	dataPtr = dataPtr & 0x00FFFFFF
 	result = getIpInfo(result.Ip, getLong(dbBuff, dataPtr), dbBuff[(dataPtr)+4:dataPtr+dataLen])
-	return result, nil
 
+	return result, nil
 }
