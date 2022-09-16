@@ -214,7 +214,12 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
 
-			requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp := "", "", "", ""
+			var requestClientIpCountry string
+			var requestClientIpProvince string
+			var requestClientIpCity string
+			var requestClientIpIsp string
+			var requestClientIpLocationLatitude float64
+			var requestClientIpLocationLongitude float64
 			if c.ipService != nil {
 				if net.ParseIP(clientIp).To4() != nil {
 					// IPv4
@@ -223,12 +228,16 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 					requestClientIpProvince = info.Ip2regionV2info.Province
 					requestClientIpCity = info.Ip2regionV2info.City
 					requestClientIpIsp = info.Ip2regionV2info.Operator
+					requestClientIpLocationLatitude = info.GeoipInfo.Location.Latitude
+					requestClientIpLocationLongitude = info.GeoipInfo.Location.Longitude
 				} else if net.ParseIP(clientIp).To16() != nil {
 					// IPv6
 					info := c.ipService.Analyse(clientIp)
 					requestClientIpCountry = info.Ipv6wryInfo.Country
 					requestClientIpProvince = info.Ipv6wryInfo.Province
 					requestClientIpCity = info.Ipv6wryInfo.City
+					requestClientIpLocationLatitude = info.GeoipInfo.Location.Latitude
+					requestClientIpLocationLongitude = info.GeoipInfo.Location.Longitude
 				}
 			}
 
@@ -254,12 +263,12 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据：%s", data)
 					}
-					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				} else {
 					if c.logDebug {
 						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据：%s", data)
 					}
-					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				}
 			}
 		}()
