@@ -95,8 +95,8 @@ github.com/go-playground/locales v0.14.0 h1:u50s323jtVGugKlcYeyzC0etD1HifMjqmJqb
 github.com/go-playground/locales v0.14.0/go.mod h1:sawfccIbzZTqEDETgFXqTho0QybSa7l++s0DH+LDiLs=
 github.com/go-playground/universal-translator v0.18.0 h1:82dyy6p4OuJq4/CByFNOn/jYrnRPArHwAcmLoJZxyho=
 github.com/go-playground/universal-translator v0.18.0/go.mod h1:UvRDBj+xPUEGrFYl+lu/H90nyDXpg0fqeB/AQUGNTVA=
-github.com/go-playground/validator/v10 v10.11.0 h1:0W+xRM511GY47Yy3bZUbJVitCNg2BOGlCyvTqsp/xIw=
-github.com/go-playground/validator/v10 v10.11.0/go.mod h1:i+3WkQ1FvaUjjxh1kSvIA4dMGDBiPU55YFDl0WbKdWU=
+github.com/go-playground/validator/v10 v10.11.1 h1:prmOlTVv+YjZjmRmNSF3VmspqJIxJWXmqUsHwfTRRkQ=
+github.com/go-playground/validator/v10 v10.11.1/go.mod h1:i+3WkQ1FvaUjjxh1kSvIA4dMGDBiPU55YFDl0WbKdWU=
 github.com/go-redis/redis/v9 v9.0.0-beta.2 h1:ZSr84TsnQyKMAg8gnV+oawuQezeJR11/09THcWCQzr4=
 github.com/go-redis/redis/v9 v9.0.0-beta.2/go.mod h1:Bldcd/M/bm9HbnNPi/LUtYBSD8ttcZYBMupwMXhdU0o=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
@@ -499,8 +499,8 @@ github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a/go.mod h1:ul22v+Nro/
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
-go.dtapp.net/dorm v1.0.33 h1:QRAVEQ6Uf3WENSOrXytzzH+PjH90JySowd3jbB9PQjw=
-go.dtapp.net/dorm v1.0.33/go.mod h1:4WNSzrUGs7YIudq1cRZQNkHOlPAbG6thI3mXX1tQcYY=
+go.dtapp.net/dorm v1.0.36 h1:3kqdGhZ/oAKr8YMQo9OXAlByGal+uok6Yh33YXmdJtw=
+go.dtapp.net/dorm v1.0.36/go.mod h1:z9ksZ4Y0HHH0odjEiG57d90/ZUBM51qXEWJC8fS+dEM=
 go.dtapp.net/goip v1.0.34 h1:aW2CuPpQwcDOJiyx/gHbvrha3/x+poFRpDxsLtO4EVw=
 go.dtapp.net/goip v1.0.34/go.mod h1:EctL6B8ue/kZKPr+kKZPU6YTTpNhihane9BHHffwo6Q=
 go.dtapp.net/gorandom v1.0.1 h1:IWfMClh1ECPvyUjlqD7MwLq4mZdUusD1qAwAdsvEJBs=

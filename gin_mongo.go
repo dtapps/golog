@@ -33,7 +33,7 @@ type ginMongoLog struct {
 	LogId             primitive.ObjectID                   `json:"log_id,omitempty" bson:"_id,omitempty"`                              //【记录】编号
 	LogTime           primitive.DateTime                   `json:"log_time,omitempty" bson:"log_time,omitempty"`                       //【记录】时间
 	TraceId           string                               `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                       //【记录】跟踪编号
-	RequestTime       string                               `json:"request_time,omitempty" bson:"request_time,omitempty"`               //【请求】时间
+	RequestTime       dorm.BsonTime                        `json:"request_time,omitempty" bson:"request_time,omitempty"`               //【请求】时间
 	RequestUri        string                               `json:"request_uri,omitempty" bson:"request_uri,omitempty"`                 //【请求】请求链接 域名+路径+参数
 	RequestUrl        string                               `json:"request_url,omitempty" bson:"request_url,omitempty"`                 //【请求】请求链接 域名+路径
 	RequestApi        string                               `json:"request_api,omitempty" bson:"request_api,omitempty"`                 //【请求】请求接口 路径
@@ -50,7 +50,7 @@ type ginMongoLog struct {
 	RequestIpIsp      string                               `json:"request_ip_isp,omitempty" bson:"request_ip_isp,omitempty"`           //【请求】请求客户端运营商
 	RequestIpLocation ginMongoLogRequestIpLocationLocation `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
 	RequestHeader     interface{}                          `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
-	ResponseTime      string                               `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
+	ResponseTime      dorm.BsonTime                        `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
 	ResponseCode      int                                  `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
 	ResponseMsg       string                               `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
 	ResponseData      interface{}                          `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
@@ -131,97 +131,123 @@ func (c *GinClient) mongoCreateCollection(ctx context.Context) {
 		"listCollections", 1,
 	}}).Decode(&commandResult)
 	if commandErr != nil {
-		c.zapLog.WithLogger().Sugar().Error("检查时间序列集合：", commandErr)
+		c.zapLog.WithTraceId(ctx).Sugar().Error("检查时间序列集合：", commandErr)
 	} else {
 		err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(ctx, c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("log_time")))
 		if err != nil {
-			c.zapLog.WithLogger().Sugar().Error("创建时间序列集合：", err)
+			c.zapLog.WithTraceId(ctx).Sugar().Error("创建时间序列集合：", err)
 		}
 	}
 }
 
 // 创建索引
 func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"trace_id", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_time", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_method", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_proto", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip_country", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip_province", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip_city", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip_isp", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"response_time", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"response_code", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"system_host_name", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"system_inside_ip", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"system_os", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"system_arch", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"system_cpu_quantity", 1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"go_version", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"sdk_version", -1},
-		}}))
-	c.zapLog.WithLogger().Sugar().Infof(c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys: bson.D{
-			{"request_ip_location", "2dsphere"},
-		}}))
+	indexes, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).CreateManyIndexes(ctx, []mongo.IndexModel{
+		{
+			Keys: bson.D{{
+				Key:   "trace_id",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_time",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_method",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_proto",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip_country",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip_province",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip_city",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip_isp",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "response_time",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "response_code",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "system_host_name",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "system_inside_ip",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "system_os",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "system_arch",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "system_cpu_quantity",
+				Value: 1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "go_version",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "sdk_version",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
+				Key:   "request_ip_location",
+				Value: "2dsphere",
+			}},
+		},
+	})
+	if err != nil {
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建索引：%s", err)
+	}
+	c.zapLog.WithTraceId(ctx).Sugar().Infof("创建索引：%s", indexes)
 }
 
 // 记录日志
-func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
+func (c *GinClient) mongoRecord(ctx context.Context, mongoLog ginMongoLog) (err error) {
 
 	mongoLog.SystemHostName = c.mongoConfig.hostname //【系统】主机名
 	mongoLog.SystemInsideIp = c.mongoConfig.insideIp //【系统】内网ip
@@ -232,7 +258,7 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
 	mongoLog.SystemCpuQuantity = c.config.maxProCs   //【系统】CPU核数
 	mongoLog.LogId = primitive.NewObjectID()         //【记录】编号
 
-	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(mongoLog)
+	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, mongoLog)
 	if err != nil {
 		c.zapLog.WithTraceIdStr(mongoLog.TraceId).Sugar().Errorf("[golog.gin.mongoRecord]：%s", err)
 	}
@@ -242,6 +268,8 @@ func (c *GinClient) mongoRecord(mongoLog ginMongoLog) (err error) {
 
 func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
 
+	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
+
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordJson]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
 	}
@@ -249,7 +277,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	data := ginMongoLog{
 		TraceId:           traceId,                                                      //【记录】跟踪编号
 		LogTime:           primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
-		RequestTime:       gotime.SetCurrent(requestTime).Bson(),                        //【请求】时间
+		RequestTime:       dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
 		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
 		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
 		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
@@ -263,7 +291,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
 		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:      gotime.Current().Bson(),                                      //【返回】时间
+		ResponseTime:      dorm.NewBsonTimeCurrent(),                                    //【返回】时间
 		ResponseCode:      responseCode,                                                 //【返回】状态码
 		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
 		CostTime:          endTime - startTime,                                          //【系统】花费时间
@@ -293,13 +321,15 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.data]：%+v", data)
 	}
 
-	err := c.mongoRecord(data)
+	err := c.mongoRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.mongoRecordJson]：%s", err)
 	}
 }
 
 func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
+
+	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
 
 	if c.logDebug {
 		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordXml]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
@@ -308,7 +338,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 	data := ginMongoLog{
 		TraceId:           traceId,                                                      //【记录】跟踪编号
 		LogTime:           primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
-		RequestTime:       gotime.SetCurrent(requestTime).Bson(),                        //【请求】时间
+		RequestTime:       dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
 		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
 		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
 		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
@@ -322,7 +352,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
 		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:      gotime.Current().Bson(),                                      //【返回】时间
+		ResponseTime:      dorm.NewBsonTimeCurrent(),                                    //【返回】时间
 		ResponseCode:      responseCode,                                                 //【返回】状态码
 		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
 		CostTime:          endTime - startTime,                                          //【系统】花费时间
@@ -352,7 +382,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.data]：%+v", data)
 	}
 
-	err := c.mongoRecord(data)
+	err := c.mongoRecord(ctx, data)
 	if err != nil {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.mongoRecordXml]：%s", err)
 	}
