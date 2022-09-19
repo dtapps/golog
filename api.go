@@ -10,6 +10,10 @@ import (
 	"runtime"
 )
 
+// ApiClientFun *ApiClient 驱动
+// jsonStatus bool json状态
+type ApiClientFun func() (*ApiClient, bool)
+
 // ApiClient 接口
 type ApiClient struct {
 	gormClient *dorm.GormClient // 数据库驱动

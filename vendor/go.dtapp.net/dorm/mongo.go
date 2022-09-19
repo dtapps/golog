@@ -8,6 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MongoClientFun *MongoClient 驱动
+// databaseName string 库名
+type MongoClientFun func() (*MongoClient, string)
+
 type ConfigMongoClient struct {
 	Dns          string // 地址
 	Opts         *options.ClientOptions

@@ -17,6 +17,10 @@ import (
 	"runtime"
 )
 
+// GinClientFun *GinClient 驱动
+// jsonStatus bool json状态
+type GinClientFun func() (*GinClient, bool)
+
 // GinClient 框架
 type GinClient struct {
 	gormClient *dorm.GormClient // 数据库驱动
