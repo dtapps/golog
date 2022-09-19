@@ -39,13 +39,17 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 		config.CurrentIp = goip.GetOutsideIp(ctx)
 	}
 	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
-		c.currentIp = config.CurrentIp
+		c.config.systemOutsideIp = config.CurrentIp
+	}
+
+	if c.config.systemOutsideIp == "" {
+		return nil, currentIpNoConfig
 	}
 
 	client, tableName := config.GormClientFun()
 
 	if client == nil || client.Db == nil {
-		return nil, errors.New("没有设置驱动")
+		return nil, gormClientFunNoConfig
 	}
 
 	c.gormClient = client
@@ -93,7 +97,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLogString)
 	data.SystemInsideIp = c.config.systemInsideIp
 	data.GoVersion = c.config.goVersion
 	data.TraceId = gotrace_id.GetTraceIdContext(ctx)
-	data.RequestIp = c.currentIp
+	data.RequestIp = c.config.systemOutsideIp
 	data.SystemOs = c.config.systemOs
 	data.SystemArch = c.config.systemArch
 

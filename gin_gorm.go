@@ -46,7 +46,7 @@ func NewGinGormClient(config *GinGormClientConfig) (*GinClient, error) {
 	client, tableName := config.GormClientFun()
 
 	if client == nil || client.Db == nil {
-		return nil, errors.New("没有设置驱动")
+		return nil, gormClientFunNoConfig
 	}
 
 	c.gormClient = client

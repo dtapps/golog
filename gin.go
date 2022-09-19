@@ -71,7 +71,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	gormClient, gormTableName := config.GormClientFun()
 
 	if gormClient == nil || gormClient.Db == nil {
-		return nil, errors.New("没有设置驱动")
+		return nil, gormClientFunNoConfig
 	}
 
 	if gormClient != nil || gormClient.Db != nil {

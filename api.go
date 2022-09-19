@@ -20,7 +20,6 @@ type ApiClient struct {
 	gormClient *dorm.GormClient // 数据库驱动
 	zapLog     *ZapLog          // 日志服务
 	logDebug   bool             // 日志开关
-	currentIp  string           // 当前ip
 	gormConfig struct {
 		tableName string // 表名
 	}
@@ -62,13 +61,17 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 		config.CurrentIp = goip.GetOutsideIp(ctx)
 	}
 	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
-		c.currentIp = config.CurrentIp
+		c.config.systemOutsideIp = config.CurrentIp
+	}
+
+	if c.config.systemOutsideIp == "" {
+		return nil, currentIpNoConfig
 	}
 
 	gormClient, gormTableName := config.GormClientFun()
 
 	if gormClient == nil || gormClient.Db == nil {
-		return nil, errors.New("没有设置驱动")
+		return nil, gormClientFunNoConfig
 	}
 
 	if gormClient != nil || gormClient.Db != nil {
