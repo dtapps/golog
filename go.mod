@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
-	go.dtapp.net/dorm v1.0.37
+	go.dtapp.net/dorm v1.0.38
 	go.dtapp.net/goip v1.0.34
 	go.dtapp.net/gorequest v1.0.31
 	go.dtapp.net/gotime v1.0.5

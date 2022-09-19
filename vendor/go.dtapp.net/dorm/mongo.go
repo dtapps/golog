@@ -9,8 +9,13 @@ import (
 )
 
 // MongoClientFun *MongoClient 驱动
-// databaseName string 库名
+// string 库名
 type MongoClientFun func() (*MongoClient, string)
+
+// MongoClientCollectionFun *MongoClient 驱动
+// string 库名
+// string 集合
+type MongoClientCollectionFun func() (*MongoClient, string, string)
 
 type ConfigMongoClient struct {
 	Dns          string // 地址
