@@ -10,8 +10,6 @@ import (
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"gorm.io/datatypes"
-	"os"
-	"runtime"
 	"unicode/utf8"
 )
 
@@ -62,11 +60,8 @@ func NewApiGormClient(config *ApiGormClientConfig) (*ApiClient, error) {
 		return nil, errors.New("创建表失败：" + err.Error())
 	}
 
-	hostname, _ := os.Hostname()
-
-	c.gormConfig.hostname = hostname
-	c.gormConfig.insideIp = goip.GetInsideIp(ctx)
-	c.gormConfig.goVersion = runtime.Version()
+	// 配置信息
+	c.setConfig(ctx)
 
 	return c, nil
 }
@@ -94,16 +89,13 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLogString)
 		data.ResponseBody = ""
 	}
 
-	data.SystemHostName = c.gormConfig.hostname
-	data.SystemInsideIp = c.gormConfig.insideIp
-	data.GoVersion = c.gormConfig.goVersion
-
+	data.SystemHostName = c.config.systemHostName
+	data.SystemInsideIp = c.config.systemInsideIp
+	data.GoVersion = c.config.goVersion
 	data.TraceId = gotrace_id.GetTraceIdContext(ctx)
-
 	data.RequestIp = c.currentIp
-
-	data.SystemOs = c.config.os
-	data.SystemArch = c.config.arch
+	data.SystemOs = c.config.systemOs
+	data.SystemArch = c.config.systemArch
 
 	if c.config.jsonStatus {
 		err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&apiPostgresqlLogJson{
