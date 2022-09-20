@@ -47,6 +47,21 @@ func (c *ApiClient) mongoCreateCollection(ctx context.Context) {
 	}
 }
 
+// 创建索引
+func (c *ApiClient) mongoCreateIndexes(ctx context.Context) {
+	indexes, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).CreateManyIndexes(ctx, []mongo.IndexModel{
+		{
+			Keys: bson.D{{
+				Key:   "log_time",
+				Value: -1,
+			}},
+		}})
+	if err != nil {
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建索引：%s", err)
+	}
+	c.zapLog.WithTraceId(ctx).Sugar().Infof("创建索引：%s", indexes)
+}
+
 // 记录日志
 func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err error) {
 
