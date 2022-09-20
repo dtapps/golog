@@ -41,66 +41,10 @@ type apiMongolLog struct {
 
 // 创建时间序列集合
 func (c *ApiClient) mongoCreateCollection(ctx context.Context) {
-	err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(ctx, c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("log_time")))
+	err := c.mongoClient.Database(c.mongoConfig.databaseName).CreateCollection(ctx, c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("log_time")))
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建时间序列集合：%s", err)
 	}
-}
-
-// 创建索引
-func (c *ApiClient) mongoCreateIndexes(ctx context.Context) {
-	indexes, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).CreateManyIndexes(ctx, []mongo.IndexModel{
-		{
-			Keys: bson.D{{
-				Key:   "trace_id",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_time",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_method",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "response_status_code",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "response_time",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "system_os",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "system_arch",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "go_version",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "sdk_version",
-				Value: -1,
-			}},
-		},
-	})
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建索引：%s", err)
-	}
-	c.zapLog.WithTraceId(ctx).Sugar().Infof("创建索引：%s", indexes)
 }
 
 // 记录日志

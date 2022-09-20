@@ -54,11 +54,14 @@ type ginMongoLog struct {
 	SdkVersion        string                               `json:"sdk_version,omitempty" bson:"sdk_version,omitempty"`                 //【程序】Sdk版本
 }
 
-// 创建时间序列集合
+// 创建集合
 func (c *GinClient) mongoCreateCollection(ctx context.Context) {
-	err := c.mongoClient.Db.Database(c.mongoConfig.databaseName).CreateCollection(ctx, c.mongoConfig.collectionName, options.CreateCollection().SetTimeSeriesOptions(options.TimeSeries().SetTimeField("log_time")))
+	err := c.mongoClient.Database(c.mongoConfig.databaseName).CreateCollection(ctx, c.mongoConfig.collectionName, options.CreateCollection().SetCollation(&options.Collation{
+		Locale:   "request_time",
+		Strength: -1,
+	}))
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Error("创建时间序列集合：", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Error("创建集合：", err)
 	}
 }
 
@@ -68,11 +71,6 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 		{
 			Keys: bson.D{{
 				Key:   "trace_id",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_time",
 				Value: -1,
 			}},
 		}, {

@@ -115,9 +115,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 		// 创建时间序列集合
 		c.mongoCreateCollection(ctx)
 
-		// 创建索引
-		c.mongoCreateIndexes(ctx)
-
 		c.mongoConfig.stats = true
 	}
 
