@@ -11,17 +11,20 @@ import (
 // ApiClientFun *ApiClient 驱动
 type ApiClientFun func() *ApiClient
 
-// ApiClientJsonFun *ApiClient 驱动
-// jsonStatus bool json状态
-type ApiClientJsonFun func() (*ApiClient, bool)
-
 // ApiClient 接口
 type ApiClient struct {
-	gormClient *dorm.GormClient // 数据库驱动
-	zapLog     *ZapLog          // 日志服务
-	logDebug   bool             // 日志开关
-	gormConfig struct {
+	gormClient  *dorm.GormClient  // 数据库驱动
+	mongoClient *dorm.MongoClient // 数据库驱动
+	zapLog      *ZapLog           // 日志服务
+	logDebug    bool              // 日志开关
+	gormConfig  struct {
+		stats     bool   // 状态
 		tableName string // 表名
+	}
+	mongoConfig struct {
+		stats          bool   // 状态
+		databaseName   string // 库名
+		collectionName string // 表名
 	}
 	config struct {
 		systemHostName  string // 主机名
@@ -31,17 +34,16 @@ type ApiClient struct {
 		goVersion       string // go版本
 		sdkVersion      string // sdk版本
 		systemOutsideIp string // 外网ip
-		jsonStatus      bool   // json状态
 	}
 }
 
 // ApiClientConfig 接口实例配置
 type ApiClientConfig struct {
-	GormClientFun dorm.GormClientTableFun // 日志配置
-	Debug         bool                    // 日志开关
-	ZapLog        *ZapLog                 // 日志服务
-	CurrentIp     string                  // 当前ip
-	JsonStatus    bool                    // json状态
+	GormClientFun  dorm.GormClientTableFun       // 日志配置
+	MongoClientFun dorm.MongoClientCollectionFun // 日志配置
+	Debug          bool                          // 日志开关
+	ZapLog         *ZapLog                       // 日志服务
+	CurrentIp      string                        // 当前ip
 }
 
 // NewApiClient 创建接口实例化
@@ -55,8 +57,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 	c.logDebug = config.Debug
 
-	c.config.jsonStatus = config.JsonStatus
-
 	if config.CurrentIp == "" {
 		config.CurrentIp = goip.GetOutsideIp(ctx)
 	}
@@ -68,10 +68,14 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 		return nil, currentIpNoConfig
 	}
 
-	gormClient, gormTableName := config.GormClientFun()
+	// 配置信息
+	c.setConfig(ctx)
 
-	if gormClient == nil || gormClient.Db == nil {
-		return nil, gormClientFunNoConfig
+	gormClient, gormTableName := config.GormClientFun()
+	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()
+
+	if (gormClient == nil || gormClient.Db == nil) || (mongoClient == nil || mongoClient.Db == nil) {
+		return nil, dbClientFunNoConfig
 	}
 
 	if gormClient != nil || gormClient.Db != nil {
@@ -80,33 +84,70 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 		if gormTableName == "" {
 			return nil, errors.New("没有设置表名")
-		}
-		c.gormConfig.tableName = gormTableName
-
-		err := c.gormAutoMigrate()
-		if err != nil {
-			return nil, errors.New("创建表失败：" + err.Error())
+		} else {
+			c.gormConfig.tableName = gormTableName
 		}
 
+		// 创建模型
+		c.gormAutoMigrate(ctx)
+
+		c.gormConfig.stats = true
 	}
 
-	// 配置信息
-	c.setConfig(ctx)
+	if mongoClient != nil || mongoClient.Db != nil {
+
+		c.mongoClient = mongoClient
+
+		if mongoDatabaseName == "" {
+			return nil, errors.New("没有设置库名")
+		} else {
+			c.mongoConfig.databaseName = mongoDatabaseName
+		}
+
+		if mongoCollectionName == "" {
+			return nil, errors.New("没有设置表名")
+		} else {
+			c.mongoConfig.collectionName = mongoCollectionName
+		}
+
+		// 创建时间序列集合
+		c.mongoCreateCollection(ctx)
+
+		// 创建索引
+		c.mongoCreateIndexes(ctx)
+
+		c.mongoConfig.stats = true
+	}
 
 	return c, nil
 }
 
 // Middleware 中间件
 func (c *ApiClient) Middleware(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	c.GormMiddleware(ctx, request, sdkVersion)
+	if c.gormConfig.stats {
+		c.gormMiddleware(ctx, request, sdkVersion)
+	}
+	if c.mongoConfig.stats {
+		c.mongoMiddleware(ctx, request, sdkVersion)
+	}
 }
 
 // MiddlewareXml 中间件
 func (c *ApiClient) MiddlewareXml(ctx context.Context, request gorequest.Response, sdkVersion string) {
-	c.GormMiddlewareXml(ctx, request, sdkVersion)
+	if c.gormConfig.stats {
+		c.gormMiddlewareXml(ctx, request, sdkVersion)
+	}
+	if c.mongoConfig.stats {
+		c.mongoMiddlewareXml(ctx, request, sdkVersion)
+	}
 }
 
 // MiddlewareCustom 中间件
 func (c *ApiClient) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response, sdkVersion string) {
-	c.GormMiddlewareCustom(ctx, api, request, sdkVersion)
+	if c.gormConfig.stats {
+		c.gormMiddlewareCustom(ctx, api, request, sdkVersion)
+	}
+	if c.mongoConfig.stats {
+		c.mongoMiddlewareCustom(ctx, api, request, sdkVersion)
+	}
 }
