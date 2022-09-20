@@ -24,16 +24,7 @@ type GinClient struct {
 	ipService   *goip.Client      // ip服务
 	zapLog      *ZapLog           // 日志服务
 	logDebug    bool              // 日志开关
-	gormConfig  struct {
-		stats     bool   // 状态
-		tableName string // 表名
-	}
-	mongoConfig struct {
-		stats          bool   // 状态
-		databaseName   string // 库名
-		collectionName string // 表名
-	}
-	config struct {
+	config      struct {
 		systemHostName  string // 主机名
 		systemInsideIp  string // 内网ip
 		systemOs        string // 系统类型
@@ -41,6 +32,15 @@ type GinClient struct {
 		goVersion       string // go版本
 		sdkVersion      string // sdk版本
 		systemOutsideIp string // 外网ip
+	}
+	gormConfig struct {
+		stats     bool   // 状态
+		tableName string // 表名
+	}
+	mongoConfig struct {
+		stats          bool   // 状态
+		databaseName   string // 库名
+		collectionName string // 表名
 	}
 }
 
@@ -76,6 +76,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 		return nil, dbClientFunNoConfig
 	}
 
+	// 配置关系数据库
 	if gormClient != nil || gormClient.Db != nil {
 
 		c.gormClient = gormClient
@@ -91,6 +92,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 		c.gormConfig.stats = true
 	}
 
+	// 配置非关系数据库
 	if mongoClient != nil || mongoClient.Db != nil {
 
 		c.mongoClient = mongoClient

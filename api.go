@@ -17,16 +17,7 @@ type ApiClient struct {
 	mongoClient *dorm.MongoClient // 数据库驱动
 	zapLog      *ZapLog           // 日志服务
 	logDebug    bool              // 日志开关
-	gormConfig  struct {
-		stats     bool   // 状态
-		tableName string // 表名
-	}
-	mongoConfig struct {
-		stats          bool   // 状态
-		databaseName   string // 库名
-		collectionName string // 表名
-	}
-	config struct {
+	config      struct {
 		systemHostName  string // 主机名
 		systemInsideIp  string // 内网ip
 		systemOs        string // 系统类型
@@ -34,6 +25,15 @@ type ApiClient struct {
 		goVersion       string // go版本
 		sdkVersion      string // sdk版本
 		systemOutsideIp string // 外网ip
+	}
+	gormConfig struct {
+		stats     bool   // 状态
+		tableName string // 表名
+	}
+	mongoConfig struct {
+		stats          bool   // 状态
+		databaseName   string // 库名
+		collectionName string // 表名
 	}
 }
 
@@ -78,6 +78,7 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 		return nil, dbClientFunNoConfig
 	}
 
+	// 配置关系数据库
 	if gormClient != nil || gormClient.Db != nil {
 
 		c.gormClient = gormClient
@@ -94,6 +95,7 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 		c.gormConfig.stats = true
 	}
 
+	// 配置非关系数据库
 	if mongoClient != nil || mongoClient.Db != nil {
 
 		c.mongoClient = mongoClient
