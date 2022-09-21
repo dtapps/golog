@@ -23,7 +23,6 @@ type GinClient struct {
 	mongoClient *dorm.MongoClient // 数据库驱动
 	ipService   *goip.Client      // ip服务
 	zapLog      *ZapLog           // 日志服务
-	logDebug    bool              // 日志开关
 	config      struct {
 		systemHostName  string // 主机名
 		systemInsideIp  string // 内网ip
@@ -49,7 +48,6 @@ type GinClientConfig struct {
 	IpService      *goip.Client                  // ip服务
 	GormClientFun  dorm.GormClientTableFun       // 日志配置
 	MongoClientFun dorm.MongoClientCollectionFun // 日志配置
-	Debug          bool                          // 日志开关
 	ZapLog         *ZapLog                       // 日志服务
 }
 
@@ -61,8 +59,6 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	c := &GinClient{}
 
 	c.zapLog = config.ZapLog
-
-	c.logDebug = config.Debug
 
 	c.ipService = config.IpService
 
@@ -206,27 +202,15 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			// 记录
 			if c.gormConfig.stats {
 				if dataJson {
-					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordJson}保存数据：%s", data)
-					}
 					c.gormRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				} else {
-					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{gormRecordXml}保存数据：%s", data)
-					}
 					c.gormRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				}
 			}
 			if c.mongoConfig.stats {
 				if dataJson {
-					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordJson}保存数据：%s", data)
-					}
 					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				} else {
-					if c.logDebug {
-						c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.Middleware]准备使用{mongoRecordXml}保存数据：%s", data)
-					}
 					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
 				}
 			}

@@ -178,10 +178,6 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 
 	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
 
-	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordJson]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
-	}
-
 	data := ginMongoLog{
 		TraceId:           traceId,                                                      //【记录】跟踪编号
 		LogTime:           primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
@@ -212,10 +208,6 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.JsonDecodeNoError(requestBody) //【请求】请求主体
-	} else {
-		if c.logDebug {
-			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.len]：%s，%s", data.RequestUri, requestBody)
-		}
 	}
 
 	if requestClientIpLocationLatitude != 0 && requestClientIpLocationLongitude != 0 {
@@ -225,23 +217,15 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		}
 	}
 
-	if c.logDebug {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordJson.data]：%+v", data)
-	}
-
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.mongoRecordJson]：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
 
 func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
 
 	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
-
-	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.mongoRecordXml]收到保存数据要求：%s,%s", c.mongoConfig.databaseName, c.mongoConfig.collectionName)
-	}
 
 	data := ginMongoLog{
 		TraceId:           traceId,                                                      //【记录】跟踪编号
@@ -273,10 +257,6 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.XmlDecodeNoError(requestBody) //【请求】请求主体
-	} else {
-		if c.logDebug {
-			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.len]：%s，%s", data.RequestUri, requestBody)
-		}
 	}
 
 	if requestClientIpLocationLatitude != 0 && requestClientIpLocationLongitude != 0 {
@@ -286,12 +266,8 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		}
 	}
 
-	if c.logDebug {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.mongoRecordXml.data]：%+v", data)
-	}
-
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.mongoRecordXml]：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }

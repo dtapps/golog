@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"go.dtapp.net/dorm"
-	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 )
 
@@ -16,7 +15,6 @@ type ApiClient struct {
 	gormClient  *dorm.GormClient  // 数据库驱动
 	mongoClient *dorm.MongoClient // 数据库驱动
 	zapLog      *ZapLog           // 日志服务
-	logDebug    bool              // 日志开关
 	config      struct {
 		systemHostName  string // 主机名
 		systemInsideIp  string // 内网ip
@@ -41,7 +39,6 @@ type ApiClient struct {
 type ApiClientConfig struct {
 	GormClientFun  dorm.GormClientTableFun       // 日志配置
 	MongoClientFun dorm.MongoClientCollectionFun // 日志配置
-	Debug          bool                          // 日志开关
 	ZapLog         *ZapLog                       // 日志服务
 	CurrentIp      string                        // 当前ip
 }
@@ -55,11 +52,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 
 	c.zapLog = config.ZapLog
 
-	c.logDebug = config.Debug
-
-	if config.CurrentIp == "" {
-		config.CurrentIp = goip.GetOutsideIp(ctx)
-	}
 	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
 		c.config.systemOutsideIp = config.CurrentIp
 	}

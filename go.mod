@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.dtapp.net/dorm v1.0.42
-	go.dtapp.net/goip v1.0.36
+	go.dtapp.net/goip v1.0.38
 	go.dtapp.net/gorequest v1.0.31
 	go.dtapp.net/gotime v1.0.5
 	go.dtapp.net/gotrace_id v1.0.6

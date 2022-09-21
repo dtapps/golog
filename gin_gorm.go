@@ -71,10 +71,6 @@ func (c *GinClient) gormRecord(data ginPostgresqlLog) (err error) {
 
 func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
 
-	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordJson]收到保存数据要求：%s", c.gormConfig.tableName)
-	}
-
 	data := ginPostgresqlLog{
 		TraceId:            traceId,                                                      //【系统】跟踪编号
 		RequestTime:        requestTime,                                                  //【请求】时间
@@ -90,8 +86,8 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		RequestIpProvince:  requestClientIpProvince,                                      //【请求】请求客户端省份
 		RequestIpCity:      requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:       requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestIpLatitude:  requestClientIpLocationLatitude,                              // 【请求】请求客户端纬度
-		RequestIpLongitude: requestClientIpLocationLongitude,                             // 【请求】请求客户端经度
+		RequestIpLatitude:  requestClientIpLocationLatitude,                              //【请求】请求客户端纬度
+		RequestIpLongitude: requestClientIpLocationLongitude,                             //【请求】请求客户端经度
 		RequestHeader:      dorm.JsonEncodeNoError(ginCtx.Request.Header),                //【请求】请求头
 		ResponseTime:       gotime.Current().Time,                                        //【返回】时间
 		ResponseCode:       responseCode,                                                 //【返回】状态码
@@ -106,29 +102,15 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.JsonEncodeNoError(requestBody) //【请求】请求主体
-	} else {
-		if c.logDebug {
-			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.len]：%s，%s", data.RequestUri, requestBody)
-		}
-	}
-
-	if c.logDebug {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordJson.data]：%+v", data)
 	}
 
 	err := c.gormRecord(data)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordJson]：%s", err)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordJson.string]：%s", requestBody)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordJson.JsonEncodeNoError.string]：%s", dorm.JsonEncodeNoError(requestBody))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
 
 func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
-
-	if c.logDebug {
-		c.zapLog.WithLogger().Sugar().Infof("[golog.gin.gormRecordXml]收到保存数据要求：%s", c.gormConfig.tableName)
-	}
 
 	data := ginPostgresqlLog{
 		TraceId:            traceId,                                                      //【系统】跟踪编号
@@ -145,8 +127,8 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		RequestIpProvince:  requestClientIpProvince,                                      //【请求】请求客户端省份
 		RequestIpCity:      requestClientIpCity,                                          //【请求】请求客户端城市
 		RequestIpIsp:       requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestIpLatitude:  requestClientIpLocationLatitude,                              // 【请求】请求客户端纬度
-		RequestIpLongitude: requestClientIpLocationLongitude,                             // 【请求】请求客户端经度
+		RequestIpLatitude:  requestClientIpLocationLatitude,                              //【请求】请求客户端纬度
+		RequestIpLongitude: requestClientIpLocationLongitude,                             //【请求】请求客户端经度
 		RequestHeader:      dorm.JsonEncodeNoError(ginCtx.Request.Header),                //【请求】请求头
 		ResponseTime:       gotime.Current().Time,                                        //【返回】时间
 		ResponseCode:       responseCode,                                                 //【返回】状态码
@@ -161,22 +143,11 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 
 	if len(requestBody) > 0 {
 		data.RequestBody = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)) //【请求】请求内容
-	} else {
-		if c.logDebug {
-			c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.len]：%s，%s", data.RequestUri, requestBody)
-		}
-	}
-
-	if c.logDebug {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Infof("[golog.gin.gormRecordXml.data]：%+v", data)
 	}
 
 	err := c.gormRecord(data)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml]：%s", err)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.string]：%s", requestBody)
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlDecodeNoError.string]：%s", dorm.XmlDecodeNoError(requestBody))
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.gormRecordXml.XmlEncodeNoError.string]：%s", dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)))
+		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
 

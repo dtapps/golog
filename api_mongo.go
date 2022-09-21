@@ -103,25 +103,15 @@ func (c *ApiClient) mongoMiddleware(ctx context.Context, request gorequest.Respo
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
-	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddleware.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
-	} else {
+	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
-		} else {
-			if c.logDebug {
-				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddleware.len]：%s %s", data.RequestUri, request.ResponseBody)
-			}
 		}
-	}
-
-	if c.logDebug {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddleware.data]：%+v", data)
 	}
 
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.mongoMiddleware]：%s", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
 
@@ -142,25 +132,15 @@ func (c *ApiClient) mongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
-	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareXml.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
-	} else {
+	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.XmlDecodeNoError(request.ResponseBody) //【返回】内容
-		} else {
-			if c.logDebug {
-				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareXml]：%s %s", data.RequestUri, request.ResponseBody)
-			}
 		}
-	}
-
-	if c.logDebug {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareXml.data]：%+v", data)
 	}
 
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.mongoMiddlewareXml]：%s", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
 
@@ -181,24 +161,14 @@ func (c *ApiClient) mongoMiddlewareCustom(ctx context.Context, api string, reque
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
 		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
-	if request.HeaderIsImg() {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareCustom.type]：%s %s", data.RequestUri, request.ResponseHeader.Get("Content-Type"))
-	} else {
+	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = dorm.JsonDecodeNoError(request.ResponseBody) //【返回】内容
-		} else {
-			if c.logDebug {
-				c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareCustom]：%s %s", data.RequestUri, request.ResponseBody)
-			}
 		}
-	}
-
-	if c.logDebug {
-		c.zapLog.WithTraceId(ctx).Sugar().Infof("[golog.api.mongoMiddlewareCustom.data]：%+v", data)
 	}
 
 	err := c.mongoRecord(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("[golog.api.mongoMiddlewareCustom]：%s", err.Error())
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
 	}
 }
