@@ -153,5 +153,9 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 
 // GormDelete 删除
 func (c *GinClient) GormDelete(ctx context.Context, hour int64) error {
-	return c.gormClient.GetDb().Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&ginPostgresqlLog{}).Error
+	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&ginPostgresqlLog{}).Error
+	if err != nil {
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("删除失败：%s", err)
+	}
+	return err
 }
