@@ -46,7 +46,7 @@ type ginPostgresqlLog struct {
 
 // 创建模型
 func (c *GinClient) gormAutoMigrate(ctx context.Context) {
-	err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
+	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建模型：%s", err)
 	}
@@ -62,7 +62,7 @@ func (c *GinClient) gormRecord(data ginPostgresqlLog) (err error) {
 	data.SystemOs = c.config.systemOs             //【系统】系统类型
 	data.SystemArch = c.config.systemArch         //【系统】系统架构
 
-	err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&data).Error
+	err = c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {
 		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录日志失败：%s", err)
 	}
@@ -182,5 +182,5 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 
 // GormDelete 删除
 func (c *GinClient) GormDelete(ctx context.Context, hour int64) error {
-	return c.gormClient.Db.Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&ginPostgresqlLog{}).Error
+	return c.gormClient.GetDb().Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&ginPostgresqlLog{}).Error
 }

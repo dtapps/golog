@@ -38,7 +38,7 @@ type apiPostgresqlLog struct {
 
 // 创建模型
 func (c *ApiClient) gormAutoMigrate(ctx context.Context) {
-	err := c.gormClient.Db.Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("创建模型：%s", err)
 	}
@@ -59,7 +59,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLog) (err 
 	data.SystemOs = c.config.systemOs                //【系统】系统类型
 	data.SystemArch = c.config.systemArch            //【系统】系统架构
 
-	err = c.gormClient.Db.Table(c.gormConfig.tableName).Create(&data).Error
+	err = c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("记录日志失败：%s", err)
 	}
@@ -68,7 +68,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLog) (err 
 
 // GormDelete 删除
 func (c *ApiClient) GormDelete(ctx context.Context, hour int64) error {
-	return c.gormClient.Db.Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&apiPostgresqlLog{}).Error
+	return c.gormClient.GetDb().Table(c.gormConfig.tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&apiPostgresqlLog{}).Error
 }
 
 // 中间件
