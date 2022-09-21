@@ -72,12 +72,12 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	gormClient, gormTableName := config.GormClientFun()
 	mongoClient, mongoDatabaseName, mongoCollectionName := config.MongoClientFun()
 
-	if (gormClient == nil || gormClient.Db == nil) || (mongoClient == nil || mongoClient.Db == nil) {
+	if (gormClient == nil || gormClient.GetDb() == nil) || (mongoClient == nil || mongoClient.GetDb() == nil) {
 		return nil, dbClientFunNoConfig
 	}
 
 	// 配置关系数据库
-	if gormClient != nil || gormClient.Db != nil {
+	if gormClient != nil || gormClient.GetDb() != nil {
 
 		c.gormClient = gormClient
 
@@ -93,7 +93,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	}
 
 	// 配置非关系数据库
-	if mongoClient != nil || mongoClient.Db != nil {
+	if mongoClient != nil || mongoClient.GetDb() != nil {
 
 		c.mongoClient = mongoClient
 

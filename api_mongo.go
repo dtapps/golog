@@ -62,6 +62,12 @@ func (c *ApiClient) mongoCreateIndexes(ctx context.Context) {
 	c.zapLog.WithTraceId(ctx).Sugar().Infof("创建索引：%s", indexes)
 }
 
+// MongoDelete 删除
+func (c *ApiClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
+	filter := bson.D{{"log_time", bson.D{{"$lt", primitive.NewDateTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
+	return c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
+}
+
 // 记录日志
 func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err error) {
 
@@ -79,12 +85,6 @@ func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err
 		c.zapLog.WithTraceId(ctx).Sugar().Errorf("记录日志失败：%s", err)
 	}
 	return err
-}
-
-// MongoDelete 删除
-func (c *ApiClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
-	filter := bson.D{{"log_time", bson.D{{"$lt", primitive.NewDateTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
-	return c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
 }
 
 // 中间件

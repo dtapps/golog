@@ -151,6 +151,12 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 	c.zapLog.WithTraceId(ctx).Sugar().Infof("创建索引：%s", indexes)
 }
 
+// MongoDelete 删除
+func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
+	filter := bson.D{{"log_time", bson.D{{"$lt", primitive.NewDateTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
+	return c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
+}
+
 // 记录日志
 func (c *GinClient) mongoRecord(ctx context.Context, mongoLog ginMongoLog) (err error) {
 
@@ -289,10 +295,4 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 	if err != nil {
 		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("[golog.gin.mongoRecordXml]：%s", err)
 	}
-}
-
-// MongoDelete 删除
-func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
-	filter := bson.D{{"log_time", bson.D{{"$lt", primitive.NewDateTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
-	return c.mongoClient.Db.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
 }
