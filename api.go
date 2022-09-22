@@ -18,11 +18,11 @@ type ApiClient struct {
 	config      struct {
 		systemHostName  string // 主机名
 		systemInsideIp  string // 内网ip
+		systemOutsideIp string // 外网ip
 		systemOs        string // 系统类型
 		systemArch      string // 系统架构
 		goVersion       string // go版本
 		sdkVersion      string // sdk版本
-		systemOutsideIp string // 外网ip
 	}
 	gormConfig struct {
 		stats     bool   // 状态

@@ -50,15 +50,16 @@ type ginMongoLog struct {
 	ResponseData      interface{}   `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
 	CostTime          int64         `json:"cost_time,omitempty" bson:"cost_time,omitempty"`                     //【系统】花费时间
 	System            struct {
-		HostName string `json:"host_name,omitempty" bson:"host_name,omitempty"` //【系统】主机名
-		InsideIp string `json:"inside_ip,omitempty" bson:"inside_ip,omitempty"` //【系统】内网ip
-		Os       string `json:"os,omitempty" bson:"os,omitempty"`               //【系统】系统类型
-		Arch     string `json:"arch,omitempty" bson:"arch,omitempty"`           //【系统】系统架构
-	} `json:"system,omitempty" bson:"system,omitempty"` //【系统】信息
+		HostName  string `json:"host_name" bson:"host_name"`   //【系统】主机名
+		InsideIp  string `json:"inside_ip" bson:"inside_ip"`   //【系统】内网ip
+		OutsideIp string `json:"outside_ip" bson:"outside_ip"` //【系统】外网ip
+		Os        string `json:"os" bson:"os"`                 //【系统】系统类型
+		Arch      string `json:"arch" bson:"arch"`             //【系统】系统架构
+	} `json:"system" bson:"system"` //【系统】信息
 	Version struct {
-		Go  string `json:"go,omitempty" bson:"go,omitempty"`   //【程序】Go版本
-		Sdk string `json:"sdk,omitempty" bson:"sdk,omitempty"` //【程序】Sdk版本
-	} `json:"version,omitempty" bson:"version,omitempty"` //【程序】版本信息
+		Go  string `json:"go" bson:"go"`   //【程序】Go版本
+		Sdk string `json:"sdk" bson:"sdk"` //【程序】Sdk版本
+	} `json:"version" bson:"version"` //【程序】版本信息
 }
 
 // 创建集合
@@ -121,13 +122,14 @@ func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteR
 // 记录日志
 func (c *GinClient) mongoRecord(ctx context.Context, data ginMongoLog) {
 
-	data.System.HostName = c.config.systemHostName //【系统】主机名
-	data.System.InsideIp = c.config.systemInsideIp //【系统】内网ip
-	data.System.Os = c.config.systemOs             //【系统】系统类型
-	data.System.Arch = c.config.systemArch         //【系统】系统架构
-	data.Version.Go = c.config.goVersion           //【程序】Go版本
-	data.Version.Sdk = c.config.sdkVersion         //【程序】Sdk版本
-	data.LogId = primitive.NewObjectID()           //【记录】编号
+	data.LogId = primitive.NewObjectID()             //【记录】编号
+	data.System.HostName = c.config.systemHostName   //【系统】主机名
+	data.System.InsideIp = c.config.systemInsideIp   //【系统】内网ip
+	data.System.OutsideIp = c.config.systemOutsideIp //【系统】外网ip
+	data.System.Os = c.config.systemOs               //【系统】系统类型
+	data.System.Arch = c.config.systemArch           //【系统】系统架构
+	data.Version.Go = c.config.goVersion             //【程序】Go版本
+	data.Version.Sdk = c.config.sdkVersion           //【程序】Sdk版本
 
 	_, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, data)
 	if err != nil {
