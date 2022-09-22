@@ -61,7 +61,6 @@ func NewApiClient(config *ApiClientConfig) (*ApiClient, error) {
 	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
 		c.config.systemOutsideIp = config.CurrentIp
 	}
-
 	if c.config.systemOutsideIp == "" {
 		return nil, currentIpNoConfig
 	}

@@ -55,6 +55,7 @@ type GinClientConfig struct {
 	GormClientFun  dorm.GormClientTableFun       // 日志配置
 	MongoClientFun dorm.MongoClientCollectionFun // 日志配置
 	ZapLog         *ZapLog                       // 日志服务
+	CurrentIp      string                        // 当前ip
 }
 
 // NewGinClient 创建框架实例化
@@ -65,6 +66,13 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	c := &GinClient{}
 
 	c.zapLog = config.ZapLog
+
+	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
+		c.config.systemOutsideIp = config.CurrentIp
+	}
+	if c.config.systemOutsideIp == "" {
+		return nil, currentIpNoConfig
+	}
 
 	c.ipService = config.IpService
 
