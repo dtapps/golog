@@ -56,12 +56,12 @@ func (c *GinClient) gormAutoMigrate(ctx context.Context) {
 // gormRecord 记录日志
 func (c *GinClient) gormRecord(data ginPostgresqlLog) {
 
-	data.SystemHostName = c.config.systemHostName //【系统】主机名
+	data.SystemHostName = c.config.systemHostname //【系统】主机名
 	data.SystemInsideIp = c.config.systemInsideIp //【系统】内网ip
 	data.GoVersion = c.config.goVersion           //【程序】Go版本
 	data.SdkVersion = c.config.sdkVersion         //【程序】Sdk版本
 	data.SystemOs = c.config.systemOs             //【系统】系统类型
-	data.SystemArch = c.config.systemArch         //【系统】系统架构
+	data.SystemArch = c.config.systemKernel       //【系统】系统架构
 
 	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {

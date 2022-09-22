@@ -51,13 +51,13 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLog) {
 		data.ResponseBody = ""
 	}
 
-	data.SystemHostName = c.config.systemHostName    //【系统】主机名
+	data.SystemHostName = c.config.systemHostname    //【系统】主机名
 	data.SystemInsideIp = c.config.systemInsideIp    //【系统】内网ip
 	data.GoVersion = c.config.goVersion              //【程序】Go版本
 	data.TraceId = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
 	data.RequestIp = c.config.systemOutsideIp        //【请求】请求Ip
 	data.SystemOs = c.config.systemOs                //【系统】系统类型
-	data.SystemArch = c.config.systemArch            //【系统】系统架构
+	data.SystemArch = c.config.systemKernel          //【系统】系统架构
 
 	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {

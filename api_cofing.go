@@ -3,16 +3,25 @@ package golog
 import (
 	"context"
 	"go.dtapp.net/goip"
-	"os"
 	"runtime"
 )
 
 func (c *ApiClient) setConfig(ctx context.Context) {
-	c.config.sdkVersion = Version
-	c.config.systemOs = runtime.GOOS
-	c.config.systemArch = runtime.GOARCH
-	c.config.goVersion = runtime.Version()
+
+	info := getSystem()
+
+	c.config.systemHostname = info.SystemHostname
+	c.config.systemOs = info.SystemOs
+	c.config.systemVersion = info.SystemVersion
+	c.config.systemKernel = info.SystemKernel
+	c.config.systemKernelVersion = info.SystemKernelVersion
+	c.config.systemBootTime = info.SystemBootTime
+	c.config.cpuCores = info.CpuCores
+	c.config.cpuModelName = info.CpuModelName
+	c.config.cpuMhz = info.CpuMhz
+
 	c.config.systemInsideIp = goip.GetInsideIp(ctx)
-	hostname, _ := os.Hostname()
-	c.config.systemHostName = hostname
+
+	c.config.sdkVersion = Version
+	c.config.goVersion = runtime.Version()
 }
