@@ -119,21 +119,21 @@ func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteR
 }
 
 // 记录日志
-func (c *GinClient) mongoRecord(ctx context.Context, mongoLog ginMongoLog) (err error) {
+func (c *GinClient) mongoRecord(ctx context.Context, data ginMongoLog) {
 
-	mongoLog.System.HostName = c.config.systemHostName //【系统】主机名
-	mongoLog.System.InsideIp = c.config.systemInsideIp //【系统】内网ip
-	mongoLog.System.Os = c.config.systemOs             //【系统】系统类型
-	mongoLog.System.Arch = c.config.systemArch         //【系统】系统架构
-	mongoLog.Version.Go = c.config.goVersion           //【程序】Go版本
-	mongoLog.Version.Sdk = c.config.sdkVersion         //【程序】Sdk版本
-	mongoLog.LogId = primitive.NewObjectID()           //【记录】编号
+	data.System.HostName = c.config.systemHostName //【系统】主机名
+	data.System.InsideIp = c.config.systemInsideIp //【系统】内网ip
+	data.System.Os = c.config.systemOs             //【系统】系统类型
+	data.System.Arch = c.config.systemArch         //【系统】系统架构
+	data.Version.Go = c.config.goVersion           //【程序】Go版本
+	data.Version.Sdk = c.config.sdkVersion         //【程序】Sdk版本
+	data.LogId = primitive.NewObjectID()           //【记录】编号
 
-	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, mongoLog)
+	_, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(mongoLog.TraceId).Sugar().Errorf("保存框架日志失败：%s", err)
+		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("保存框架日志错误：%s", err)
+		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("保存框架日志数据：%+v", data)
 	}
-	return err
 }
 
 func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {

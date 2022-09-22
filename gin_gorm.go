@@ -54,7 +54,7 @@ func (c *GinClient) gormAutoMigrate(ctx context.Context) {
 }
 
 // gormRecord 记录日志
-func (c *GinClient) gormRecord(data ginPostgresqlLog) (err error) {
+func (c *GinClient) gormRecord(data ginPostgresqlLog) {
 
 	data.SystemHostName = c.config.systemHostName //【系统】主机名
 	data.SystemInsideIp = c.config.systemInsideIp //【系统】内网ip
@@ -63,11 +63,11 @@ func (c *GinClient) gormRecord(data ginPostgresqlLog) (err error) {
 	data.SystemOs = c.config.systemOs             //【系统】系统类型
 	data.SystemArch = c.config.systemArch         //【系统】系统架构
 
-	err = c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
+	err := c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {
-		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录框架日志失败：%s", err)
+		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录框架日志错误：%s", err)
+		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录框架日志数据：%+v", data)
 	}
-	return
 }
 
 func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {

@@ -72,23 +72,23 @@ func (c *ApiClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteR
 }
 
 // 记录日志
-func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog, sdkVersion string) (err error) {
+func (c *ApiClient) mongoRecord(ctx context.Context, data apiMongolLog, sdkVersion string) {
 
-	mongoLog.System.HostName = c.config.systemHostName   //【系统】主机名
-	mongoLog.System.InsideIp = c.config.systemInsideIp   //【系统】内网ip
-	mongoLog.System.Os = c.config.systemOs               //【系统】系统类型
-	mongoLog.System.Arch = c.config.systemArch           //【系统】系统架构
-	mongoLog.Version.Go = c.config.goVersion             //【程序】Go版本
-	mongoLog.Version.Sdk = sdkVersion                    //【程序】Sdk版本
-	mongoLog.TraceId = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
-	mongoLog.RequestIp = c.config.systemOutsideIp        //【请求】请求Ip
-	mongoLog.LogId = primitive.NewObjectID()             //【记录】编号
+	data.System.HostName = c.config.systemHostName   //【系统】主机名
+	data.System.InsideIp = c.config.systemInsideIp   //【系统】内网ip
+	data.System.Os = c.config.systemOs               //【系统】系统类型
+	data.System.Arch = c.config.systemArch           //【系统】系统架构
+	data.Version.Go = c.config.goVersion             //【程序】Go版本
+	data.Version.Sdk = sdkVersion                    //【程序】Sdk版本
+	data.TraceId = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
+	data.RequestIp = c.config.systemOutsideIp        //【请求】请求Ip
+	data.LogId = primitive.NewObjectID()             //【记录】编号
 
-	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, mongoLog)
+	_, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, data)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存接口日志失败：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存接口日志错误：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存接口日志数据：%+v", data)
 	}
-	return err
 }
 
 // 中间件
