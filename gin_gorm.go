@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
+	"go.dtapp.net/goip"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
 	"time"
@@ -64,12 +65,12 @@ func (c *GinClient) gormRecord(data ginPostgresqlLog) (err error) {
 
 	err = c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {
-		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录日志失败：%s", err)
+		c.zapLog.WithTraceIdStr(data.TraceId).Sugar().Errorf("记录框架日志失败：%s", err)
 	}
 	return
 }
 
-func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
+func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 
 	data := ginPostgresqlLog{
 		TraceId:            traceId,                                                      //【系统】跟踪编号
@@ -81,13 +82,13 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		RequestUa:          ginCtx.Request.UserAgent(),                                   //【请求】请求UA
 		RequestReferer:     ginCtx.Request.Referer(),                                     //【请求】请求referer
 		RequestUrlQuery:    dorm.JsonEncodeNoError(ginCtx.Request.URL.Query()),           //【请求】请求URL参数
-		RequestIp:          clientIp,                                                     //【请求】请求客户端Ip
-		RequestIpCountry:   requestClientIpCountry,                                       //【请求】请求客户端城市
-		RequestIpProvince:  requestClientIpProvince,                                      //【请求】请求客户端省份
-		RequestIpCity:      requestClientIpCity,                                          //【请求】请求客户端城市
-		RequestIpIsp:       requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestIpLatitude:  requestClientIpLocationLatitude,                              //【请求】请求客户端纬度
-		RequestIpLongitude: requestClientIpLocationLongitude,                             //【请求】请求客户端经度
+		RequestIp:          ipInfo.Ip,                                                    //【请求】请求客户端Ip
+		RequestIpCountry:   ipInfo.Country,                                               //【请求】请求客户端城市
+		RequestIpProvince:  ipInfo.Province,                                              //【请求】请求客户端省份
+		RequestIpCity:      ipInfo.City,                                                  //【请求】请求客户端城市
+		RequestIpIsp:       ipInfo.Isp,                                                   //【请求】请求客户端运营商
+		RequestIpLatitude:  ipInfo.LocationLatitude,                                      //【请求】请求客户端纬度
+		RequestIpLongitude: ipInfo.LocationLongitude,                                     //【请求】请求客户端经度
 		RequestHeader:      dorm.JsonEncodeNoError(ginCtx.Request.Header),                //【请求】请求头
 		ResponseTime:       gotime.Current().Time,                                        //【返回】时间
 		ResponseCode:       responseCode,                                                 //【返回】状态码
@@ -104,13 +105,10 @@ func (c *GinClient) gormRecordJson(ginCtx *gin.Context, traceId string, requestT
 		data.RequestBody = dorm.JsonEncodeNoError(requestBody) //【请求】请求主体
 	}
 
-	err := c.gormRecord(data)
-	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.gormRecord(data)
 }
 
-func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
+func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 
 	data := ginPostgresqlLog{
 		TraceId:            traceId,                                                      //【系统】跟踪编号
@@ -122,13 +120,13 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		RequestUa:          ginCtx.Request.UserAgent(),                                   //【请求】请求UA
 		RequestReferer:     ginCtx.Request.Referer(),                                     //【请求】请求referer
 		RequestUrlQuery:    dorm.JsonEncodeNoError(ginCtx.Request.URL.Query()),           //【请求】请求URL参数
-		RequestIp:          clientIp,                                                     //【请求】请求客户端Ip
-		RequestIpCountry:   requestClientIpCountry,                                       //【请求】请求客户端城市
-		RequestIpProvince:  requestClientIpProvince,                                      //【请求】请求客户端省份
-		RequestIpCity:      requestClientIpCity,                                          //【请求】请求客户端城市
-		RequestIpIsp:       requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestIpLatitude:  requestClientIpLocationLatitude,                              //【请求】请求客户端纬度
-		RequestIpLongitude: requestClientIpLocationLongitude,                             //【请求】请求客户端经度
+		RequestIp:          ipInfo.Ip,                                                    //【请求】请求客户端Ip
+		RequestIpCountry:   ipInfo.Country,                                               //【请求】请求客户端城市
+		RequestIpProvince:  ipInfo.Province,                                              //【请求】请求客户端省份
+		RequestIpCity:      ipInfo.City,                                                  //【请求】请求客户端城市
+		RequestIpIsp:       ipInfo.Isp,                                                   //【请求】请求客户端运营商
+		RequestIpLatitude:  ipInfo.LocationLatitude,                                      //【请求】请求客户端纬度
+		RequestIpLongitude: ipInfo.LocationLongitude,                                     //【请求】请求客户端经度
 		RequestHeader:      dorm.JsonEncodeNoError(ginCtx.Request.Header),                //【请求】请求头
 		ResponseTime:       gotime.Current().Time,                                        //【返回】时间
 		ResponseCode:       responseCode,                                                 //【返回】状态码
@@ -145,10 +143,7 @@ func (c *GinClient) gormRecordXml(ginCtx *gin.Context, traceId string, requestTi
 		data.RequestBody = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)) //【请求】请求内容
 	}
 
-	err := c.gormRecord(data)
-	if err != nil {
-		c.zapLog.WithTraceIdStr(traceId).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.gormRecord(data)
 }
 
 // GormDelete 删除

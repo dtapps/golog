@@ -106,7 +106,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 		}
 
 		// 创建时间序列集合
-		c.mongoCreateCollection(ctx)
+		//c.mongoCreateCollection(ctx)
 
 		// 创建索引
 		c.mongoCreateIndexes(ctx)
@@ -180,21 +180,10 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			}
 
 			clientIp := gorequest.ClientIp(ginCtx.Request)
+			var info = goip.AnalyseResult{}
 
-			var requestClientIpCountry string
-			var requestClientIpProvince string
-			var requestClientIpCity string
-			var requestClientIpIsp string
-			var requestClientIpLocationLatitude float64
-			var requestClientIpLocationLongitude float64
 			if c.ipService != nil {
-				info := c.ipService.Analyse(clientIp)
-				requestClientIpCountry = info.Country
-				requestClientIpProvince = info.Province
-				requestClientIpCity = info.City
-				requestClientIpIsp = info.Isp
-				requestClientIpLocationLatitude = info.LocationLatitude
-				requestClientIpLocationLongitude = info.LocationLongitude
+				info = c.ipService.Analyse(clientIp)
 			}
 
 			var traceId = gotrace_id.GetGinTraceId(ginCtx)
@@ -202,16 +191,16 @@ func (c *GinClient) Middleware() gin.HandlerFunc {
 			// 记录
 			if c.gormConfig.stats {
 				if dataJson {
-					c.gormRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
+					c.gormRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, info)
 				} else {
-					c.gormRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
+					c.gormRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, info)
 				}
 			}
 			if c.mongoConfig.stats {
 				if dataJson {
-					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
+					c.mongoRecordJson(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, info)
 				} else {
-					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp, requestClientIpLocationLatitude, requestClientIpLocationLongitude)
+					c.mongoRecordXml(ginCtx, traceId, requestTime, data, responseCode, responseBody, startTime, endTime, info)
 				}
 			}
 		}()

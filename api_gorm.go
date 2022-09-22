@@ -61,7 +61,7 @@ func (c *ApiClient) gormRecord(ctx context.Context, data apiPostgresqlLog) (err 
 
 	err = c.gormClient.GetDb().Table(c.gormConfig.tableName).Create(&data).Error
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("记录日志失败：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("记录接口日志失败：%s", err)
 	}
 	return
 }
@@ -97,10 +97,7 @@ func (c *ApiClient) gormMiddleware(ctx context.Context, request gorequest.Respon
 		}
 	}
 
-	err := c.gormRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.gormRecord(ctx, data)
 }
 
 // 中间件
@@ -125,10 +122,7 @@ func (c *ApiClient) gormMiddlewareXml(ctx context.Context, request gorequest.Res
 		}
 	}
 
-	err := c.gormRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.gormRecord(ctx, data)
 }
 
 // 中间件
@@ -153,8 +147,5 @@ func (c *ApiClient) gormMiddlewareCustom(ctx context.Context, api string, reques
 		}
 	}
 
-	err := c.gormRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.gormRecord(ctx, data)
 }

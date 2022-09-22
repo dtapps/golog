@@ -31,12 +31,16 @@ type apiMongolLog struct {
 	ResponseBody          interface{}        `json:"response_body,omitempty" bson:"response_body,omitempty"`                     //【返回】内容
 	ResponseContentLength int64              `json:"response_content_length,omitempty" bson:"response_content_length,omitempty"` //【返回】大小
 	ResponseTime          dorm.BsonTime      `json:"response_time,omitempty" bson:"response_time,omitempty"`                     //【返回】时间
-	SystemHostName        string             `json:"system_host_name,omitempty" bson:"system_host_name,omitempty"`               //【系统】主机名
-	SystemInsideIp        string             `json:"system_inside_ip,omitempty" bson:"system_inside_ip,omitempty"`               //【系统】内网ip
-	SystemOs              string             `json:"system_os,omitempty" bson:"system_os,omitempty"`                             //【系统】系统类型
-	SystemArch            string             `json:"system_arch,omitempty" bson:"system_arch,omitempty"`                         //【系统】系统架构
-	GoVersion             string             `json:"go_version,omitempty" bson:"go_version,omitempty"`                           //【程序】Go版本
-	SdkVersion            string             `json:"sdk_version,omitempty" bson:"sdk_version,omitempty"`                         //【程序】Sdk版本
+	System                struct {
+		HostName string `json:"host_name,omitempty" bson:"host_name,omitempty"` //【系统】主机名
+		InsideIp string `json:"inside_ip,omitempty" bson:"inside_ip,omitempty"` //【系统】内网ip
+		Os       string `json:"os,omitempty" bson:"os,omitempty"`               //【系统】系统类型
+		Arch     string `json:"arch,omitempty" bson:"arch,omitempty"`           //【系统】系统架构
+	} `json:"system,omitempty" bson:"system,omitempty"` //【系统】信息
+	Version struct {
+		Go  string `json:"go,omitempty" bson:"go,omitempty"`   //【程序】Go版本
+		Sdk string `json:"sdk,omitempty" bson:"sdk,omitempty"` //【程序】Sdk版本
+	} `json:"version,omitempty" bson:"version,omitempty"` //【程序】版本信息
 }
 
 // 创建时间序列集合
@@ -68,20 +72,21 @@ func (c *ApiClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteR
 }
 
 // 记录日志
-func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog) (err error) {
+func (c *ApiClient) mongoRecord(ctx context.Context, mongoLog apiMongolLog, sdkVersion string) (err error) {
 
-	mongoLog.SystemHostName = c.config.systemHostName    //【系统】主机名
-	mongoLog.SystemInsideIp = c.config.systemInsideIp    //【系统】内网ip
-	mongoLog.GoVersion = c.config.goVersion              //【程序】Go版本
+	mongoLog.System.HostName = c.config.systemHostName   //【系统】主机名
+	mongoLog.System.InsideIp = c.config.systemInsideIp   //【系统】内网ip
+	mongoLog.System.Os = c.config.systemOs               //【系统】系统类型
+	mongoLog.System.Arch = c.config.systemArch           //【系统】系统架构
+	mongoLog.Version.Go = c.config.goVersion             //【程序】Go版本
+	mongoLog.Version.Sdk = sdkVersion                    //【程序】Sdk版本
 	mongoLog.TraceId = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
 	mongoLog.RequestIp = c.config.systemOutsideIp        //【请求】请求Ip
-	mongoLog.SystemOs = c.config.systemOs                //【系统】系统类型
-	mongoLog.SystemArch = c.config.systemArch            //【系统】系统架构
 	mongoLog.LogId = primitive.NewObjectID()             //【记录】编号
 
 	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, mongoLog)
 	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("记录日志失败：%s", err)
+		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存接口日志失败：%s", err)
 	}
 	return err
 }
@@ -101,7 +106,6 @@ func (c *ApiClient) mongoMiddleware(ctx context.Context, request gorequest.Respo
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
-		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
@@ -109,10 +113,7 @@ func (c *ApiClient) mongoMiddleware(ctx context.Context, request gorequest.Respo
 		}
 	}
 
-	err := c.mongoRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.mongoRecord(ctx, data, sdkVersion)
 }
 
 // 中间件
@@ -130,7 +131,6 @@ func (c *ApiClient) mongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
-		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
@@ -138,10 +138,7 @@ func (c *ApiClient) mongoMiddlewareXml(ctx context.Context, request gorequest.Re
 		}
 	}
 
-	err := c.mongoRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.mongoRecord(ctx, data, sdkVersion)
 }
 
 // 中间件
@@ -159,7 +156,6 @@ func (c *ApiClient) mongoMiddlewareCustom(ctx context.Context, api string, reque
 		ResponseStatusCode:    request.ResponseStatusCode,                         //【返回】状态码
 		ResponseContentLength: request.ResponseContentLength,                      //【返回】大小
 		ResponseTime:          dorm.NewBsonTimeFromTime(request.ResponseTime),     //【返回】时间
-		SdkVersion:            sdkVersion,                                         //【程序】Sdk版本
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
@@ -167,8 +163,5 @@ func (c *ApiClient) mongoMiddlewareCustom(ctx context.Context, api string, reque
 		}
 	}
 
-	err := c.mongoRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.mongoRecord(ctx, data, sdkVersion)
 }

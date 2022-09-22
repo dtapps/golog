@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
+	"go.dtapp.net/goip"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
@@ -21,37 +22,43 @@ type ginMongoLogRequestIpLocationLocation struct {
 
 // 模型结构体
 type ginMongoLog struct {
-	LogId             primitive.ObjectID `json:"log_id,omitempty" bson:"_id,omitempty"`                              //【记录】编号
-	LogTime           primitive.DateTime `json:"log_time,omitempty" bson:"log_time"`                                 //【记录】时间
-	TraceId           string             `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                       //【记录】跟踪编号
-	RequestTime       dorm.BsonTime      `json:"request_time,omitempty" bson:"request_time,omitempty"`               //【请求】时间
-	RequestUri        string             `json:"request_uri,omitempty" bson:"request_uri,omitempty"`                 //【请求】请求链接 域名+路径+参数
-	RequestUrl        string             `json:"request_url,omitempty" bson:"request_url,omitempty"`                 //【请求】请求链接 域名+路径
-	RequestApi        string             `json:"request_api,omitempty" bson:"request_api,omitempty"`                 //【请求】请求接口 路径
-	RequestMethod     string             `json:"request_method,omitempty" bson:"request_method,omitempty"`           //【请求】请求方式
-	RequestProto      string             `json:"request_proto,omitempty" bson:"request_proto,omitempty"`             //【请求】请求协议
-	RequestUa         string             `json:"request_ua,omitempty" bson:"request_ua,omitempty"`                   //【请求】请求UA
-	RequestReferer    string             `json:"request_referer,omitempty" bson:"request_referer,omitempty"`         //【请求】请求referer
-	RequestBody       interface{}        `json:"request_body,omitempty" bson:"request_body,omitempty"`               //【请求】请求主体
-	RequestUrlQuery   interface{}        `json:"request_url_query,omitempty" bson:"request_url_query,omitempty"`     //【请求】请求URL参数
-	RequestIp         string             `json:"request_ip,omitempty" bson:"request_ip,omitempty"`                   //【请求】请求客户端Ip
-	RequestIpCountry  string             `json:"request_ip_country,omitempty" bson:"request_ip_country,omitempty"`   //【请求】请求客户端国家
-	RequestIpProvince string             `json:"request_ip_province,omitempty" bson:"request_ip_province,omitempty"` //【请求】请求客户端省份
-	RequestIpCity     string             `json:"request_ip_city,omitempty" bson:"request_ip_city,omitempty"`         //【请求】请求客户端城市
-	RequestIpIsp      string             `json:"request_ip_isp,omitempty" bson:"request_ip_isp,omitempty"`           //【请求】请求客户端运营商
-	RequestIpLocation interface{}        `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
-	RequestHeader     interface{}        `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
-	ResponseTime      dorm.BsonTime      `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
-	ResponseCode      int                `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
-	ResponseMsg       string             `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
-	ResponseData      interface{}        `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
-	CostTime          int64              `json:"cost_time,omitempty" bson:"cost_time,omitempty"`                     //【系统】花费时间
-	SystemHostName    string             `json:"system_host_name,omitempty" bson:"system_host_name,omitempty"`       //【系统】主机名
-	SystemInsideIp    string             `json:"system_inside_ip,omitempty" bson:"system_inside_ip,omitempty"`       //【系统】内网ip
-	SystemOs          string             `json:"system_os,omitempty" bson:"system_os,omitempty"`                     //【系统】系统类型
-	SystemArch        string             `json:"system_arch,omitempty" bson:"system_arch,omitempty"`                 //【系统】系统架构
-	GoVersion         string             `json:"go_version,omitempty" bson:"go_version,omitempty"`                   //【程序】Go版本
-	SdkVersion        string             `json:"sdk_version,omitempty" bson:"sdk_version,omitempty"`                 //【程序】Sdk版本
+	LogId           primitive.ObjectID `json:"log_id,omitempty" bson:"_id,omitempty"`                          //【记录】编号
+	TraceId         string             `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                   //【记录】跟踪编号
+	RequestTime     dorm.BsonTime      `json:"request_time,omitempty" bson:"request_time,omitempty"`           //【请求】时间
+	RequestUri      string             `json:"request_uri,omitempty" bson:"request_uri,omitempty"`             //【请求】请求链接 域名+路径+参数
+	RequestUrl      string             `json:"request_url,omitempty" bson:"request_url,omitempty"`             //【请求】请求链接 域名+路径
+	RequestApi      string             `json:"request_api,omitempty" bson:"request_api,omitempty"`             //【请求】请求接口 路径
+	RequestMethod   string             `json:"request_method,omitempty" bson:"request_method,omitempty"`       //【请求】请求方式
+	RequestProto    string             `json:"request_proto,omitempty" bson:"request_proto,omitempty"`         //【请求】请求协议
+	RequestUa       string             `json:"request_ua,omitempty" bson:"request_ua,omitempty"`               //【请求】请求UA
+	RequestReferer  string             `json:"request_referer,omitempty" bson:"request_referer,omitempty"`     //【请求】请求referer
+	RequestBody     interface{}        `json:"request_body,omitempty" bson:"request_body,omitempty"`           //【请求】请求主体
+	RequestUrlQuery interface{}        `json:"request_url_query,omitempty" bson:"request_url_query,omitempty"` //【请求】请求URL参数
+	RequestIp       struct {
+		Ip        string `json:"ip,omitempty" bson:"ip,omitempty"`               //【请求】请求客户端Ip
+		Continent string `json:"continent,omitempty" bson:"continent,omitempty"` //【请求】请求客户端大陆
+		Country   string `json:"country,omitempty" bson:"country,omitempty"`     //【请求】请求客户端国家
+		Province  string `json:"province,omitempty" bson:"province,omitempty"`   //【请求】请求客户端省份
+		City      string `json:"city,omitempty" bson:"city,omitempty"`           //【请求】请求客户端城市
+		Isp       string `json:"isp,omitempty" bson:"isp,omitempty"`             //【请求】请求客户端运营商
+	} `json:"request_ip,omitempty" bson:"request_ip,omitempty"` //【请求】请求客户端信息
+	RequestIpLocation interface{}   `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
+	RequestHeader     interface{}   `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
+	ResponseTime      dorm.BsonTime `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
+	ResponseCode      int           `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
+	ResponseMsg       string        `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
+	ResponseData      interface{}   `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
+	CostTime          int64         `json:"cost_time,omitempty" bson:"cost_time,omitempty"`                     //【系统】花费时间
+	System            struct {
+		HostName string `json:"host_name,omitempty" bson:"host_name,omitempty"` //【系统】主机名
+		InsideIp string `json:"inside_ip,omitempty" bson:"inside_ip,omitempty"` //【系统】内网ip
+		Os       string `json:"os,omitempty" bson:"os,omitempty"`               //【系统】系统类型
+		Arch     string `json:"arch,omitempty" bson:"arch,omitempty"`           //【系统】系统架构
+	} `json:"system,omitempty" bson:"system,omitempty"` //【系统】信息
+	Version struct {
+		Go  string `json:"go,omitempty" bson:"go,omitempty"`   //【程序】Go版本
+		Sdk string `json:"sdk,omitempty" bson:"sdk,omitempty"` //【程序】Sdk版本
+	} `json:"version,omitempty" bson:"version,omitempty"` //【程序】版本信息
 }
 
 // 创建集合
@@ -75,32 +82,12 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 			}},
 		}, {
 			Keys: bson.D{{
+				Key:   "request_time",
+				Value: -1,
+			}},
+		}, {
+			Keys: bson.D{{
 				Key:   "request_method",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_ip",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_ip_country",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_ip_province",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_ip_city",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "request_ip_isp",
 				Value: 1,
 			}},
 		}, {
@@ -112,31 +99,6 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 			Keys: bson.D{{
 				Key:   "response_code",
 				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "system_host_name",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "system_os",
-				Value: 1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "system_arch",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "go_version",
-				Value: -1,
-			}},
-		}, {
-			Keys: bson.D{{
-				Key:   "sdk_version",
-				Value: -1,
 			}},
 		}, {
 			Keys: bson.D{{
@@ -152,53 +114,47 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 
 // MongoDelete 删除
 func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
-	filter := bson.D{{"log_time", bson.D{{"$lt", primitive.NewDateTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
+	filter := bson.D{{"request_time", bson.D{{"$lt", dorm.NewBsonTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
 	return c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
 }
 
 // 记录日志
 func (c *GinClient) mongoRecord(ctx context.Context, mongoLog ginMongoLog) (err error) {
 
-	mongoLog.SystemHostName = c.config.systemHostName //【系统】主机名
-	mongoLog.SystemInsideIp = c.config.systemInsideIp //【系统】内网ip
-	mongoLog.GoVersion = c.config.goVersion           //【程序】Go版本
-	mongoLog.SdkVersion = c.config.sdkVersion         //【程序】Sdk版本
-	mongoLog.SystemOs = c.config.systemOs             //【系统】系统类型
-	mongoLog.SystemArch = c.config.systemArch         //【系统】系统架构
-	mongoLog.LogId = primitive.NewObjectID()          //【记录】编号
+	mongoLog.System.HostName = c.config.systemHostName //【系统】主机名
+	mongoLog.System.InsideIp = c.config.systemInsideIp //【系统】内网ip
+	mongoLog.System.Os = c.config.systemOs             //【系统】系统类型
+	mongoLog.System.Arch = c.config.systemArch         //【系统】系统架构
+	mongoLog.Version.Go = c.config.goVersion           //【程序】Go版本
+	mongoLog.Version.Sdk = c.config.sdkVersion         //【程序】Sdk版本
+	mongoLog.LogId = primitive.NewObjectID()           //【记录】编号
 
 	_, err = c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, mongoLog)
 	if err != nil {
-		c.zapLog.WithTraceIdStr(mongoLog.TraceId).Sugar().Errorf("记录日志失败：%s", err)
+		c.zapLog.WithTraceIdStr(mongoLog.TraceId).Sugar().Errorf("保存框架日志失败：%s", err)
 	}
 	return err
 }
 
-func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
+func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 
 	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
 
 	data := ginMongoLog{
-		TraceId:           traceId,                                                      //【记录】跟踪编号
-		LogTime:           primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
-		RequestTime:       dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
-		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
-		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
-		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
-		RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
-		RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
-		RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
-		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
-		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
-		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端国家
-		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
-		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
-		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:      dorm.NewBsonTimeCurrent(),                                    //【返回】时间
-		ResponseCode:      responseCode,                                                 //【返回】状态码
-		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
-		CostTime:          endTime - startTime,                                          //【系统】花费时间
+		TraceId:         traceId,                                                      //【记录】跟踪编号
+		RequestTime:     dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
+		RequestUrl:      ginCtx.Request.RequestURI,                                    //【请求】请求链接
+		RequestApi:      gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
+		RequestMethod:   ginCtx.Request.Method,                                        //【请求】请求方式
+		RequestProto:    ginCtx.Request.Proto,                                         //【请求】请求协议
+		RequestUa:       ginCtx.Request.UserAgent(),                                   //【请求】请求UA
+		RequestReferer:  ginCtx.Request.Referer(),                                     //【请求】请求referer
+		RequestUrlQuery: ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
+		RequestHeader:   ginCtx.Request.Header,                                        //【请求】请求头
+		ResponseTime:    dorm.NewBsonTimeCurrent(),                                    //【返回】时间
+		ResponseCode:    responseCode,                                                 //【返回】状态码
+		ResponseData:    dorm.JsonDecodeNoError([]byte(responseBody)),                 //【返回】数据
+		CostTime:        endTime - startTime,                                          //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
 		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
@@ -210,44 +166,42 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		data.RequestBody = dorm.JsonDecodeNoError(requestBody) //【请求】请求主体
 	}
 
-	if requestClientIpLocationLatitude != 0 && requestClientIpLocationLongitude != 0 {
+	//【请求】请求客户端信息
+	data.RequestIp.Ip = ipInfo.Ip
+	data.RequestIp.Continent = ipInfo.Continent
+	data.RequestIp.Country = ipInfo.Country
+	data.RequestIp.Province = ipInfo.Province
+	data.RequestIp.City = ipInfo.City
+	data.RequestIp.City = ipInfo.Isp
+	if ipInfo.LocationLatitude != 0 && ipInfo.LocationLongitude != 0 {
 		data.RequestIpLocation = ginMongoLogRequestIpLocationLocation{
 			Type:        "Point",
-			Coordinates: []float64{requestClientIpLocationLongitude, requestClientIpLocationLatitude},
+			Coordinates: []float64{ipInfo.LocationLongitude, ipInfo.LocationLatitude},
 		}
 	}
 
-	err := c.mongoRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.mongoRecord(ctx, data)
 }
 
-func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, clientIp, requestClientIpCountry, requestClientIpProvince, requestClientIpCity, requestClientIpIsp string, requestClientIpLocationLatitude, requestClientIpLocationLongitude float64) {
+func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 
 	var ctx = gotrace_id.SetGinTraceIdContext(context.Background(), ginCtx)
 
 	data := ginMongoLog{
-		TraceId:           traceId,                                                      //【记录】跟踪编号
-		LogTime:           primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
-		RequestTime:       dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
-		RequestUrl:        ginCtx.Request.RequestURI,                                    //【请求】请求链接
-		RequestApi:        gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
-		RequestMethod:     ginCtx.Request.Method,                                        //【请求】请求方式
-		RequestProto:      ginCtx.Request.Proto,                                         //【请求】请求协议
-		RequestUa:         ginCtx.Request.UserAgent(),                                   //【请求】请求UA
-		RequestReferer:    ginCtx.Request.Referer(),                                     //【请求】请求referer
-		RequestUrlQuery:   ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
-		RequestIp:         clientIp,                                                     //【请求】请求客户端Ip
-		RequestIpCountry:  requestClientIpCountry,                                       //【请求】请求客户端国家
-		RequestIpProvince: requestClientIpProvince,                                      //【请求】请求客户端省份
-		RequestIpCity:     requestClientIpCity,                                          //【请求】请求客户端城市
-		RequestIpIsp:      requestClientIpIsp,                                           //【请求】请求客户端运营商
-		RequestHeader:     ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:      dorm.NewBsonTimeCurrent(),                                    //【返回】时间
-		ResponseCode:      responseCode,                                                 //【返回】状态码
-		ResponseData:      c.jsonUnmarshal(responseBody),                                //【返回】数据
-		CostTime:          endTime - startTime,                                          //【系统】花费时间
+		TraceId:         traceId,                                                      //【记录】跟踪编号
+		RequestTime:     dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
+		RequestUrl:      ginCtx.Request.RequestURI,                                    //【请求】请求链接
+		RequestApi:      gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
+		RequestMethod:   ginCtx.Request.Method,                                        //【请求】请求方式
+		RequestProto:    ginCtx.Request.Proto,                                         //【请求】请求协议
+		RequestUa:       ginCtx.Request.UserAgent(),                                   //【请求】请求UA
+		RequestReferer:  ginCtx.Request.Referer(),                                     //【请求】请求referer
+		RequestUrlQuery: ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
+		RequestHeader:   ginCtx.Request.Header,                                        //【请求】请求头
+		ResponseTime:    dorm.NewBsonTimeCurrent(),                                    //【返回】时间
+		ResponseCode:    responseCode,                                                 //【返回】状态码
+		ResponseData:    dorm.JsonDecodeNoError([]byte(responseBody)),                 //【返回】数据
+		CostTime:        endTime - startTime,                                          //【系统】花费时间
 	}
 	if ginCtx.Request.TLS == nil {
 		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
@@ -259,15 +213,19 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		data.RequestBody = dorm.XmlDecodeNoError(requestBody) //【请求】请求主体
 	}
 
-	if requestClientIpLocationLatitude != 0 && requestClientIpLocationLongitude != 0 {
+	//【请求】请求客户端信息
+	data.RequestIp.Ip = ipInfo.Ip
+	data.RequestIp.Continent = ipInfo.Continent
+	data.RequestIp.Country = ipInfo.Country
+	data.RequestIp.Province = ipInfo.Province
+	data.RequestIp.City = ipInfo.City
+	data.RequestIp.City = ipInfo.Isp
+	if ipInfo.LocationLatitude != 0 && ipInfo.LocationLongitude != 0 {
 		data.RequestIpLocation = ginMongoLogRequestIpLocationLocation{
 			Type:        "Point",
-			Coordinates: []float64{requestClientIpLocationLongitude, requestClientIpLocationLatitude},
+			Coordinates: []float64{ipInfo.LocationLongitude, ipInfo.LocationLatitude},
 		}
 	}
 
-	err := c.mongoRecord(ctx, data)
-	if err != nil {
-		c.zapLog.WithTraceId(ctx).Sugar().Errorf("保存失败：%s", err.Error())
-	}
+	c.mongoRecord(ctx, data)
 }
