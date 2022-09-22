@@ -41,7 +41,7 @@ type ginMongoLog struct {
 		Province  string `json:"province,omitempty" bson:"province,omitempty"`   //【请求】请求客户端省份
 		City      string `json:"city,omitempty" bson:"city,omitempty"`           //【请求】请求客户端城市
 		Isp       string `json:"isp,omitempty" bson:"isp,omitempty"`             //【请求】请求客户端运营商
-	} `json:"request_ip,omitempty" bson:"request_ip,omitempty"` //【请求】请求客户端信息
+	} `json:"request_ip" bson:"request_ip"` //【请求】请求客户端信息
 	RequestIpLocation interface{}   `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
 	RequestHeader     interface{}   `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
 	ResponseTime      dorm.BsonTime `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
@@ -184,7 +184,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 	data.RequestIp.Country = ipInfo.Country
 	data.RequestIp.Province = ipInfo.Province
 	data.RequestIp.City = ipInfo.City
-	data.RequestIp.City = ipInfo.Isp
+	data.RequestIp.Isp = ipInfo.Isp
 	if ipInfo.LocationLatitude != 0 && ipInfo.LocationLongitude != 0 {
 		data.RequestIpLocation = ginMongoLogRequestIpLocationLocation{
 			Type:        "Point",
@@ -231,7 +231,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 	data.RequestIp.Country = ipInfo.Country
 	data.RequestIp.Province = ipInfo.Province
 	data.RequestIp.City = ipInfo.City
-	data.RequestIp.City = ipInfo.Isp
+	data.RequestIp.Isp = ipInfo.Isp
 	if ipInfo.LocationLatitude != 0 && ipInfo.LocationLongitude != 0 {
 		data.RequestIpLocation = ginMongoLogRequestIpLocationLocation{
 			Type:        "Point",
