@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	go.dtapp.net/dorm v1.0.42
+	go.dtapp.net/dorm v1.0.45
 	go.dtapp.net/goip v1.0.38
 	go.dtapp.net/gorequest v1.0.31
 	go.dtapp.net/gotime v1.0.5
@@ -80,10 +80,10 @@ require (
 	go.dtapp.net/gostring v1.0.10 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/crypto v0.0.0-20220919173607-35f4265a4bc0 // indirect
+	golang.org/x/crypto v0.0.0-20220924013350-4ba4fb4dd9e7 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220921203646-d300de134e69 // indirect
-	golang.org/x/sync v0.0.0-20220907140024-f12130a52804 // indirect
+	golang.org/x/net v0.0.0-20220923203811-8be639271d50 // indirect
+	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
@@ -91,7 +91,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.3.6 // indirect
 	gorm.io/driver/postgres v1.3.10 // indirect
-	gorm.io/gorm v1.23.9 // indirect
+	gorm.io/gorm v1.23.10 // indirect
 	mellium.im/sasl v0.3.0 // indirect
 	modernc.org/libc v1.16.19 // indirect
 	modernc.org/sqlite v1.18.0 // indirect

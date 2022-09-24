@@ -70,6 +70,7 @@ func NewGinClient(config *GinClientConfig) (*GinClient, error) {
 	if config.CurrentIp != "" && config.CurrentIp != "0.0.0.0" {
 		c.config.systemOutsideIp = config.CurrentIp
 	}
+	c.config.systemOutsideIp = goip.IsIp(c.config.systemOutsideIp)
 	if c.config.systemOutsideIp == "" {
 		return nil, currentIpNoConfig
 	}
