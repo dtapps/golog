@@ -24,7 +24,7 @@ type ginMongoLogRequestIpLocationLocation struct {
 type ginMongoLog struct {
 	LogId           primitive.ObjectID `json:"log_id,omitempty" bson:"_id,omitempty"`                          //【记录】编号
 	TraceId         string             `json:"trace_id,omitempty" bson:"trace_id,omitempty"`                   //【记录】跟踪编号
-	RequestTime     dorm.BsonTime      `json:"request_time,omitempty" bson:"request_time,omitempty"`           //【请求】时间
+	RequestTime     string             `json:"request_time,omitempty" bson:"request_time,omitempty"`           //【请求】时间
 	RequestUri      string             `json:"request_uri,omitempty" bson:"request_uri,omitempty"`             //【请求】请求链接 域名+路径+参数
 	RequestUrl      string             `json:"request_url,omitempty" bson:"request_url,omitempty"`             //【请求】请求链接 域名+路径
 	RequestApi      string             `json:"request_api,omitempty" bson:"request_api,omitempty"`             //【请求】请求接口 路径
@@ -41,29 +41,29 @@ type ginMongoLog struct {
 		Province  string `json:"province,omitempty" bson:"province,omitempty"`   //【请求】请求客户端省份
 		City      string `json:"city,omitempty" bson:"city,omitempty"`           //【请求】请求客户端城市
 		Isp       string `json:"isp,omitempty" bson:"isp,omitempty"`             //【请求】请求客户端运营商
-	} `json:"request_ip" bson:"request_ip"` //【请求】请求客户端信息
-	RequestIpLocation interface{}   `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
-	RequestHeader     interface{}   `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
-	ResponseTime      dorm.BsonTime `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
-	ResponseCode      int           `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
-	ResponseMsg       string        `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
-	ResponseData      interface{}   `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
-	CostTime          int64         `json:"cost_time,omitempty" bson:"cost_time,omitempty"`                     //【系统】花费时间
+	} `json:"request_ip,omitempty" bson:"request_ip,omitempty"` //【请求】请求客户端信息
+	RequestIpLocation interface{} `json:"request_ip_location,omitempty" bson:"request_ip_location,omitempty"` //【请求】请求客户端位置
+	RequestHeader     interface{} `json:"request_header,omitempty" bson:"request_header,omitempty"`           //【请求】请求头
+	ResponseTime      string      `json:"response_time,omitempty" bson:"response_time,omitempty"`             //【返回】时间
+	ResponseCode      int         `json:"response_code,omitempty" bson:"response_code,omitempty"`             //【返回】状态码
+	ResponseMsg       string      `json:"response_msg,omitempty" bson:"response_msg,omitempty"`               //【返回】描述
+	ResponseData      interface{} `json:"response_data,omitempty" bson:"response_data,omitempty"`             //【返回】数据
+	CostTime          int64       `json:"cost_time,omitempty" bson:"cost_time,omitempty"`                     //【系统】花费时间
 	System            struct {
-		Hostname      string        `json:"hostname" bson:"hostname"`                                 //【系统】主机名
-		Os            string        `json:"os" bson:"os"`                                             //【系统】系统类型
-		Version       string        `json:"version" bson:"version"`                                   //【系统】系统版本
-		Kernel        string        `json:"kernel" bson:"kernel"`                                     //【系统】系统内核
-		KernelVersion string        `json:"kernel_version" bson:"kernel_version"`                     //【系统】系统内核版本
-		BootTime      dorm.BsonTime `json:"boot_time" bson:"boot_time"`                               //【系统】系统开机时间
-		CpuCores      int           `json:"cpu_cores,omitempty" bson:"cpu_cores,omitempty"`           //【系统】CPU核数
-		CpuModelName  string        `json:"cpu_model_name,omitempty" bson:"cpu_model_name,omitempty"` //【系统】CPU型号名称
-		CpuMhz        float64       `json:"cpu_mhz,omitempty" bson:"cpu_mhz,omitempty"`               //【系统】CPU兆赫
-		InsideIp      string        `json:"inside_ip" bson:"inside_ip"`                               //【系统】内网ip
-		OutsideIp     string        `json:"outside_ip" bson:"outside_ip"`                             //【系统】外网ip
-		GoVersion     string        `json:"go_version" bson:"go_version"`                             //【系统】go版本
-		SdkVersion    string        `json:"sdk_version" bson:"sdk_version"`                           //【系统】sdk版本
-	} `json:"system" bson:"system"` //【系统】信息
+		Hostname      string  `json:"hostname" bson:"hostname"`                                 //【系统】主机名
+		Os            string  `json:"os" bson:"os"`                                             //【系统】系统类型
+		Version       string  `json:"version" bson:"version"`                                   //【系统】系统版本
+		Kernel        string  `json:"kernel" bson:"kernel"`                                     //【系统】系统内核
+		KernelVersion string  `json:"kernel_version" bson:"kernel_version"`                     //【系统】系统内核版本
+		BootTime      string  `json:"boot_time" bson:"boot_time"`                               //【系统】系统开机时间
+		CpuCores      int     `json:"cpu_cores,omitempty" bson:"cpu_cores,omitempty"`           //【系统】CPU核数
+		CpuModelName  string  `json:"cpu_model_name,omitempty" bson:"cpu_model_name,omitempty"` //【系统】CPU型号名称
+		CpuMhz        float64 `json:"cpu_mhz,omitempty" bson:"cpu_mhz,omitempty"`               //【系统】CPU兆赫
+		InsideIp      string  `json:"inside_ip" bson:"inside_ip"`                               //【系统】内网ip
+		OutsideIp     string  `json:"outside_ip" bson:"outside_ip"`                             //【系统】外网ip
+		GoVersion     string  `json:"go_version" bson:"go_version"`                             //【系统】go版本
+		SdkVersion    string  `json:"sdk_version" bson:"sdk_version"`                           //【系统】sdk版本
+	} `json:"system,omitempty" bson:"system,omitempty"` //【系统】信息
 }
 
 // 创建集合
@@ -119,27 +119,27 @@ func (c *GinClient) mongoCreateIndexes(ctx context.Context) {
 
 // MongoDelete 删除
 func (c *GinClient) MongoDelete(ctx context.Context, hour int64) (*mongo.DeleteResult, error) {
-	filter := bson.D{{"request_time", bson.D{{"$lt", dorm.NewBsonTimeFromTime(gotime.Current().BeforeHour(hour).Time)}}}}
+	filter := bson.D{{"request_time", bson.D{{"$lt", gotime.SetCurrent(gotime.Current().BeforeHour(hour).Time)}}}}
 	return c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).DeleteMany(ctx, filter)
 }
 
 // 记录日志
 func (c *GinClient) mongoRecord(ctx context.Context, data ginMongoLog) {
 
-	data.LogId = primitive.NewObjectID()                                                                        //【记录】编号
-	data.System.Hostname = c.config.systemHostname                                                              //【系统】主机名
-	data.System.Os = c.config.systemOs                                                                          //【系统】系统类型
-	data.System.Version = c.config.systemVersion                                                                //【系统】系统版本
-	data.System.Kernel = c.config.systemKernel                                                                  //【系统】系统内核
-	data.System.KernelVersion = c.config.systemKernelVersion                                                    //【系统】系统内核版本
-	data.System.BootTime = dorm.NewBsonTimeFromTime(gotime.SetCurrentUnix(int64(c.config.systemBootTime)).Time) //【系统】系统开机时间
-	data.System.CpuCores = c.config.cpuCores                                                                    //【系统】CPU核数
-	data.System.CpuModelName = c.config.cpuModelName                                                            //【程序】CPU型号名称
-	data.System.CpuMhz = c.config.cpuMhz                                                                        //【系统】CPU兆赫
-	data.System.InsideIp = c.config.systemInsideIp                                                              //【系统】内网ip
-	data.System.OutsideIp = c.config.systemOutsideIp                                                            //【系统】外网ip
-	data.System.GoVersion = c.config.goVersion                                                                  //【系统】Go版本
-	data.System.SdkVersion = c.config.sdkVersion                                                                //【系统】Sdk版本
+	data.LogId = primitive.NewObjectID()                                                                          //【记录】编号
+	data.System.Hostname = c.config.systemHostname                                                                //【系统】主机名
+	data.System.Os = c.config.systemOs                                                                            //【系统】系统类型
+	data.System.Version = c.config.systemVersion                                                                  //【系统】系统版本
+	data.System.Kernel = c.config.systemKernel                                                                    //【系统】系统内核
+	data.System.KernelVersion = c.config.systemKernelVersion                                                      //【系统】系统内核版本
+	data.System.BootTime = gotime.SetCurrent(gotime.SetCurrentUnix(int64(c.config.systemBootTime)).Time).Format() //【系统】系统开机时间
+	data.System.CpuCores = c.config.cpuCores                                                                      //【系统】CPU核数
+	data.System.CpuModelName = c.config.cpuModelName                                                              //【程序】CPU型号名称
+	data.System.CpuMhz = c.config.cpuMhz                                                                          //【系统】CPU兆赫
+	data.System.InsideIp = c.config.systemInsideIp                                                                //【系统】内网ip
+	data.System.OutsideIp = c.config.systemOutsideIp                                                              //【系统】外网ip
+	data.System.GoVersion = c.config.goVersion                                                                    //【系统】Go版本
+	data.System.SdkVersion = c.config.sdkVersion                                                                  //【系统】Sdk版本
 
 	_, err := c.mongoClient.Database(c.mongoConfig.databaseName).Collection(c.mongoConfig.collectionName).InsertOne(ctx, data)
 	if err != nil {
@@ -154,7 +154,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 
 	data := ginMongoLog{
 		TraceId:         traceId,                                                      //【记录】跟踪编号
-		RequestTime:     dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
+		RequestTime:     gotime.SetCurrent(requestTime).Format(),                      //【请求】时间
 		RequestUrl:      ginCtx.Request.RequestURI,                                    //【请求】请求链接
 		RequestApi:      gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
 		RequestMethod:   ginCtx.Request.Method,                                        //【请求】请求方式
@@ -163,7 +163,7 @@ func (c *GinClient) mongoRecordJson(ginCtx *gin.Context, traceId string, request
 		RequestReferer:  ginCtx.Request.Referer(),                                     //【请求】请求referer
 		RequestUrlQuery: ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
 		RequestHeader:   ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:    dorm.NewBsonTimeCurrent(),                                    //【返回】时间
+		ResponseTime:    gotime.Current().Format(),                                    //【返回】时间
 		ResponseCode:    responseCode,                                                 //【返回】状态码
 		ResponseData:    dorm.JsonDecodeNoError([]byte(responseBody)),                 //【返回】数据
 		CostTime:        endTime - startTime,                                          //【系统】花费时间
@@ -201,7 +201,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 
 	data := ginMongoLog{
 		TraceId:         traceId,                                                      //【记录】跟踪编号
-		RequestTime:     dorm.NewBsonTimeFromTime(requestTime),                        //【请求】时间
+		RequestTime:     gotime.SetCurrent(requestTime).Format(),                      //【请求】时间
 		RequestUrl:      ginCtx.Request.RequestURI,                                    //【请求】请求链接
 		RequestApi:      gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
 		RequestMethod:   ginCtx.Request.Method,                                        //【请求】请求方式
@@ -210,7 +210,7 @@ func (c *GinClient) mongoRecordXml(ginCtx *gin.Context, traceId string, requestT
 		RequestReferer:  ginCtx.Request.Referer(),                                     //【请求】请求referer
 		RequestUrlQuery: ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
 		RequestHeader:   ginCtx.Request.Header,                                        //【请求】请求头
-		ResponseTime:    dorm.NewBsonTimeCurrent(),                                    //【返回】时间
+		ResponseTime:    gotime.Current().Format(),                                    //【返回】时间
 		ResponseCode:    responseCode,                                                 //【返回】状态码
 		ResponseData:    dorm.JsonDecodeNoError([]byte(responseBody)),                 //【返回】数据
 		CostTime:        endTime - startTime,                                          //【系统】花费时间
