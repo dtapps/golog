@@ -37,6 +37,8 @@ type GinClient struct {
 		systemOutsideIp     string  // 外网ip
 		goVersion           string  // go版本
 		sdkVersion          string  // sdk版本
+		mongoVersion        string  // mongo版本
+		mongoSdkVersion     string  // mongo sdk版本
 	}
 	gormConfig struct {
 		stats     bool   // 状态
