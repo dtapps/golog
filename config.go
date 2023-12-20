@@ -3,7 +3,6 @@ package golog
 import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
-	"log"
 )
 
 type systemResult struct {
@@ -21,10 +20,7 @@ type systemResult struct {
 
 func getSystem() (result systemResult) {
 
-	hInfo, err := host.Info()
-	if err != nil {
-		log.Printf("getSystem.host.Info：%s\n", err)
-	}
+	hInfo, _ := host.Info()
 
 	result.SystemHostname = hInfo.Hostname
 	result.SystemOs = hInfo.OS
@@ -36,17 +32,12 @@ func getSystem() (result systemResult) {
 		result.SystemBootTime = hInfo.BootTime
 	}
 
-	hCpu, err := cpu.Times(true)
-	if err != nil {
-		log.Printf("getSystem.cpu.Times：%s\n", err)
-	}
+	hCpu, _ := cpu.Times(true)
 
 	result.CpuCores = len(hCpu)
 
-	cInfo, err := cpu.Info()
-	if err != nil {
-		log.Printf("getSystem.cpu.Info：%s\n", err)
-	}
+	cInfo, _ := cpu.Info()
+
 	if len(cInfo) > 0 {
 		result.CpuModelName = cInfo[0].ModelName
 		result.CpuMhz = cInfo[0].Mhz
