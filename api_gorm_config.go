@@ -2,7 +2,7 @@ package golog
 
 import (
 	"context"
-	"go.dtapp.net/goip"
+	"go.dtapp.net/gorequest"
 	"runtime"
 )
 
@@ -20,7 +20,7 @@ func (gl *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	gl.config.cpuModelName = info.CpuModelName
 	gl.config.cpuMhz = info.CpuMhz
 
-	gl.config.systemInsideIp = goip.GetInsideIp(ctx)
+	gl.config.systemInsideIp = gorequest.GetInsideIp(ctx)
 	gl.config.systemOutsideIp = systemOutsideIp
 
 	gl.config.goVersion = runtime.Version()

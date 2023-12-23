@@ -7,9 +7,9 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/dorm v1.0.55
-	go.dtapp.net/goip v1.0.42
+	go.dtapp.net/goip v1.0.43
 	go.dtapp.net/gojson v1.0.2
-	go.dtapp.net/gorequest v1.0.39
+	go.dtapp.net/gorequest v1.0.40
 	go.dtapp.net/gotime v1.0.6
 	go.dtapp.net/gotrace_id v1.0.6
 	go.dtapp.net/gourl v1.0.0
@@ -50,17 +50,14 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/redis/go-redis/v9 v9.3.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
-	github.com/saracen/go7z v0.0.0-20191010121135-9c09b6bd7fda // indirect
-	github.com/saracen/solidblock v0.0.0-20190426153529-45df20abab6f // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.dtapp.net/gorandom v1.0.2 // indirect
-	go.dtapp.net/gostring v1.0.11 // indirect
+	go.dtapp.net/gostring v1.0.12 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect

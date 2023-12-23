@@ -10,6 +10,6 @@
 
 #### 安装
 
-```go
-go get -v -u go.dtapp.net/golog
+```shell
+go get -v -u go.dtapp.net/golog@v1.0.104
 ```
