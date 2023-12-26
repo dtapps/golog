@@ -41,7 +41,7 @@ type GinCustomClientGinRecordOperation struct {
 }
 
 // GinRecord 记录日志
-func (c *GinCustomClient) GinRecord(ginCtx *gin.Context) *GinCustomClientGinRecordOperation {
+func (c *GinSLogCustom) GinRecord(ginCtx *gin.Context) *GinCustomClientGinRecordOperation {
 	operation := &GinCustomClientGinRecordOperation{
 		slogClient: c.slog.client,
 		ipService:  c.ipService,

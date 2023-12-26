@@ -9,9 +9,9 @@ require (
 	go.dtapp.net/dorm v1.0.55
 	go.dtapp.net/goip v1.0.43
 	go.dtapp.net/gojson v1.0.2
-	go.dtapp.net/gorequest v1.0.40
+	go.dtapp.net/gorequest v1.0.41
 	go.dtapp.net/gotime v1.0.6
-	go.dtapp.net/gotrace_id v1.0.6
+	go.dtapp.net/gotrace_id v1.0.8
 	go.dtapp.net/gourl v1.0.0
 )
 
@@ -57,7 +57,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.dtapp.net/gorandom v1.0.2 // indirect
-	go.dtapp.net/gostring v1.0.12 // indirect
+	go.dtapp.net/gostring v1.0.13 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
@@ -66,8 +66,9 @@ require (
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.1 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/datatypes v1.2.0 // indirect
 	gorm.io/driver/mysql v1.5.2 // indirect

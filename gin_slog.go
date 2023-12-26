@@ -12,10 +12,22 @@ import (
 	"io/ioutil"
 )
 
-// NewGinClient 创建框架实例化
-func NewGinClient(ctx context.Context, config *GinClientConfig) (*GinClient, error) {
-	c := &GinClient{}
-	c.ipService = config.IpService
+// GinSLog 框架日志
+type GinSLog struct {
+	ipService *goip.Client // IP服务
+	slog      struct {
+		status bool  // 状态
+		client *SLog // 日志服务
+	}
+}
+
+// GinSLogFun  框架日志驱动
+type GinSLogFun func() *GinSLog
+
+// NewGinSLog 创建框架实例化
+func NewGinSLog(ctx context.Context, ipService *goip.Client) (*GinSLog, error) {
+	c := &GinSLog{}
+	c.ipService = ipService
 	return c, nil
 }
 
@@ -34,13 +46,13 @@ func (w bodyLogWriter) WriteString(s string) (int, error) {
 	return w.ResponseWriter.WriteString(s)
 }
 
-func (c *GinClient) jsonUnmarshal(data string) (result interface{}) {
+func (c *GinSLog) jsonUnmarshal(data string) (result interface{}) {
 	_ = gojson.Unmarshal([]byte(data), &result)
 	return
 }
 
 // Middleware 中间件
-func (c *GinClient) Middleware() gin.HandlerFunc {
+func (c *GinSLog) Middleware() gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
 
 		// 开始时间

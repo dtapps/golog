@@ -40,7 +40,7 @@ type ginSLog struct {
 }
 
 // record 记录日志
-func (c *GinClient) record(msg string, data ginSLog) {
+func (c *GinSLog) record(msg string, data ginSLog) {
 	c.slog.client.WithTraceIdStr(data.TraceID).Info(msg,
 		"request_time", data.RequestTime,
 		"request_uri", data.RequestUri,
@@ -69,7 +69,7 @@ func (c *GinClient) record(msg string, data ginSLog) {
 	)
 }
 
-func (c *GinClient) recordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
+func (c *GinSLog) recordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 	data := ginSLog{
 		TraceID:            traceId,                                                      //【系统】跟踪编号
 		RequestTime:        requestTime,                                                  //【请求】时间
@@ -102,7 +102,7 @@ func (c *GinClient) recordJson(ginCtx *gin.Context, traceId string, requestTime 
 	c.record("json", data)
 }
 
-func (c *GinClient) recordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
+func (c *GinSLog) recordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 	data := ginSLog{
 		TraceID:            traceId,                                                      //【系统】跟踪编号
 		RequestTime:        requestTime,                                                  //【请求】时间
