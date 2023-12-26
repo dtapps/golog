@@ -1,20 +1,20 @@
 package golog
 
 // ConfigSLogClientFun 日志配置
-func (c *GinSLog) ConfigSLogClientFun(sLogFun SLogFun) {
+func (gl *GinSLog) ConfigSLogClientFun(sLogFun SLogFun) {
 	sLog := sLogFun()
 	if sLog != nil {
-		c.slog.client = sLog
-		c.slog.status = true
+		gl.slog.client = sLog
+		gl.slog.status = true
 	}
 }
 
 // ConfigSLogResultClientFun 日志配置然后返回
-func (c *GinSLog) ConfigSLogResultClientFun(sLogFun SLogFun) *GinSLog {
+func (gl *GinSLog) ConfigSLogResultClientFun(sLogFun SLogFun) *GinSLog {
 	sLog := sLogFun()
 	if sLog != nil {
-		c.slog.client = sLog
-		c.slog.status = true
+		gl.slog.client = sLog
+		gl.slog.status = true
 	}
-	return c
+	return gl
 }

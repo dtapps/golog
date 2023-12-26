@@ -1,5 +1,5 @@
 <h1>
-<a href="https://www.dtapp.net/">Golang Log</a>
+<a href="https://www.dtapp.net/">Golang</a>
 </h1>
 
 [comment]: <> (go)
@@ -11,5 +11,5 @@
 #### 安装
 
 ```shell
-go get -v -u go.dtapp.net/golog@v1.0.104
+go get -v -u go.dtapp.net/golog@v1.0.105
 ```

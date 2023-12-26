@@ -31,28 +31,28 @@ func NewGinSLog(ctx context.Context, ipService *goip.Client) (*GinSLog, error) {
 	return c, nil
 }
 
-type bodyLogWriter struct {
+type bodySLogWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
 }
 
-func (w bodyLogWriter) Write(b []byte) (int, error) {
+func (w bodySLogWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
 
-func (w bodyLogWriter) WriteString(s string) (int, error) {
+func (w bodySLogWriter) WriteString(s string) (int, error) {
 	w.body.WriteString(s)
 	return w.ResponseWriter.WriteString(s)
 }
 
-func (c *GinSLog) jsonUnmarshal(data string) (result interface{}) {
+func (gl *GinSLog) jsonUnmarshal(data string) (result interface{}) {
 	_ = gojson.Unmarshal([]byte(data), &result)
 	return
 }
 
 // Middleware 中间件
-func (c *GinSLog) Middleware() gin.HandlerFunc {
+func (gl *GinSLog) Middleware() gin.HandlerFunc {
 	return func(ginCtx *gin.Context) {
 
 		// 开始时间
@@ -81,7 +81,7 @@ func (c *GinSLog) Middleware() gin.HandlerFunc {
 		// 重新赋值
 		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(rawData))
 
-		blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
+		blw := &bodySLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
 		ginCtx.Writer = blw
 
 		// 处理请求
@@ -99,14 +99,14 @@ func (c *GinSLog) Middleware() gin.HandlerFunc {
 			clientIp := gorequest.ClientIp(ginCtx.Request)
 			var info = goip.AnalyseResult{}
 
-			if c.ipService != nil {
-				info = c.ipService.Analyse(clientIp)
+			if gl.ipService != nil {
+				info = gl.ipService.Analyse(clientIp)
 			}
 
 			var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
 			// 记录
-			c.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, info)
+			gl.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, info)
 
 		}()
 	}

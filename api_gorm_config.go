@@ -6,24 +6,24 @@ import (
 	"runtime"
 )
 
-func (gl *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
+func (ag *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 
 	info := getSystem()
 
-	gl.config.systemHostname = info.SystemHostname
-	gl.config.systemOs = info.SystemOs
-	gl.config.systemVersion = info.SystemVersion
-	gl.config.systemKernel = info.SystemKernel
-	gl.config.systemKernelVersion = info.SystemKernelVersion
-	gl.config.systemBootTime = info.SystemBootTime
-	gl.config.cpuCores = info.CpuCores
-	gl.config.cpuModelName = info.CpuModelName
-	gl.config.cpuMhz = info.CpuMhz
+	ag.config.systemHostname = info.SystemHostname
+	ag.config.systemOs = info.SystemOs
+	ag.config.systemVersion = info.SystemVersion
+	ag.config.systemKernel = info.SystemKernel
+	ag.config.systemKernelVersion = info.SystemKernelVersion
+	ag.config.systemBootTime = info.SystemBootTime
+	ag.config.cpuCores = info.CpuCores
+	ag.config.cpuModelName = info.CpuModelName
+	ag.config.cpuMhz = info.CpuMhz
 
-	gl.config.systemInsideIp = gorequest.GetInsideIp(ctx)
-	gl.config.systemOutsideIp = systemOutsideIp
+	ag.config.systemInsideIp = gorequest.GetInsideIp(ctx)
+	ag.config.systemOutsideIp = systemOutsideIp
 
-	gl.config.goVersion = runtime.Version()
-	gl.config.sdkVersion = Version
+	ag.config.goVersion = runtime.Version()
+	ag.config.sdkVersion = Version
 
 }

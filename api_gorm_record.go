@@ -38,30 +38,30 @@ type apiPostgresqlLog struct {
 }
 
 // 创建模型
-func (gl *ApiGorm) gormAutoMigrate(ctx context.Context) {
-	err := gl.gormClient.GetDb().Table(gl.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
+	err := ag.gormClient.GetDb().Table(ag.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
 	if err != nil {
 		log.Printf("创建模型：%s", err)
 	}
 }
 
 // 记录日志
-func (gl *ApiGorm) gormRecord(ctx context.Context, data apiPostgresqlLog) {
+func (ag *ApiGorm) gormRecord(ctx context.Context, data apiPostgresqlLog) {
 
 	if utf8.ValidString(data.ResponseBody) == false {
 		data.ResponseBody = ""
 	}
 
-	data.SystemHostName = gl.config.systemHostname   //【系统】主机名
-	data.SystemInsideIp = gl.config.systemInsideIp   //【系统】内网ip
-	data.GoVersion = gl.config.goVersion             //【程序】Go版本
-	data.SdkVersion = gl.config.systemVersion        //【程序】Sdk版本
+	data.SystemHostName = ag.config.systemHostname   //【系统】主机名
+	data.SystemInsideIp = ag.config.systemInsideIp   //【系统】内网ip
+	data.GoVersion = ag.config.goVersion             //【程序】Go版本
+	data.SdkVersion = ag.config.systemVersion        //【程序】Sdk版本
 	data.TraceID = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
-	data.RequestIp = gl.config.systemOutsideIp       //【请求】请求Ip
-	data.SystemOs = gl.config.systemOs               //【系统】系统类型
-	data.SystemArch = gl.config.systemKernel         //【系统】系统架构
+	data.RequestIp = ag.config.systemOutsideIp       //【请求】请求Ip
+	data.SystemOs = ag.config.systemOs               //【系统】系统类型
+	data.SystemArch = ag.config.systemKernel         //【系统】系统架构
 
-	err := gl.gormClient.GetDb().Table(gl.gormConfig.tableName).Create(&data).Error
+	err := ag.gormClient.GetDb().Table(ag.gormConfig.tableName).Create(&data).Error
 	if err != nil {
 		log.Printf("记录接口日志错误：%s", err)
 		log.Printf("记录接口日志数据：%+v", data)
@@ -69,13 +69,13 @@ func (gl *ApiGorm) gormRecord(ctx context.Context, data apiPostgresqlLog) {
 }
 
 // GormDelete 删除
-func (gl *ApiGorm) GormDelete(ctx context.Context, hour int64) error {
-	return gl.GormCustomTableDelete(ctx, gl.gormConfig.tableName, hour)
+func (ag *ApiGorm) GormDelete(ctx context.Context, hour int64) error {
+	return ag.GormCustomTableDelete(ctx, ag.gormConfig.tableName, hour)
 }
 
 // GormCustomTableDelete 删除数据 - 自定义表名
-func (gl *ApiGorm) GormCustomTableDelete(ctx context.Context, tableName string, hour int64) error {
-	err := gl.gormClient.GetDb().Table(tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&apiPostgresqlLog{}).Error
+func (ag *ApiGorm) GormCustomTableDelete(ctx context.Context, tableName string, hour int64) error {
+	err := ag.gormClient.GetDb().Table(tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&apiPostgresqlLog{}).Error
 	if err != nil {
 		log.Printf("删除失败：%s", err)
 	}
@@ -83,7 +83,7 @@ func (gl *ApiGorm) GormCustomTableDelete(ctx context.Context, tableName string, 
 }
 
 // 中间件
-func (gl *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Response) {
 	data := apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                            //【请求】时间
 		RequestUri:            request.RequestUri,                             //【请求】链接
@@ -103,11 +103,11 @@ func (gl *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Respons
 		}
 	}
 
-	gl.gormRecord(ctx, data)
+	ag.gormRecord(ctx, data)
 }
 
 // 中间件
-func (gl *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Response) {
 	data := apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                            //【请求】时间
 		RequestUri:            request.RequestUri,                             //【请求】链接
@@ -127,11 +127,11 @@ func (gl *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Resp
 		}
 	}
 
-	gl.gormRecord(ctx, data)
+	ag.gormRecord(ctx, data)
 }
 
 // 中间件
-func (gl *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 	data := apiPostgresqlLog{
 		RequestTime:           request.RequestTime,                            //【请求】时间
 		RequestUri:            request.RequestUri,                             //【请求】链接
@@ -151,5 +151,5 @@ func (gl *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request
 		}
 	}
 
-	gl.gormRecord(ctx, data)
+	ag.gormRecord(ctx, data)
 }

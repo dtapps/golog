@@ -2,7 +2,6 @@ package golog
 
 import (
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/dorm"
 	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
@@ -40,8 +39,8 @@ type ginSLog struct {
 }
 
 // record 记录日志
-func (c *GinSLog) record(msg string, data ginSLog) {
-	c.slog.client.WithTraceIdStr(data.TraceID).Info(msg,
+func (gl *GinSLog) record(msg string, data ginSLog) {
+	gl.slog.client.WithTraceIdStr(data.TraceID).Info(msg,
 		"request_time", data.RequestTime,
 		"request_uri", data.RequestUri,
 		"request_url", data.RequestUrl,
@@ -69,7 +68,7 @@ func (c *GinSLog) record(msg string, data ginSLog) {
 	)
 }
 
-func (c *GinSLog) recordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
+func (gl *GinSLog) recordJson(ginCtx *gin.Context, traceId string, requestTime time.Time, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
 	data := ginSLog{
 		TraceID:            traceId,                                                      //【系统】跟踪编号
 		RequestTime:        requestTime,                                                  //【请求】时间
@@ -99,41 +98,5 @@ func (c *GinSLog) recordJson(ginCtx *gin.Context, traceId string, requestTime ti
 	} else {
 		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
 	}
-	c.record("json", data)
-}
-
-func (c *GinSLog) recordXml(ginCtx *gin.Context, traceId string, requestTime time.Time, requestBody []byte, paramsBody gorequest.Params, responseCode int, responseBody string, startTime, endTime int64, ipInfo goip.AnalyseResult) {
-	data := ginSLog{
-		TraceID:            traceId,                                                      //【系统】跟踪编号
-		RequestTime:        requestTime,                                                  //【请求】时间
-		RequestUrl:         ginCtx.Request.RequestURI,                                    //【请求】请求链接
-		RequestApi:         gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
-		RequestMethod:      ginCtx.Request.Method,                                        //【请求】请求方式
-		RequestProto:       ginCtx.Request.Proto,                                         //【请求】请求协议
-		RequestUa:          ginCtx.Request.UserAgent(),                                   //【请求】请求UA
-		RequestReferer:     ginCtx.Request.Referer(),                                     //【请求】请求referer
-		RequestUrlQuery:    ginCtx.Request.URL.Query(),                                   //【请求】请求URL参数
-		RequestIP:          ipInfo.Ip,                                                    //【请求】请求客户端Ip
-		RequestIpCountry:   ipInfo.Country,                                               //【请求】请求客户端城市
-		RequestIpProvince:  ipInfo.Province,                                              //【请求】请求客户端省份
-		RequestIpCity:      ipInfo.City,                                                  //【请求】请求客户端城市
-		RequestIpIsp:       ipInfo.Isp,                                                   //【请求】请求客户端运营商
-		RequestIpLatitude:  ipInfo.LocationLatitude,                                      //【请求】请求客户端纬度
-		RequestIpLongitude: ipInfo.LocationLongitude,                                     //【请求】请求客户端经度
-		RequestHeader:      ginCtx.Request.Header,                                        //【请求】请求头
-		RequestAllContent:  paramsBody,                                                   //【请求】请求全部内容
-		ResponseTime:       gotime.Current().Time,                                        //【返回】时间
-		ResponseCode:       responseCode,                                                 //【返回】状态码
-		ResponseData:       responseBody,                                                 //【返回】数据
-		CostTime:           endTime - startTime,                                          //【系统】花费时间
-	}
-	if ginCtx.Request.TLS == nil {
-		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
-	} else {
-		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
-	}
-	if len(requestBody) > 0 {
-		data.RequestBody = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(requestBody)) //【请求】请求内容
-	}
-	c.record("xml", data)
+	gl.record("json", data)
 }

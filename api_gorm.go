@@ -68,22 +68,22 @@ func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.Go
 }
 
 // Middleware 中间件
-func (gl *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
-	if gl.gormConfig.stats {
-		gl.gormMiddleware(ctx, request)
+func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
+	if ag.gormConfig.stats {
+		ag.gormMiddleware(ctx, request)
 	}
 }
 
 // MiddlewareXml 中间件
-func (gl *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response) {
-	if gl.gormConfig.stats {
-		gl.gormMiddlewareXml(ctx, request)
+func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response) {
+	if ag.gormConfig.stats {
+		ag.gormMiddlewareXml(ctx, request)
 	}
 }
 
 // MiddlewareCustom 中间件
-func (gl *ApiGorm) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
-	if gl.gormConfig.stats {
-		gl.gormMiddlewareCustom(ctx, api, request)
+func (ag *ApiGorm) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
+	if ag.gormConfig.stats {
+		ag.gormMiddlewareCustom(ctx, api, request)
 	}
 }

@@ -26,7 +26,7 @@ type apiSLog struct {
 }
 
 // Middleware 中间件
-func (sl *ApiSLog) Middleware(ctx context.Context, request gorequest.Response) {
+func (al *ApiSLog) Middleware(ctx context.Context, request gorequest.Response) {
 	data := apiSLog{
 		TraceID:            gotrace_id.GetTraceIdContext(ctx),
 		RequestTime:        request.RequestTime,
@@ -41,8 +41,8 @@ func (sl *ApiSLog) Middleware(ctx context.Context, request gorequest.Response) {
 		ResponseBody:       dorm.JsonDecodeNoError(request.ResponseBody),
 		ResponseTime:       request.ResponseTime,
 	}
-	if sl.slog.status {
-		sl.slog.client.WithTraceId(ctx).Info("Middleware",
+	if al.slog.status {
+		al.slog.client.WithTraceId(ctx).Info("Middleware",
 			"request_time", data.RequestTime,
 			"request_uri", data.RequestUri,
 			"request_url", data.RequestUrl,
@@ -59,7 +59,7 @@ func (sl *ApiSLog) Middleware(ctx context.Context, request gorequest.Response) {
 }
 
 // MiddlewareXml 中间件
-func (sl *ApiSLog) MiddlewareXml(ctx context.Context, request gorequest.Response) {
+func (al *ApiSLog) MiddlewareXml(ctx context.Context, request gorequest.Response) {
 	data := apiSLog{
 		TraceID:            gotrace_id.GetTraceIdContext(ctx),
 		RequestTime:        request.RequestTime,
@@ -74,8 +74,8 @@ func (sl *ApiSLog) MiddlewareXml(ctx context.Context, request gorequest.Response
 		ResponseBody:       dorm.XmlDecodeNoError(request.ResponseBody),
 		ResponseTime:       request.ResponseTime,
 	}
-	if sl.slog.status {
-		sl.slog.client.WithTraceId(ctx).Info("MiddlewareXml",
+	if al.slog.status {
+		al.slog.client.WithTraceId(ctx).Info("MiddlewareXml",
 			"request_time", data.RequestTime,
 			"request_uri", data.RequestUri,
 			"request_url", data.RequestUrl,
@@ -92,7 +92,7 @@ func (sl *ApiSLog) MiddlewareXml(ctx context.Context, request gorequest.Response
 }
 
 // MiddlewareCustom 中间件
-func (sl *ApiSLog) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
+func (al *ApiSLog) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 	data := apiSLog{
 		TraceID:            gotrace_id.GetTraceIdContext(ctx),
 		RequestTime:        request.RequestTime,
@@ -107,8 +107,8 @@ func (sl *ApiSLog) MiddlewareCustom(ctx context.Context, api string, request gor
 		ResponseBody:       dorm.JsonDecodeNoError(request.ResponseBody),
 		ResponseTime:       request.ResponseTime,
 	}
-	if sl.slog.status {
-		sl.slog.client.WithTraceId(ctx).Info("MiddlewareCustom",
+	if al.slog.status {
+		al.slog.client.WithTraceId(ctx).Info("MiddlewareCustom",
 			"request_time", data.RequestTime,
 			"request_uri", data.RequestUri,
 			"request_url", data.RequestUrl,
