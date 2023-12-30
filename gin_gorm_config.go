@@ -2,7 +2,7 @@ package golog
 
 import (
 	"context"
-	"go.dtapp.net/goip"
+	"go.dtapp.net/gorequest"
 	"runtime"
 )
 
@@ -20,7 +20,7 @@ func (gg *GinGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	gg.config.cpuModelName = info.CpuModelName
 	gg.config.cpuMhz = info.CpuMhz
 
-	gg.config.systemInsideIp = goip.GetInsideIp(ctx)
+	gg.config.systemInsideIp = gorequest.GetInsideIp(ctx)
 	gg.config.systemOutsideIp = systemOutsideIp
 
 	gg.config.sdkVersion = Version

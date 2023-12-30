@@ -6,7 +6,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
-	"go.dtapp.net/goip"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
@@ -17,7 +16,6 @@ import (
 // GinGorm 框架日志
 type GinGorm struct {
 	gormClient *dorm.GormClient // 数据库驱动
-	ipService  *goip.Client     // IP服务
 	config     struct {
 		systemHostname      string  // 主机名
 		systemOs            string  // 系统类型
@@ -43,7 +41,7 @@ type GinGorm struct {
 type GinGormFun func() *GinGorm
 
 // NewGinGorm 创建框架实例化
-func NewGinGorm(ctx context.Context, systemOutsideIp string, ipService *goip.Client, gormClient *dorm.GormClient, gormTableName string) (*GinGorm, error) {
+func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.GormClient, gormTableName string) (*GinGorm, error) {
 
 	gg := &GinGorm{}
 
@@ -52,8 +50,6 @@ func NewGinGorm(ctx context.Context, systemOutsideIp string, ipService *goip.Cli
 		return nil, errors.New("没有设置外网IP")
 	}
 	gg.setConfig(ctx, systemOutsideIp)
-
-	gg.ipService = ipService
 
 	if gormClient == nil || gormClient.GetDb() == nil {
 		gg.gormConfig.stats = false
@@ -141,17 +137,12 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 
 		go func() {
 
-			clientIp := gorequest.ClientIp(ginCtx.Request)
-			var info = goip.AnalyseResult{}
-
-			if gg.ipService != nil {
-				info = gg.ipService.Analyse(clientIp)
-			}
+			requestIp := gorequest.ClientIp(ginCtx.Request)
 
 			var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
 			// 记录
-			gg.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, info)
+			gg.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, requestIp)
 
 		}()
 	}

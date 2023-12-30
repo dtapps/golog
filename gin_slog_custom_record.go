@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/dorm"
-	"go.dtapp.net/goip"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
@@ -12,31 +11,24 @@ import (
 
 // 结构体
 type ginSLogCustom struct {
-	TraceID            string  `json:"trace_id,omitempty"`             //【系统】跟踪编号
-	RequestUri         string  `json:"request_uri,omitempty"`          //【请求】请求链接 域名+路径+参数
-	RequestUrl         string  `json:"request_url,omitempty"`          //【请求】请求链接 域名+路径
-	RequestApi         string  `json:"request_api,omitempty"`          //【请求】请求接口 路径
-	RequestMethod      string  `json:"request_method,omitempty"`       //【请求】请求方式
-	RequestProto       string  `json:"request_proto,omitempty"`        //【请求】请求协议
-	RequestUa          string  `json:"request_ua,omitempty"`           //【请求】请求UA
-	RequestReferer     string  `json:"request_referer,omitempty"`      //【请求】请求referer
-	RequestUrlQuery    string  `json:"request_url_query,omitempty"`    //【请求】请求URL参数
-	RequestHeader      string  `json:"request_header,omitempty"`       //【请求】请求头
-	RequestIP          string  `json:"request_ip,omitempty"`           //【请求】请求客户端Ip
-	RequestIpCountry   string  `json:"request_ip_country,omitempty"`   //【请求】请求客户端城市
-	RequestIpProvince  string  `json:"request_ip_province,omitempty"`  //【请求】请求客户端省份
-	RequestIpCity      string  `json:"request_ip_city,omitempty"`      //【请求】请求客户端城市
-	RequestIpIsp       string  `json:"request_ip_isp,omitempty"`       //【请求】请求客户端运营商
-	RequestIpLongitude float64 `json:"request_ip_longitude,omitempty"` //【请求】请求客户端经度
-	RequestIpLatitude  float64 `json:"request_ip_latitude,omitempty"`  //【请求】请求客户端纬度
-	CustomID           string  `json:"custom_id,omitempty"`            //【日志】自定义编号
-	CustomType         string  `json:"custom_type,omitempty"`          //【日志】自定义类型
-	CustomContent      string  `json:"custom_content,omitempty"`       //【日志】自定义内容
+	TraceID         string `json:"trace_id,omitempty"`          //【系统】跟踪编号
+	RequestUri      string `json:"request_uri,omitempty"`       //【请求】请求链接 域名+路径+参数
+	RequestUrl      string `json:"request_url,omitempty"`       //【请求】请求链接 域名+路径
+	RequestApi      string `json:"request_api,omitempty"`       //【请求】请求接口 路径
+	RequestMethod   string `json:"request_method,omitempty"`    //【请求】请求方式
+	RequestProto    string `json:"request_proto,omitempty"`     //【请求】请求协议
+	RequestUa       string `json:"request_ua,omitempty"`        //【请求】请求UA
+	RequestReferer  string `json:"request_referer,omitempty"`   //【请求】请求referer
+	RequestUrlQuery string `json:"request_url_query,omitempty"` //【请求】请求URL参数
+	RequestHeader   string `json:"request_header,omitempty"`    //【请求】请求头
+	RequestIP       string `json:"request_ip,omitempty"`        //【请求】请求客户端IP
+	CustomID        string `json:"custom_id,omitempty"`         //【日志】自定义编号
+	CustomType      string `json:"custom_type,omitempty"`       //【日志】自定义类型
+	CustomContent   string `json:"custom_content,omitempty"`    //【日志】自定义内容
 }
 
 type GinCustomClientGinRecordOperation struct {
 	slogClient *SLog          // 日志服务
-	ipService  *goip.Client   // IP服务
 	data       *ginSLogCustom // 数据
 }
 
@@ -44,7 +36,6 @@ type GinCustomClientGinRecordOperation struct {
 func (c *GinSLogCustom) GinRecord(ginCtx *gin.Context) *GinCustomClientGinRecordOperation {
 	operation := &GinCustomClientGinRecordOperation{
 		slogClient: c.slog.client,
-		ipService:  c.ipService,
 	}
 	operation.data = new(ginSLogCustom)
 	operation.data.TraceID = gotrace_id.GetGinTraceId(ginCtx) // 【系统】跟踪编号
@@ -84,12 +75,6 @@ func (o *GinCustomClientGinRecordOperation) CreateData() {
 		"request_url_query", o.data.RequestUrlQuery,
 		"request_header", o.data.RequestHeader,
 		"request_ip", o.data.RequestIP,
-		"request_ip_country", o.data.RequestIpCountry,
-		"request_ip_province", o.data.RequestIpProvince,
-		"request_ip_city", o.data.RequestIpCity,
-		"request_ip_isp", o.data.RequestIpIsp,
-		"request_ip_longitude", o.data.RequestIpLongitude,
-		"request_ip_latitude", o.data.RequestIpLatitude,
 		"custom_id", o.data.CustomID,
 		"custom_type", o.data.CustomType,
 		"custom_content", o.data.CustomContent,
@@ -108,12 +93,6 @@ func (o *GinCustomClientGinRecordOperation) CreateDataNoError() {
 		"request_url_query", o.data.RequestUrlQuery,
 		"request_header", o.data.RequestHeader,
 		"request_ip", o.data.RequestIP,
-		"request_ip_country", o.data.RequestIpCountry,
-		"request_ip_province", o.data.RequestIpProvince,
-		"request_ip_city", o.data.RequestIpCity,
-		"request_ip_isp", o.data.RequestIpIsp,
-		"request_ip_longitude", o.data.RequestIpLongitude,
-		"request_ip_latitude", o.data.RequestIpLatitude,
 		"custom_id", o.data.CustomID,
 		"custom_type", o.data.CustomType,
 		"custom_content", o.data.CustomContent,

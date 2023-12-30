@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/goip"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
@@ -14,8 +13,7 @@ import (
 
 // GinSLog 框架日志
 type GinSLog struct {
-	ipService *goip.Client // IP服务
-	slog      struct {
+	slog struct {
 		status bool  // 状态
 		client *SLog // 日志服务
 	}
@@ -25,9 +23,8 @@ type GinSLog struct {
 type GinSLogFun func() *GinSLog
 
 // NewGinSLog 创建框架实例化
-func NewGinSLog(ctx context.Context, ipService *goip.Client) (*GinSLog, error) {
+func NewGinSLog(ctx context.Context) (*GinSLog, error) {
 	c := &GinSLog{}
-	c.ipService = ipService
 	return c, nil
 }
 
@@ -96,17 +93,12 @@ func (gl *GinSLog) Middleware() gin.HandlerFunc {
 
 		go func() {
 
-			clientIp := gorequest.ClientIp(ginCtx.Request)
-			var info = goip.AnalyseResult{}
-
-			if gl.ipService != nil {
-				info = gl.ipService.Analyse(clientIp)
-			}
+			requestIp := gorequest.ClientIp(ginCtx.Request)
 
 			var traceId = gotrace_id.GetGinTraceId(ginCtx)
 
 			// 记录
-			gl.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, info)
+			gl.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, requestIp)
 
 		}()
 	}

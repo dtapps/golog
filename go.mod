@@ -7,9 +7,8 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/dorm v1.0.55
-	go.dtapp.net/goip v1.0.43
 	go.dtapp.net/gojson v1.0.2
-	go.dtapp.net/gorequest v1.0.41
+	go.dtapp.net/gorequest v1.0.43
 	go.dtapp.net/gotime v1.0.6
 	go.dtapp.net/gotrace_id v1.0.8
 	go.dtapp.net/gourl v1.0.0
@@ -45,8 +44,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/oschwald/geoip2-golang v1.9.0 // indirect
-	github.com/oschwald/maxminddb-golang v1.12.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/redis/go-redis/v9 v9.3.1 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
