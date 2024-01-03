@@ -8,7 +8,6 @@ import (
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
-	"go.dtapp.net/gotrace_id"
 	"gorm.io/gorm"
 	"io/ioutil"
 )
@@ -101,11 +100,11 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		requestTime := gotime.Current().Time
 
 		// 获取全部内容
-		paramsBody := gorequest.NewParams()
+		requestBody := gorequest.NewParams()
 		queryParams := ginCtx.Request.URL.Query() // 请求URL参数
 		for key, values := range queryParams {
 			for _, value := range values {
-				paramsBody.Set(key, value)
+				requestBody.Set(key, value)
 			}
 		}
 		var dataMap map[string]interface{}
@@ -116,7 +115,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 			dataMap = gojson.ParseQueryString(string(rawData))
 		}
 		for key, value := range dataMap {
-			paramsBody.Set(key, value)
+			requestBody.Set(key, value)
 		}
 
 		// 重新赋值
@@ -134,15 +133,12 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 
 		// 结束时间
 		endTime := gotime.Current().TimestampWithMillisecond()
+		responseTime := gotime.Current().Time
 
 		go func() {
 
-			requestIp := gorequest.ClientIp(ginCtx.Request)
-
-			var traceId = gotrace_id.GetGinTraceId(ginCtx)
-
 			// 记录
-			gg.recordJson(ginCtx, traceId, requestTime, paramsBody, responseCode, responseBody, startTime, endTime, requestIp)
+			gg.recordJson(ginCtx, requestTime, requestBody, responseTime, responseCode, responseBody, endTime-startTime, gorequest.ClientIp(ginCtx.Request))
 
 		}()
 	}
