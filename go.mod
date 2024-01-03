@@ -7,8 +7,8 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/dorm v1.0.55
-	go.dtapp.net/gojson v1.0.2
-	go.dtapp.net/gorequest v1.0.43
+	go.dtapp.net/gojson v1.0.3
+	go.dtapp.net/gorequest v1.0.46
 	go.dtapp.net/gotime v1.0.6
 	go.dtapp.net/gotrace_id v1.0.8
 	go.dtapp.net/gourl v1.0.0

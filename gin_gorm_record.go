@@ -13,7 +13,7 @@ import (
 
 // 模型
 type ginPostgresqlLog struct {
-	LogID           uint      `gorm:"primaryKey;comment:【记录】编号" json:"log_id,omitempty"`       //【记录】编号
+	LogID           int64     `gorm:"primaryKey;comment:【记录】编号" json:"log_id,omitempty"`       //【记录】编号
 	TraceID         string    `gorm:"index;comment:【系统】跟踪编号" json:"trace_id,omitempty"`        //【系统】跟踪编号
 	RequestTime     time.Time `gorm:"index;comment:【请求】时间" json:"request_time,omitempty"`      //【请求】时间
 	RequestUri      string    `gorm:"comment:【请求】请求链接 域名+路径+参数" json:"request_uri,omitempty"`  //【请求】请求链接 域名+路径+参数
