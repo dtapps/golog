@@ -20,5 +20,5 @@ func (gg *GinGorm) GormDeleteDataCustom(ctx context.Context, tableName string, d
 	if tableName == "" {
 		return errors.New("没有设置表名")
 	}
-	return gg.gormClient.Table(tableName).Where("request_time < ?", gotime.Current().BeforeDay(day).Format()).Delete(&ginPostgresqlLog{}).Error
+	return gg.gormClient.Table(tableName).Where("request_time < ?", gotime.Current().BeforeDay(day).Format()).Delete(&ginGormLog{}).Error
 }
