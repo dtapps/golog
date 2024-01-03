@@ -2,9 +2,8 @@ package golog
 
 import (
 	"context"
-	"go.dtapp.net/dorm"
+	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
-	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"log"
@@ -39,7 +38,11 @@ type apiPostgresqlLog struct {
 
 // 创建模型
 func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
-	err := ag.gormClient.GetDb().Table(ag.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
+	if ag.gormConfig.stats == false {
+		return
+	}
+
+	err := ag.gormClient.Table(ag.gormConfig.tableName).AutoMigrate(&apiPostgresqlLog{})
 	if err != nil {
 		log.Printf("创建模型：%s", err)
 	}
@@ -47,6 +50,9 @@ func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
 
 // 记录日志
 func (ag *ApiGorm) gormRecord(ctx context.Context, data apiPostgresqlLog) {
+	if ag.gormConfig.stats == false {
+		return
+	}
 
 	if utf8.ValidString(data.ResponseBody) == false {
 		data.ResponseBody = ""
@@ -61,45 +67,31 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiPostgresqlLog) {
 	data.SystemOs = ag.config.systemOs               //【系统】系统类型
 	data.SystemArch = ag.config.systemKernel         //【系统】系统架构
 
-	err := ag.gormClient.GetDb().Table(ag.gormConfig.tableName).Create(&data).Error
+	err := ag.gormClient.Table(ag.gormConfig.tableName).Create(&data).Error
 	if err != nil {
 		log.Printf("记录接口日志错误：%s", err)
 		log.Printf("记录接口日志数据：%+v", data)
 	}
 }
 
-// GormDelete 删除
-func (ag *ApiGorm) GormDelete(ctx context.Context, hour int64) error {
-	return ag.GormCustomTableDelete(ctx, ag.gormConfig.tableName, hour)
-}
-
-// GormCustomTableDelete 删除数据 - 自定义表名
-func (ag *ApiGorm) GormCustomTableDelete(ctx context.Context, tableName string, hour int64) error {
-	err := ag.gormClient.GetDb().Table(tableName).Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).Delete(&apiPostgresqlLog{}).Error
-	if err != nil {
-		log.Printf("删除失败：%s", err)
-	}
-	return err
-}
-
 // 中间件
 func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Response) {
 	data := apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                            //【请求】时间
-		RequestUri:            request.RequestUri,                             //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,         //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path,        //【请求】接口
-		RequestMethod:         request.RequestMethod,                          //【请求】方式
-		RequestParams:         dorm.JsonEncodeNoError(request.RequestParams),  //【请求】参数
-		RequestHeader:         dorm.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
-		ResponseHeader:        dorm.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                     //【返回】状态码
-		ResponseContentLength: request.ResponseContentLength,                  //【返回】大小
-		ResponseTime:          request.ResponseTime,                           //【返回】时间
+		RequestTime:           request.RequestTime,                              //【请求】时间
+		RequestUri:            request.RequestUri,                               //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,           //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,          //【请求】接口
+		RequestMethod:         request.RequestMethod,                            //【请求】方式
+		RequestParams:         gojson.JsonEncodeNoError(request.RequestParams),  //【请求】参数
+		RequestHeader:         gojson.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
+		ResponseHeader:        gojson.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                       //【返回】状态码
+		ResponseContentLength: request.ResponseContentLength,                    //【返回】大小
+		ResponseTime:          request.ResponseTime,                             //【返回】时间
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
-			data.ResponseBody = dorm.JsonEncodeNoError(dorm.JsonDecodeNoError(request.ResponseBody)) //【返回】数据
+			data.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(request.ResponseBody))) //【返回】数据
 		}
 	}
 
@@ -109,21 +101,21 @@ func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Respons
 // 中间件
 func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Response) {
 	data := apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                            //【请求】时间
-		RequestUri:            request.RequestUri,                             //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,         //【请求】链接
-		RequestApi:            gourl.UriParse(request.RequestUri).Path,        //【请求】接口
-		RequestMethod:         request.RequestMethod,                          //【请求】方式
-		RequestParams:         dorm.JsonEncodeNoError(request.RequestParams),  //【请求】参数
-		RequestHeader:         dorm.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
-		ResponseHeader:        dorm.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                     //【返回】状态码
-		ResponseContentLength: request.ResponseContentLength,                  //【返回】大小
-		ResponseTime:          request.ResponseTime,                           //【返回】时间
+		RequestTime:           request.RequestTime,                              //【请求】时间
+		RequestUri:            request.RequestUri,                               //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,           //【请求】链接
+		RequestApi:            gourl.UriParse(request.RequestUri).Path,          //【请求】接口
+		RequestMethod:         request.RequestMethod,                            //【请求】方式
+		RequestParams:         gojson.JsonEncodeNoError(request.RequestParams),  //【请求】参数
+		RequestHeader:         gojson.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
+		ResponseHeader:        gojson.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                       //【返回】状态码
+		ResponseContentLength: request.ResponseContentLength,                    //【返回】大小
+		ResponseTime:          request.ResponseTime,                             //【返回】时间
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
-			data.ResponseBody = dorm.XmlEncodeNoError(dorm.XmlDecodeNoError(request.ResponseBody)) //【返回】内容
+			data.ResponseBody = gojson.XmlEncodeNoError(gojson.XmlDecodeNoError(request.ResponseBody)) //【返回】内容
 		}
 	}
 
@@ -133,21 +125,21 @@ func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Resp
 // 中间件
 func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 	data := apiPostgresqlLog{
-		RequestTime:           request.RequestTime,                            //【请求】时间
-		RequestUri:            request.RequestUri,                             //【请求】链接
-		RequestUrl:            gourl.UriParse(request.RequestUri).Url,         //【请求】链接
-		RequestApi:            api,                                            //【请求】接口
-		RequestMethod:         request.RequestMethod,                          //【请求】方式
-		RequestParams:         dorm.JsonEncodeNoError(request.RequestParams),  //【请求】参数
-		RequestHeader:         dorm.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
-		ResponseHeader:        dorm.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
-		ResponseStatusCode:    request.ResponseStatusCode,                     //【返回】状态码
-		ResponseContentLength: request.ResponseContentLength,                  //【返回】大小
-		ResponseTime:          request.ResponseTime,                           //【返回】时间
+		RequestTime:           request.RequestTime,                              //【请求】时间
+		RequestUri:            request.RequestUri,                               //【请求】链接
+		RequestUrl:            gourl.UriParse(request.RequestUri).Url,           //【请求】链接
+		RequestApi:            api,                                              //【请求】接口
+		RequestMethod:         request.RequestMethod,                            //【请求】方式
+		RequestParams:         gojson.JsonEncodeNoError(request.RequestParams),  //【请求】参数
+		RequestHeader:         gojson.JsonEncodeNoError(request.RequestHeader),  //【请求】头部
+		ResponseHeader:        gojson.JsonEncodeNoError(request.ResponseHeader), //【返回】头部
+		ResponseStatusCode:    request.ResponseStatusCode,                       //【返回】状态码
+		ResponseContentLength: request.ResponseContentLength,                    //【返回】大小
+		ResponseTime:          request.ResponseTime,                             //【返回】时间
 	}
 	if !request.HeaderIsImg() {
 		if len(request.ResponseBody) > 0 {
-			data.ResponseBody = dorm.JsonEncodeNoError(dorm.JsonDecodeNoError(request.ResponseBody)) //【返回】数据
+			data.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(request.ResponseBody))) //【返回】数据
 		}
 	}
 

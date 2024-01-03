@@ -6,18 +6,19 @@ import (
 	"go.dtapp.net/gotime"
 )
 
-// DeleteData 删除N天前数据
-func (ag *ApiGorm) DeleteData(ctx context.Context, day int) error {
-	if ag.gormConfig.tableName == "" {
-		return errors.New("没有设置表名")
-	}
-	return ag.gormClient.GetDb().Table(ag.gormConfig.tableName).Where("request_time >= ?", gotime.Current().BeforeDay(day).Time).Delete(&apiPostgresqlLog{}).Error
+// GormDeleteData 删除N天前数据
+func (ag *ApiGorm) GormDeleteData(ctx context.Context, day int) error {
+	return ag.GormDeleteDataCustom(ctx, ag.gormConfig.tableName, day)
 }
 
-// DeleteDataCustom 删除N天前数据
-func (ag *ApiGorm) DeleteDataCustom(ctx context.Context, tableName string, day int) error {
+// GormDeleteDataCustom 删除N天前数据
+func (ag *ApiGorm) GormDeleteDataCustom(ctx context.Context, tableName string, day int) error {
+	if ag.gormConfig.stats == false {
+		return nil
+	}
+
 	if tableName == "" {
 		return errors.New("没有设置表名")
 	}
-	return ag.gormClient.GetDb().Table(tableName).Where("request_time >= ?", gotime.Current().BeforeDay(day).Time).Delete(&apiPostgresqlLog{}).Error
+	return ag.gormClient.Table(tableName).Where("request_time < ?", gotime.Current().BeforeDay(day).Format()).Delete(&apiPostgresqlLog{}).Error
 }

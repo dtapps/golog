@@ -2,7 +2,7 @@ package golog
 
 import (
 	"context"
-	"go.dtapp.net/dorm"
+	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
@@ -38,7 +38,7 @@ func (al *ApiSLog) Middleware(ctx context.Context, request gorequest.Response) {
 		RequestHeader:      request.RequestHeader,
 		ResponseHeader:     request.ResponseHeader,
 		ResponseStatusCode: request.ResponseStatusCode,
-		ResponseBody:       dorm.JsonDecodeNoError(request.ResponseBody),
+		ResponseBody:       gojson.JsonDecodeNoError(string(request.ResponseBody)),
 		ResponseTime:       request.ResponseTime,
 	}
 	if al.slog.status {
@@ -71,7 +71,7 @@ func (al *ApiSLog) MiddlewareXml(ctx context.Context, request gorequest.Response
 		RequestHeader:      request.RequestHeader,
 		ResponseHeader:     request.ResponseHeader,
 		ResponseStatusCode: request.ResponseStatusCode,
-		ResponseBody:       dorm.XmlDecodeNoError(request.ResponseBody),
+		ResponseBody:       gojson.XmlDecodeNoError(request.ResponseBody),
 		ResponseTime:       request.ResponseTime,
 	}
 	if al.slog.status {
@@ -104,7 +104,7 @@ func (al *ApiSLog) MiddlewareCustom(ctx context.Context, api string, request gor
 		RequestHeader:      request.RequestHeader,
 		ResponseHeader:     request.ResponseHeader,
 		ResponseStatusCode: request.ResponseStatusCode,
-		ResponseBody:       dorm.JsonDecodeNoError(request.ResponseBody),
+		ResponseBody:       gojson.JsonDecodeNoError(string(request.ResponseBody)),
 		ResponseTime:       request.ResponseTime,
 	}
 	if al.slog.status {

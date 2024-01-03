@@ -5,17 +5,17 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/dorm"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
+	"gorm.io/gorm"
 	"io/ioutil"
 )
 
 // GinGorm 框架日志
 type GinGorm struct {
-	gormClient *dorm.GormClient // 数据库驱动
+	gormClient *gorm.DB // 数据库驱动
 	config     struct {
 		systemHostname      string  // 主机名
 		systemOs            string  // 系统类型
@@ -41,7 +41,7 @@ type GinGorm struct {
 type GinGormFun func() *GinGorm
 
 // NewGinGorm 创建框架实例化
-func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.GormClient, gormTableName string) (*GinGorm, error) {
+func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*GinGorm, error) {
 
 	gg := &GinGorm{}
 
@@ -51,7 +51,7 @@ func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.Go
 	}
 	gg.setConfig(ctx, systemOutsideIp)
 
-	if gormClient == nil || gormClient.GetDb() == nil {
+	if gormClient == nil {
 		gg.gormConfig.stats = false
 	} else {
 

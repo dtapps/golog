@@ -3,7 +3,7 @@ package golog
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/dorm"
+	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
@@ -50,8 +50,8 @@ func (c *GinSLogCustom) GinRecord(ginCtx *gin.Context) *GinCustomClientGinRecord
 	operation.data.RequestProto = ginCtx.Request.Proto                                       //【请求】请求协议
 	operation.data.RequestUa = ginCtx.Request.UserAgent()                                    //【请求】请求UA
 	operation.data.RequestReferer = ginCtx.Request.Referer()                                 //【请求】请求referer
-	operation.data.RequestUrlQuery = dorm.JsonEncodeNoError(ginCtx.Request.URL.Query())      //【请求】请求URL参数
-	operation.data.RequestHeader = dorm.JsonEncodeNoError(ginCtx.Request.Header)             //【请求】请求头
+	operation.data.RequestUrlQuery = gojson.JsonEncodeNoError(ginCtx.Request.URL.Query())    //【请求】请求URL参数
+	operation.data.RequestHeader = gojson.JsonEncodeNoError(ginCtx.Request.Header)           //【请求】请求头
 	operation.data.RequestIP = gorequest.ClientIp(ginCtx.Request)                            //【请求】请求客户端Ip
 	return operation
 }

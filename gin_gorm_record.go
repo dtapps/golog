@@ -3,7 +3,7 @@ package golog
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/dorm"
+	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
@@ -42,7 +42,11 @@ type ginPostgresqlLog struct {
 
 // 创建模型
 func (gg *GinGorm) gormAutoMigrate(ctx context.Context) {
-	err := gg.gormClient.GetDb().Table(gg.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
+	if gg.gormConfig.stats == false {
+		return
+	}
+
+	err := gg.gormClient.Table(gg.gormConfig.tableName).AutoMigrate(&ginPostgresqlLog{})
 	if err != nil {
 		log.Printf("创建模型：%s\n", err)
 	}
@@ -50,6 +54,9 @@ func (gg *GinGorm) gormAutoMigrate(ctx context.Context) {
 
 // gormRecord 记录日志
 func (gg *GinGorm) gormRecord(data ginPostgresqlLog) {
+	if gg.gormConfig.stats == false {
+		return
+	}
 
 	data.SystemHostName = gg.config.systemHostname //【系统】主机名
 	data.SystemInsideIP = gg.config.systemInsideIp //【系统】内网ip
@@ -58,7 +65,7 @@ func (gg *GinGorm) gormRecord(data ginPostgresqlLog) {
 	data.SystemOs = gg.config.systemOs             //【系统】系统类型
 	data.SystemArch = gg.config.systemKernel       //【系统】系统架构
 
-	err := gg.gormClient.GetDb().Table(gg.gormConfig.tableName).Create(&data).Error
+	err := gg.gormClient.Table(gg.gormConfig.tableName).Create(&data).Error
 	if err != nil {
 		log.Printf("记录框架日志错误：%s\n", err)
 		log.Printf("记录框架日志数据：%+v\n", data)
@@ -76,10 +83,10 @@ func (gg *GinGorm) recordJson(ginCtx *gin.Context, traceId string, requestTime t
 		RequestProto:    ginCtx.Request.Proto,                                         //【请求】请求协议
 		RequestUa:       ginCtx.Request.UserAgent(),                                   //【请求】请求UA
 		RequestReferer:  ginCtx.Request.Referer(),                                     //【请求】请求referer
-		RequestBody:     dorm.JsonEncodeNoError(requestBody),                          //【请求】请求主体
-		RequestUrlQuery: dorm.JsonEncodeNoError(ginCtx.Request.URL.Query()),           //【请求】请求URL参数
+		RequestBody:     gojson.JsonEncodeNoError(requestBody),                        //【请求】请求主体
+		RequestUrlQuery: gojson.JsonEncodeNoError(ginCtx.Request.URL.Query()),         //【请求】请求URL参数
 		RequestIP:       requestIp,                                                    //【请求】请求客户端IP
-		RequestHeader:   dorm.JsonEncodeNoError(ginCtx.Request.Header),                //【请求】请求头
+		RequestHeader:   gojson.JsonEncodeNoError(ginCtx.Request.Header),              //【请求】请求头
 		ResponseTime:    gotime.Current().Time,                                        //【返回】时间
 		ResponseCode:    responseCode,                                                 //【返回】状态码
 		ResponseData:    responseBody,                                                 //【返回】数据

@@ -3,13 +3,13 @@ package golog
 import (
 	"context"
 	"errors"
-	"go.dtapp.net/dorm"
 	"go.dtapp.net/gorequest"
+	"gorm.io/gorm"
 )
 
 // ApiGorm 接口日志
 type ApiGorm struct {
-	gormClient *dorm.GormClient // 数据库驱动
+	gormClient *gorm.DB // 数据库驱动
 	config     struct {
 		systemHostname      string  // 主机名
 		systemOs            string  // 系统类型
@@ -35,7 +35,7 @@ type ApiGorm struct {
 type ApiGormFun func() *ApiGorm
 
 // NewApiGorm 创建接口实例化
-func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.GormClient, gormTableName string) (*ApiGorm, error) {
+func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*ApiGorm, error) {
 
 	gl := &ApiGorm{}
 
@@ -45,7 +45,7 @@ func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *dorm.Go
 	}
 	gl.setConfig(ctx, systemOutsideIp)
 
-	if gormClient == nil || gormClient.GetDb() == nil {
+	if gormClient == nil {
 		gl.gormConfig.stats = false
 	} else {
 
