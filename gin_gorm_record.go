@@ -29,11 +29,11 @@ type ginGormLog struct {
 	ResponseData   string    `gorm:"comment:【返回】数据" json:"response_data,omitempty"`           //【返回】数据
 	CostTime       int64     `gorm:"comment:【系统】花费时间" json:"cost_time,omitempty"`             //【系统】花费时间
 	SystemHostName string    `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"` //【系统】主机名
-	SystemInsideIP string    `gorm:"comment:【系统】内网ip" json:"system_inside_ip,omitempty"`      //【系统】内网ip
+	SystemInsideIP string    `gorm:"comment:【系统】内网IP" json:"system_inside_ip,omitempty"`      //【系统】内网IP
 	SystemOs       string    `gorm:"index;comment:【系统】系统类型" json:"system_os,omitempty"`       //【系统】系统类型
 	SystemArch     string    `gorm:"index;comment:【系统】系统架构" json:"system_arch,omitempty"`     //【系统】系统架构
-	GoVersion      string    `gorm:"comment:【程序】Go版本" json:"go_version,omitempty"`            //【程序】Go版本
-	SdkVersion     string    `gorm:"comment:【程序】Sdk版本" json:"sdk_version,omitempty"`          //【程序】Sdk版本
+	GoVersion      string    `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`      //【程序】Go版本
+	SdkVersion     string    `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`    //【程序】Sdk版本
 }
 
 // 创建模型
