@@ -1,7 +1,0 @@
-language: go
-go:
-  - tip
-before_install:
-  - go install go.dtapp.net/golog@latest
-script:
-  - $GOPATH/bin/golog -service=travis-ci
