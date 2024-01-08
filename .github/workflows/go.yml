@@ -38,16 +38,12 @@ jobs:
       - name: Run tests
         run: GOARCH=${{ matrix.arch }} go test ./...
 
-        # coverage
+        # https://coveralls.io/
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2.2.3
+
+        # https://app.codecov.io/
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        # coverage
-
-        # circleci
-      - name: Upload circleci reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        # circleci
