@@ -1,0 +1,39 @@
+name: Cross-Platform and Architecture Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            arch: amd64
+            go-version: '1.21.5'
+          - os: windows-latest
+            arch: amd64
+            go-version: '1.21.5'
+          - os: ubuntu-latest
+            arch: amd64
+            go-version: '1.21.5'
+          - os: ubuntu-latest
+            arch: arm64
+            go-version: '1.21.5'
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Set up QEMU
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-buildx-action@v1
+
+      - name: Run tests
+        run: GOARCH=${{ matrix.arch }} go test ./...
