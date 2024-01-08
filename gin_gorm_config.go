@@ -15,6 +15,7 @@ func (gg *GinGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	gg.config.systemVersion = info.SystemVersion
 	gg.config.systemKernel = info.SystemKernel
 	gg.config.systemKernelVersion = info.SystemKernelVersion
+	gg.config.systemUpTime = info.SystemUpTime
 	gg.config.systemBootTime = info.SystemBootTime
 	gg.config.cpuCores = info.CpuCores
 	gg.config.cpuModelName = info.CpuModelName

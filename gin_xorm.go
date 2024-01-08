@@ -21,6 +21,7 @@ type GinXorm struct {
 		systemVersion       string  // 系统版本
 		systemKernel        string  // 系统内核
 		systemKernelVersion string  // 系统内核版本
+		systemUpTime        uint64  // 系统运行时间
 		systemBootTime      uint64  // 系统开机时间
 		cpuCores            int     // CPU核数
 		cpuModelName        string  // CPU型号名称

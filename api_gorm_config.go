@@ -15,6 +15,7 @@ func (ag *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	ag.config.systemVersion = info.SystemVersion
 	ag.config.systemKernel = info.SystemKernel
 	ag.config.systemKernelVersion = info.SystemKernelVersion
+	ag.config.systemUpTime = info.SystemUpTime
 	ag.config.systemBootTime = info.SystemBootTime
 	ag.config.cpuCores = info.CpuCores
 	ag.config.cpuModelName = info.CpuModelName

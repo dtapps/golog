@@ -25,15 +25,21 @@ type ginGormLog struct {
 	RequestIP      string    `gorm:"index;comment:【请求】客户端IP" json:"request_ip,omitempty"`     //【请求】客户端IP
 	RequestHeader  string    `gorm:"comment:【请求】头部" json:"request_header,omitempty"`          //【请求】头部
 	ResponseTime   time.Time `gorm:"index;comment:【返回】时间" json:"response_time,omitempty"`     //【返回】时间
-	ResponseCode   int       `gorm:"index;comment:【返回】状态码" json:"response_code,omitempty"`    //【返回】状态码
+	ResponseCode   int       `gorm:"comment:【返回】状态码" json:"response_code,omitempty"`          //【返回】状态码
 	ResponseData   string    `gorm:"comment:【返回】数据" json:"response_data,omitempty"`           //【返回】数据
 	CostTime       int64     `gorm:"comment:【系统】花费时间" json:"cost_time,omitempty"`             //【系统】花费时间
 	SystemHostName string    `gorm:"index;comment:【系统】主机名" json:"system_host_name,omitempty"` //【系统】主机名
 	SystemInsideIP string    `gorm:"comment:【系统】内网IP" json:"system_inside_ip,omitempty"`      //【系统】内网IP
-	SystemOs       string    `gorm:"index;comment:【系统】系统类型" json:"system_os,omitempty"`       //【系统】系统类型
-	SystemArch     string    `gorm:"index;comment:【系统】系统架构" json:"system_arch,omitempty"`     //【系统】系统架构
-	GoVersion      string    `gorm:"index;comment:【程序】Go版本" json:"go_version,omitempty"`      //【程序】Go版本
-	SdkVersion     string    `gorm:"index;comment:【程序】Sdk版本" json:"sdk_version,omitempty"`    //【程序】Sdk版本
+	SystemOs       string    `gorm:"comment:【系统】类型" json:"system_os,omitempty"`               //【系统】类型
+	SystemArch     string    `gorm:"comment:【系统】架构" json:"system_arch,omitempty"`             //【系统】架构
+	SystemUpTime   uint64    `gorm:"comment:【系统】运行时间" json:"system_up_time,omitempty"`        //【系统】运行时间
+	SystemBootTime uint64    `gorm:"comment:【系统】开机时间" json:"system_boot_time,omitempty"`      //【系统】开机时间
+	GoVersion      string    `gorm:"comment:【程序】Go版本" json:"go_version,omitempty"`            //【程序】Go版本
+	SdkVersion     string    `gorm:"comment:【程序】Sdk版本" json:"sdk_version,omitempty"`          //【程序】Sdk版本
+	SystemVersion  string    `gorm:"comment:【程序】System版本" json:"system_version,omitempty"`    //【程序】System版本
+	CpuCores       int       `gorm:"comment:【CPU】核数" json:"cpu_cores,omitempty"`              //【CPU】核数
+	CpuModelName   string    `gorm:"comment:【CPU】型号名称" json:"cpu_model_name,omitempty"`       //【CPU】型号名称
+	CpuMhz         float64   `gorm:"comment:【CPU】兆赫" json:"cpu_mhz,omitempty"`                //【CPU】兆赫
 }
 
 // 创建模型
@@ -58,8 +64,14 @@ func (gg *GinGorm) gormRecord(data ginGormLog) {
 	data.SystemInsideIP = gg.config.systemInsideIp //【系统】内网ip
 	data.GoVersion = gg.config.goVersion           //【程序】Go版本
 	data.SdkVersion = gg.config.sdkVersion         //【程序】Sdk版本
-	data.SystemOs = gg.config.systemOs             //【系统】系统类型
-	data.SystemArch = gg.config.systemKernel       //【系统】系统架构
+	data.SystemVersion = gg.config.systemVersion   //【程序】System版本
+	data.SystemOs = gg.config.systemOs             //【系统】类型
+	data.SystemArch = gg.config.systemKernel       //【系统】架构
+	data.SystemUpTime = gg.config.systemUpTime     //【系统】运行时间
+	data.SystemBootTime = gg.config.systemBootTime //【系统】开机时间
+	data.CpuCores = gg.config.cpuCores             //【CPU】核数
+	data.CpuModelName = gg.config.cpuModelName     //【CPU】型号名称
+	data.CpuMhz = gg.config.cpuMhz                 //【CPU】兆赫
 
 	err := gg.gormClient.Table(gg.gormConfig.tableName).Create(&data).Error
 	if err != nil {

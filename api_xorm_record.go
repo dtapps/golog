@@ -29,10 +29,16 @@ type apiXormLog struct {
 	ResponseTime       time.Time `xorm:"index;comment('【返回】时间')" json:"response_time,omitempty"`     //【返回】时间
 	SystemHostName     string    `xorm:"index;comment('【系统】主机名')" json:"system_host_name,omitempty"` //【系统】主机名
 	SystemInsideIp     string    `xorm:"comment('【系统】内网IP')" json:"system_inside_ip,omitempty"`      //【系统】内网IP
-	SystemOs           string    `xorm:"index;comment('【系统】系统类型')" json:"system_os,omitempty"`       //【系统】系统类型
-	SystemArch         string    `xorm:"index;comment('【系统】系统架构')" json:"system_arch,omitempty"`     //【系统】系统架构
-	GoVersion          string    `xorm:"index;comment('【程序】Go版本')" json:"go_version,omitempty"`      //【程序】Go版本
-	SdkVersion         string    `xorm:"index;comment('【程序】Sdk版本')" json:"sdk_version,omitempty"`    //【程序】Sdk版本
+	SystemOs           string    `xorm:"comment('【系统】类型')" json:"system_os,omitempty"`               //【系统】类型
+	SystemArch         string    `xorm:"comment('【系统】架构')" json:"system_arch,omitempty"`             //【系统】架构
+	SystemUpTime       uint64    `xorm:"comment('【系统】运行时间')" json:"system_up_time,omitempty"`        //【系统】运行时间
+	SystemBootTime     uint64    `xorm:"comment('【系统】开机时间')" json:"system_boot_time,omitempty"`      //【系统】开机时间
+	GoVersion          string    `xorm:"comment('【程序】Go版本')" json:"go_version,omitempty"`            //【程序】Go版本
+	SdkVersion         string    `xorm:"comment('【程序】Sdk版本')" json:"sdk_version,omitempty"`          //【程序】Sdk版本
+	SystemVersion      string    `xorm:"comment('【程序】System版本')" json:"system_version,omitempty"`    //【程序】System版本
+	CpuCores           int       `xorm:"comment('【CPU】核数')" json:"cpu_cores,omitempty"`              //【CPU】核数
+	CpuModelName       string    `xorm:"comment('【CPU】型号名称')" json:"cpu_model_name,omitempty"`       //【CPU】型号名称
+	CpuMhz             float64   `xorm:"comment('【CPU】兆赫')" json:"cpu_mhz,omitempty"`                //【CPU】兆赫
 }
 
 // 创建模型
@@ -61,11 +67,17 @@ func (ag *ApiXorm) xormRecord(ctx context.Context, data apiXormLog) {
 	data.SystemHostName = ag.config.systemHostname   //【系统】主机名
 	data.SystemInsideIp = ag.config.systemInsideIp   //【系统】内网ip
 	data.GoVersion = ag.config.goVersion             //【程序】Go版本
-	data.SdkVersion = ag.config.systemVersion        //【程序】Sdk版本
+	data.SdkVersion = ag.config.sdkVersion           //【程序】Sdk版本
+	data.SystemVersion = ag.config.systemVersion     //【程序】System版本
 	data.TraceID = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
 	data.RequestIp = ag.config.systemOutsideIp       //【请求】请求Ip
-	data.SystemOs = ag.config.systemOs               //【系统】系统类型
-	data.SystemArch = ag.config.systemKernel         //【系统】系统架构
+	data.SystemOs = ag.config.systemOs               //【系统】类型
+	data.SystemArch = ag.config.systemKernel         //【系统】架构
+	data.SystemUpTime = ag.config.systemUpTime       //【系统】运行时间
+	data.SystemBootTime = ag.config.systemBootTime   //【系统】开机时间
+	data.CpuCores = ag.config.cpuCores               //【CPU】核数
+	data.CpuModelName = ag.config.cpuModelName       //【CPU】型号名称
+	data.CpuMhz = ag.config.cpuMhz                   //【CPU】兆赫
 
 	_, err := ag.xormClient.Table(ag.xormConfig.tableName).Insert(&data)
 	if err != nil {
