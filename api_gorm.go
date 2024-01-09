@@ -58,10 +58,10 @@ func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB
 			gl.gormConfig.tableName = gormTableName
 		}
 
+		gl.gormConfig.stats = true
+
 		// 创建模型
 		gl.gormAutoMigrate(ctx)
-
-		gl.gormConfig.stats = true
 
 	}
 

@@ -63,10 +63,11 @@ func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB
 			gg.gormConfig.tableName = gormTableName
 		}
 
+		gg.gormConfig.stats = true
+
 		// 创建模型
 		gg.gormAutoMigrate(ctx)
 
-		gg.gormConfig.stats = true
 	}
 
 	return gg, nil

@@ -63,10 +63,11 @@ func NewGinXorm(ctx context.Context, systemOutsideIp string, xormClient *xorm.En
 			gg.xormConfig.tableName = xormTableName
 		}
 
+		gg.xormConfig.stats = true
+
 		// 创建模型
 		gg.xormSync(ctx)
 
-		gg.xormConfig.stats = true
 	}
 
 	return gg, nil

@@ -58,10 +58,10 @@ func NewApiXorm(ctx context.Context, systemOutsideIp string, xormClient *xorm.En
 			gl.xormConfig.tableName = xormTableName
 		}
 
+		gl.xormConfig.stats = true
+
 		// 创建模型
 		gl.xormSync(ctx)
-
-		gl.xormConfig.stats = true
 
 	}
 
