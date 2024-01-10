@@ -26,8 +26,8 @@ type GinGorm struct {
 		cpuCores            int     // CPU核数
 		cpuModelName        string  // CPU型号名称
 		cpuMhz              float64 // CPU兆赫
-		systemInsideIp      string  // 内网ip
-		systemOutsideIp     string  // 外网ip
+		systemInsideIP      string  // 内网IP
+		systemOutsideIP     string  // 外网IP
 		goVersion           string  // go版本
 		sdkVersion          string  // sdk版本
 	}

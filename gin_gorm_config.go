@@ -21,8 +21,8 @@ func (gg *GinGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	gg.config.cpuModelName = info.CpuModelName
 	gg.config.cpuMhz = info.CpuMhz
 
-	gg.config.systemInsideIp = gorequest.GetInsideIp(ctx)
-	gg.config.systemOutsideIp = systemOutsideIp
+	gg.config.systemInsideIP = gorequest.GetInsideIp(ctx)
+	gg.config.systemOutsideIP = systemOutsideIp
 
 	gg.config.sdkVersion = Version
 	gg.config.goVersion = runtime.Version()

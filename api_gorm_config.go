@@ -21,8 +21,8 @@ func (ag *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	ag.config.cpuModelName = info.CpuModelName
 	ag.config.cpuMhz = info.CpuMhz
 
-	ag.config.systemInsideIp = gorequest.GetInsideIp(ctx)
-	ag.config.systemOutsideIp = systemOutsideIp
+	ag.config.systemInsideIP = gorequest.GetInsideIp(ctx)
+	ag.config.systemOutsideIP = systemOutsideIp
 
 	ag.config.goVersion = runtime.Version()
 	ag.config.sdkVersion = Version
