@@ -7,6 +7,7 @@ import (
 	"go.dtapp.net/gotrace_id"
 	"log/slog"
 	"os"
+	"runtime"
 )
 
 type SLogFun func() *SLog
@@ -116,6 +117,21 @@ func (sl *SLog) WithLogger() *slog.Logger {
 func (sl *SLog) WithTraceId(ctx context.Context) *slog.Logger {
 	jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
 		slog.String("trace_id", gotrace_id.GetTraceIdContext(ctx)),
+		slog.String("go_os", runtime.GOOS),
+		slog.String("go_arch", runtime.GOARCH),
+		slog.String("go_version", runtime.Version()),
+	})
+	logger := slog.New(jsonHandler)
+	return logger
+}
+
+// WithTraceID 跟踪编号
+func (sl *SLog) WithTraceID(ctx context.Context) *slog.Logger {
+	jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
+		slog.String("trace_id", gotrace_id.GetTraceIdContext(ctx)),
+		slog.String("go_os", runtime.GOOS),
+		slog.String("go_arch", runtime.GOARCH),
+		slog.String("go_version", runtime.Version()),
 	})
 	logger := slog.New(jsonHandler)
 	return logger
@@ -125,6 +141,21 @@ func (sl *SLog) WithTraceId(ctx context.Context) *slog.Logger {
 func (sl *SLog) WithTraceIdStr(traceId string) *slog.Logger {
 	jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
 		slog.String("trace_id", traceId),
+		slog.String("go_os", runtime.GOOS),
+		slog.String("go_arch", runtime.GOARCH),
+		slog.String("go_version", runtime.Version()),
+	})
+	logger := slog.New(jsonHandler)
+	return logger
+}
+
+// WithTraceIDStr 跟踪编号
+func (sl *SLog) WithTraceIDStr(traceID string) *slog.Logger {
+	jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
+		slog.String("trace_id", traceID),
+		slog.String("go_os", runtime.GOOS),
+		slog.String("go_arch", runtime.GOARCH),
+		slog.String("go_version", runtime.Version()),
 	})
 	logger := slog.New(jsonHandler)
 	return logger
