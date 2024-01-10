@@ -28,3 +28,12 @@ func (gg *GinGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	gg.config.goVersion = runtime.Version()
 
 }
+
+// ConfigSLogClientFun 日志配置
+func (gg *GinGorm) ConfigSLogClientFun(sLogFun SLogFun) {
+	sLog := sLogFun()
+	if sLog != nil {
+		gg.slog.client = sLog
+		gg.slog.status = true
+	}
+}

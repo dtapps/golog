@@ -35,6 +35,10 @@ type GinGorm struct {
 		stats     bool   // 状态
 		tableName string // 表名
 	}
+	slog struct {
+		status bool  // 状态
+		client *SLog // 日志服务
+	}
 }
 
 // GinGormFun *GinGorm 框架日志驱动

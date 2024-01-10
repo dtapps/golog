@@ -2,12 +2,12 @@ package golog
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
-	"log"
 	"time"
 )
 
@@ -48,14 +48,16 @@ func (gg *GinGorm) gormAutoMigrate(ctx context.Context) {
 		return
 	}
 
-	err := gg.gormClient.Table(gg.gormConfig.tableName).AutoMigrate(&ginGormLog{})
+	err := gg.gormClient.WithContext(ctx).Table(gg.gormConfig.tableName).AutoMigrate(&ginGormLog{})
 	if err != nil {
-		log.Printf("创建模型：%s\n", err)
+		if gg.slog.status {
+			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("创建模型：%s", err))
+		}
 	}
 }
 
 // gormRecord 记录日志
-func (gg *GinGorm) gormRecord(data ginGormLog) {
+func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
 	if gg.gormConfig.stats == false {
 		return
 	}
@@ -73,10 +75,14 @@ func (gg *GinGorm) gormRecord(data ginGormLog) {
 	data.CpuModelName = gg.config.cpuModelName     //【CPU】型号名称
 	data.CpuMhz = gg.config.cpuMhz                 //【CPU】兆赫
 
-	err := gg.gormClient.Table(gg.gormConfig.tableName).Create(&data).Error
+	err := gg.gormClient.WithContext(ctx).Table(gg.gormConfig.tableName).Create(&data).Error
 	if err != nil {
-		log.Printf("记录框架日志错误：%s\n", err)
-		log.Printf("记录框架日志数据：%+v\n", data)
+		if gg.slog.status {
+			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))
+		}
+		if gg.slog.status {
+			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志数据：%+v", data))
+		}
 	}
 }
 
@@ -103,5 +109,5 @@ func (gg *GinGorm) recordJson(ginCtx *gin.Context, requestTime time.Time, reques
 		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】链接
 	}
 
-	gg.gormRecord(data)
+	gg.gormRecord(ginCtx, data)
 }

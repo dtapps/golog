@@ -28,3 +28,12 @@ func (ag *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
 	ag.config.sdkVersion = Version
 
 }
+
+// ConfigSLogClientFun 日志配置
+func (ag *ApiGorm) ConfigSLogClientFun(sLogFun SLogFun) {
+	sLog := sLogFun()
+	if sLog != nil {
+		ag.slog.client = sLog
+		ag.slog.status = true
+	}
+}

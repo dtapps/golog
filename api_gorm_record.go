@@ -2,11 +2,11 @@ package golog
 
 import (
 	"context"
+	"fmt"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
-	"log"
 	"time"
 	"unicode/utf8"
 )
@@ -47,9 +47,11 @@ func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
 		return
 	}
 
-	err := ag.gormClient.Table(ag.gormConfig.tableName).AutoMigrate(&apiGormLog{})
+	err := ag.gormClient.WithContext(ctx).Table(ag.gormConfig.tableName).AutoMigrate(&apiGormLog{})
 	if err != nil {
-		log.Printf("创建模型：%s", err)
+		if ag.slog.status {
+			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("创建模型：%s", err))
+		}
 	}
 }
 
@@ -78,10 +80,14 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 	data.CpuModelName = ag.config.cpuModelName       //【CPU】型号名称
 	data.CpuMhz = ag.config.cpuMhz                   //【CPU】兆赫
 
-	err := ag.gormClient.Table(ag.gormConfig.tableName).Create(&data).Error
+	err := ag.gormClient.WithContext(ctx).Table(ag.gormConfig.tableName).Create(&data).Error
 	if err != nil {
-		log.Printf("记录接口日志错误：%s", err)
-		log.Printf("记录接口日志数据：%+v", data)
+		if ag.slog.status {
+			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))
+		}
+		if ag.slog.status {
+			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志数据：%+v", data))
+		}
 	}
 }
 
