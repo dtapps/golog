@@ -27,17 +27,17 @@ func NewGinSLog(ctx context.Context) (*GinSLog, error) {
 	return c, nil
 }
 
-type bodySLogWriter struct {
+type ginSLogBodyWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
 }
 
-func (w bodySLogWriter) Write(b []byte) (int, error) {
+func (w ginSLogBodyWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
 
-func (w bodySLogWriter) WriteString(s string) (int, error) {
+func (w ginSLogBodyWriter) WriteString(s string) (int, error) {
 	w.body.WriteString(s)
 	return w.ResponseWriter.WriteString(s)
 }
@@ -77,7 +77,7 @@ func (gl *GinSLog) Middleware() gin.HandlerFunc {
 		// 重新赋值
 		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(rawData))
 
-		blw := &bodySLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
+		blw := &ginSLogBodyWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
 		ginCtx.Writer = blw
 
 		// 处理请求
