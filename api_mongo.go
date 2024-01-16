@@ -3,6 +3,7 @@ package golog
 import (
 	"context"
 	"errors"
+	"go.dtapp.net/gorequest"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -79,4 +80,25 @@ func NewApiMongo(ctx context.Context, systemOutsideIp string, mongoClient *mongo
 	}
 
 	return am, nil
+}
+
+// Middleware 中间件
+func (am *ApiMongo) Middleware(ctx context.Context, request gorequest.Response) {
+	if am.mongoConfig.stats {
+		am.mongoMiddleware(ctx, request)
+	}
+}
+
+// MiddlewareXml 中间件
+func (am *ApiMongo) MiddlewareXml(ctx context.Context, request gorequest.Response) {
+	if am.mongoConfig.stats {
+		am.mongoMiddlewareXml(ctx, request)
+	}
+}
+
+// MiddlewareCustom 中间件
+func (am *ApiMongo) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
+	if am.mongoConfig.stats {
+		am.mongoMiddlewareCustom(ctx, api, request)
+	}
 }
