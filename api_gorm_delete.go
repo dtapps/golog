@@ -6,12 +6,12 @@ import (
 	"go.dtapp.net/gotime"
 )
 
-// GormDeleteData 删除N天前数据
+// GormDeleteData 删除N小时前数据
 func (ag *ApiGorm) GormDeleteData(ctx context.Context, hour int64) error {
 	return ag.GormDeleteDataCustom(ctx, ag.gormConfig.tableName, hour)
 }
 
-// GormDeleteDataCustom 删除N天前数据
+// GormDeleteDataCustom 删除N小时前数据
 func (ag *ApiGorm) GormDeleteDataCustom(ctx context.Context, tableName string, hour int64) error {
 	if ag.gormConfig.stats == false {
 		return nil
