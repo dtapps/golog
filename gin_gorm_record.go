@@ -18,7 +18,7 @@ func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
 	}
 
 	data.SystemHostName = gg.config.systemHostname //【系统】主机名
-	data.SystemInsideIP = gg.config.systemInsideIP //【系统】内网ip
+	data.SystemInsideIP = gg.config.systemInsideIP //【系统】内网IP
 	data.GoVersion = gg.config.goVersion           //【程序】Go版本
 	data.SdkVersion = gg.config.sdkVersion         //【程序】Sdk版本
 	data.SystemVersion = gg.config.systemVersion   //【程序】System版本
@@ -30,7 +30,9 @@ func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
 	data.CpuModelName = gg.config.cpuModelName     //【CPU】型号名称
 	data.CpuMhz = gg.config.cpuMhz                 //【CPU】兆赫
 
-	err := gg.gormClient.WithContext(ctx).Table(gg.gormConfig.tableName).Create(&data).Error
+	err := gg.gormClient.WithContext(ctx).
+		Table(gg.gormConfig.tableName).
+		Create(&data).Error
 	if err != nil {
 		if gg.slog.status {
 			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))

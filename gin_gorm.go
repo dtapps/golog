@@ -77,17 +77,17 @@ func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB
 	return gg, nil
 }
 
-type bodyGormWriter struct {
+type ginGormBodyWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
 }
 
-func (w bodyGormWriter) Write(b []byte) (int, error) {
+func (w ginGormBodyWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
 
-func (w bodyGormWriter) WriteString(s string) (int, error) {
+func (w ginGormBodyWriter) WriteString(s string) (int, error) {
 	w.body.WriteString(s)
 	return w.ResponseWriter.WriteString(s)
 }
@@ -127,7 +127,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		// 重新赋值
 		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(rawData))
 
-		blw := &bodyGormWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
+		blw := &ginGormBodyWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
 		ginCtx.Writer = blw
 
 		// 处理请求

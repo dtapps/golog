@@ -43,7 +43,9 @@ func (gg *GinGorm) gormAutoMigrate(ctx context.Context) {
 		return
 	}
 
-	err := gg.gormClient.WithContext(ctx).Table(gg.gormConfig.tableName).AutoMigrate(&ginGormLog{})
+	err := gg.gormClient.WithContext(ctx).
+		Table(gg.gormConfig.tableName).
+		AutoMigrate(&ginGormLog{})
 	if err != nil {
 		if gg.slog.status {
 			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("创建模型：%s", err))

@@ -26,7 +26,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 	data.GoVersion = ag.config.goVersion             //【程序】Go版本
 	data.SdkVersion = ag.config.sdkVersion           //【程序】Sdk版本
 	data.SystemVersion = ag.config.systemVersion     //【程序】System版本
-	data.RequestIP = ag.config.systemOutsideIP       //【请求】请求Ip
+	data.RequestIP = ag.config.systemOutsideIP       //【请求】请求IP
 	data.SystemOs = ag.config.systemOs               //【系统】类型
 	data.SystemArch = ag.config.systemKernel         //【系统】架构
 	data.SystemUpTime = ag.config.systemUpTime       //【系统】运行时间
@@ -35,7 +35,9 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 	data.CpuModelName = ag.config.cpuModelName       //【CPU】型号名称
 	data.CpuMhz = ag.config.cpuMhz                   //【CPU】兆赫
 
-	err := ag.gormClient.WithContext(ctx).Table(ag.gormConfig.tableName).Create(&data).Error
+	err := ag.gormClient.WithContext(ctx).
+		Table(ag.gormConfig.tableName).
+		Create(&data).Error
 	if err != nil {
 		if ag.slog.status {
 			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))
