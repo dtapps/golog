@@ -50,6 +50,7 @@ func (gm *GinMongo) recordJson(ginCtx *gin.Context, requestTime time.Time, reque
 
 	data := ginMongoLog{
 		TraceID:       gotrace_id.GetGinTraceId(ginCtx),                             //【系统】跟踪编号
+		LogTime:       primitive.NewDateTimeFromTime(requestTime),                   //【记录】时间
 		RequestTime:   gotime.SetCurrent(requestTime).Format(),                      //【请求】时间
 		RequestURL:    ginCtx.Request.RequestURI,                                    //【请求】链接
 		RequestApi:    gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】接口
