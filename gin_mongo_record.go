@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gotrace_id"
@@ -46,7 +45,7 @@ func (gm *GinMongo) gormRecord(ctx context.Context, data ginMongoLog) {
 	}
 }
 
-func (gm *GinMongo) recordJson(ginCtx *gin.Context, requestTime time.Time, requestBody gorequest.Params, responseTime time.Time, responseCode int, responseBody string, costTime int64, requestIp string) {
+func (gm *GinMongo) recordJson(ginCtx *gin.Context, requestTime time.Time, requestBody gorequest.Params, responseTime time.Time, responseCode int, responseBody any, costTime int64, requestIp string) {
 
 	data := ginMongoLog{
 		TraceID:       gotrace_id.GetGinTraceId(ginCtx),                             //【系统】跟踪编号
@@ -56,10 +55,10 @@ func (gm *GinMongo) recordJson(ginCtx *gin.Context, requestTime time.Time, reque
 		RequestApi:    gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】接口
 		RequestMethod: ginCtx.Request.Method,                                        //【请求】方式
 		RequestProto:  ginCtx.Request.Proto,                                         //【请求】协议
-		RequestBody:   gojson.JsonEncodeNoError(requestBody),                        //【请求】参数
+		RequestBody:   requestBody,                                                  //【请求】参数
 		RequestIP:     requestIp,                                                    //【请求】客户端IP
-		RequestHeader: gojson.JsonEncodeNoError(ginCtx.Request.Header),              //【请求】头部
-		ResponseTime:  responseTime,                                                 //【返回】时间
+		RequestHeader: ginCtx.Request.Header,                                        //【请求】头部
+		ResponseTime:  gotime.SetCurrent(responseTime).Format(),                     //【返回】时间
 		ResponseCode:  responseCode,                                                 //【返回】状态码
 		ResponseData:  responseBody,                                                 //【返回】数据
 		CostTime:      costTime,                                                     //【系统】花费时间

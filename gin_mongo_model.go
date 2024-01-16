@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 // 结构体模型
@@ -21,12 +20,12 @@ type ginMongoLog struct {
 	RequestApi     string             `json:"request_api,omitempty" bson:"request_api,omitempty"`           //【请求】接口
 	RequestMethod  string             `json:"request_method,omitempty" bson:"request_method,omitempty"`     //【请求】方式
 	RequestProto   string             `json:"request_proto,omitempty" bson:"request_proto,omitempty"`       //【请求】协议
-	RequestBody    interface{}        `json:"request_body,omitempty" bson:"request_body,omitempty"`         //【请求】参数
+	RequestBody    any                `json:"request_body,omitempty" bson:"request_body,omitempty"`         //【请求】参数
 	RequestIP      string             `json:"request_ip,omitempty" bson:"request_ip,omitempty"`             //【请求】客户端IP
-	RequestHeader  string             `json:"request_header,omitempty" bson:"request_header,omitempty"`     //【请求】头部
-	ResponseTime   time.Time          `json:"response_time,omitempty" bson:"response_time,omitempty"`       //【返回】时间
+	RequestHeader  any                `json:"request_header,omitempty" bson:"request_header,omitempty"`     //【请求】头部
+	ResponseTime   string             `json:"response_time,omitempty" bson:"response_time,omitempty"`       //【返回】时间
 	ResponseCode   int                `json:"response_code,omitempty" bson:"response_code,omitempty"`       //【返回】状态码
-	ResponseData   interface{}        `json:"response_data,omitempty" bson:"response_data,omitempty"`       //【返回】数据
+	ResponseData   any                `json:"response_data,omitempty" bson:"response_data,omitempty"`       //【返回】数据
 	CostTime       int64              `json:"cost_time,omitempty" bson:"cost_time,omitempty"`               //【系统】花费时间
 	SystemHostName string             `json:"system_host_name,omitempty" bson:"system_host_name,omitempty"` //【系统】主机名
 	SystemInsideIP string             `json:"system_inside_ip,omitempty" bson:"system_inside_ip,omitempty"` //【系统】内网IP

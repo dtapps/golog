@@ -102,7 +102,7 @@ func (w ginMongoBodyWriter) WriteString(s string) (int, error) {
 	return w.ResponseWriter.WriteString(s)
 }
 
-func (gm *GinMongo) jsonUnmarshal(data string) (result interface{}) {
+func (gm *GinMongo) jsonUnmarshal(data string) (result any) {
 	_ = gojson.Unmarshal([]byte(data), &result)
 	return
 }
@@ -123,7 +123,7 @@ func (gm *GinMongo) Middleware() gin.HandlerFunc {
 				requestBody.Set(key, value)
 			}
 		}
-		var dataMap map[string]interface{}
+		var dataMap map[string]any
 		rawData, _ := ginCtx.GetRawData() // 请求内容参数
 		if gojson.IsValidJSON(string(rawData)) {
 			dataMap = gojson.JsonDecodeNoError(string(rawData))
@@ -145,7 +145,7 @@ func (gm *GinMongo) Middleware() gin.HandlerFunc {
 
 		// 响应
 		responseCode := ginCtx.Writer.Status()
-		responseBody := blw.body.String()
+		responseBody := gojson.JsonDecodeNoError(blw.body.String())
 
 		// 结束时间
 		endTime := gotime.Current().TimestampWithMillisecond()

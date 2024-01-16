@@ -92,7 +92,7 @@ func (w ginGormBodyWriter) WriteString(s string) (int, error) {
 	return w.ResponseWriter.WriteString(s)
 }
 
-func (gg *GinGorm) jsonUnmarshal(data string) (result interface{}) {
+func (gg *GinGorm) jsonUnmarshal(data string) (result any) {
 	_ = gojson.Unmarshal([]byte(data), &result)
 	return
 }
@@ -113,7 +113,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 				requestBody.Set(key, value)
 			}
 		}
-		var dataMap map[string]interface{}
+		var dataMap map[string]any
 		rawData, _ := ginCtx.GetRawData() // 请求内容参数
 		if gojson.IsValidJSON(string(rawData)) {
 			dataMap = gojson.JsonDecodeNoError(string(rawData))
