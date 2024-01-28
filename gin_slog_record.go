@@ -27,7 +27,7 @@ func (gl *GinSLog) record(msg string, data ginSLog) {
 	)
 }
 
-func (gl *GinSLog) recordJson(ginCtx *gin.Context, requestTime time.Time, request_body gorequest.Params, responseTime time.Time, responseCode int, responseBody string, costTime int64, requestIp string) {
+func (gl *GinSLog) recordJson(ginCtx *gin.Context, requestTime time.Time, requestBody gorequest.Params, responseTime time.Time, responseCode int, responseBody string, costTime int64, requestIp string) {
 	data := ginSLog{
 		TraceID:       gotrace_id.GetGinTraceId(ginCtx),                             //【系统】跟踪编号
 		RequestTime:   requestTime,                                                  //【请求】时间
@@ -35,7 +35,7 @@ func (gl *GinSLog) recordJson(ginCtx *gin.Context, requestTime time.Time, reques
 		RequestApi:    gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI), //【请求】请求接口
 		RequestMethod: ginCtx.Request.Method,                                        //【请求】请求方式
 		RequestProto:  ginCtx.Request.Proto,                                         //【请求】请求协议
-		RequestBody:   request_body,                                                 //【请求】请求参数
+		RequestBody:   requestBody,                                                  //【请求】请求参数
 		RequestIP:     requestIp,                                                    //【请求】请求客户端IP
 		RequestHeader: ginCtx.Request.Header,                                        //【请求】请求头
 		ResponseTime:  responseTime,                                                 //【返回】时间
