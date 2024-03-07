@@ -29,7 +29,7 @@ type HertzGormFun func() *HertzGorm
 // NewHertzGorm 创建框架实例化
 func NewHertzGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*HertzGorm, error) {
 
-	gg := &HertzGorm{}
+	hg := &HertzGorm{}
 
 	// 配置信息
 	if systemOutsideIp == "" {
@@ -37,25 +37,25 @@ func NewHertzGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.
 	}
 
 	if gormClient == nil {
-		gg.gormConfig.stats = false
+		hg.gormConfig.stats = false
 	} else {
 
-		gg.gormClient = gormClient
+		hg.gormClient = gormClient
 
 		if gormTableName == "" {
 			return nil, errors.New("没有设置表名")
 		} else {
-			gg.gormConfig.tableName = gormTableName
+			hg.gormConfig.tableName = gormTableName
 		}
 
-		gg.gormConfig.stats = true
+		hg.gormConfig.stats = true
 
 		// 创建模型
-		gg.gormAutoMigrate(ctx)
+		hg.gormAutoMigrate(ctx)
 
 	}
 
-	return gg, nil
+	return hg, nil
 }
 
 // Middleware 中间件
@@ -85,18 +85,18 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		log.RequestID = requestid.Get(h)
 		log.RequestHost = string(h.Request.Host())
 		log.RequestPath = string(h.Request.URI().Path())
-		log.RequestQuery = gojson.ParseQueryString(string(h.Request.QueryString()))
+		log.RequestQuery = gojson.JsonEncodeNoError(gojson.ParseQueryString(string(h.Request.QueryString())))
 		log.RequestMethod = string(h.Request.Header.Method())
 		log.RequestScheme = string(h.Request.Scheme())
 
 		log.RequestContentType = string(h.ContentType())
 
 		if strings.Contains(log.RequestContentType, consts.MIMEApplicationHTMLForm) {
-			log.RequestBody = gojson.ParseQueryString(string(h.Request.Body()))
+			log.RequestBody = gojson.JsonEncodeNoError(gojson.ParseQueryString(string(h.Request.Body())))
 		} else if strings.Contains(log.RequestContentType, consts.MIMEMultipartPOSTForm) {
 			log.RequestBody = string(h.Request.Body())
 		} else if strings.Contains(log.RequestContentType, consts.MIMEApplicationJSON) {
-			log.RequestBody = gojson.JsonDecodeNoError(string(h.Request.Body()))
+			log.RequestBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(h.Request.Body())))
 		} else {
 			log.RequestBody = string(h.Request.Body())
 		}
@@ -108,7 +108,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		h.Request.Header.VisitAll(func(k, v []byte) {
 			requestHeader[string(k)] = append(requestHeader[string(k)], string(v))
 		})
-		log.RequestHeader = requestHeader
+		log.RequestHeader = gojson.JsonEncodeNoError(requestHeader)
 
 		log.RequestCostTime = latency
 
@@ -116,12 +116,12 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		h.Response.Header.VisitAll(func(k, v []byte) {
 			responseHeader[string(k)] = append(responseHeader[string(k)], string(v))
 		})
-		log.ResponseHeader = responseHeader
+		log.ResponseHeader = gojson.JsonEncodeNoError(responseHeader)
 
 		log.ResponseStatusCode = h.Response.StatusCode()
 
 		if gojson.IsValidJSON(string(h.Response.Body())) {
-			log.ResponseBody = gojson.JsonDecodeNoError(string(h.Response.Body()))
+			log.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(h.Response.Body())))
 		} else {
 			log.ResponseBody = string(h.Response.Body())
 		}

@@ -2,12 +2,12 @@ package golog
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
+	"log"
 	"time"
 )
 
@@ -17,29 +17,12 @@ func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
 		return
 	}
 
-	data.SystemHostName = gg.config.systemHostname //【系统】主机名
-	data.SystemInsideIP = gg.config.systemInsideIP //【系统】内网IP
-	data.GoVersion = gg.config.goVersion           //【程序】Go版本
-	data.SdkVersion = gg.config.sdkVersion         //【程序】Sdk版本
-	data.SystemVersion = gg.config.systemVersion   //【程序】System版本
-	data.SystemOs = gg.config.systemOs             //【系统】类型
-	data.SystemArch = gg.config.systemKernel       //【系统】架构
-	data.SystemUpTime = gg.config.systemUpTime     //【系统】运行时间
-	data.SystemBootTime = gg.config.systemBootTime //【系统】开机时间
-	data.CpuCores = gg.config.cpuCores             //【CPU】核数
-	data.CpuModelName = gg.config.cpuModelName     //【CPU】型号名称
-	data.CpuMhz = gg.config.cpuMhz                 //【CPU】兆赫
-
 	err := gg.gormClient.WithContext(ctx).
 		Table(gg.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		if gg.slog.status {
-			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))
-		}
-		if gg.slog.status {
-			gg.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志数据：%+v", data))
-		}
+		log.Printf("记录接口日志错误：%s\n", err)
+		log.Printf("记录接口日志数据：%+v\n", data)
 	}
 }
 

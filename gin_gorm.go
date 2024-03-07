@@ -15,29 +15,9 @@ import (
 // GinGorm 框架日志
 type GinGorm struct {
 	gormClient *gorm.DB // 数据库驱动
-	config     struct {
-		systemHostname      string  // 主机名
-		systemOs            string  // 系统类型
-		systemVersion       string  // 系统版本
-		systemKernel        string  // 系统内核
-		systemKernelVersion string  // 系统内核版本
-		systemUpTime        uint64  // 系统运行时间
-		systemBootTime      uint64  // 系统开机时间
-		cpuCores            int     // CPU核数
-		cpuModelName        string  // CPU型号名称
-		cpuMhz              float64 // CPU兆赫
-		systemInsideIP      string  // 内网IP
-		systemOutsideIP     string  // 外网IP
-		goVersion           string  // go版本
-		sdkVersion          string  // sdk版本
-	}
 	gormConfig struct {
 		stats     bool   // 状态
 		tableName string // 表名
-	}
-	slog struct {
-		status bool  // 状态
-		client *SLog // 日志服务
 	}
 }
 
@@ -45,15 +25,9 @@ type GinGorm struct {
 type GinGormFun func() *GinGorm
 
 // NewGinGorm 创建框架实例化
-func NewGinGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*GinGorm, error) {
+func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*GinGorm, error) {
 
 	gg := &GinGorm{}
-
-	// 配置信息
-	if systemOutsideIp == "" {
-		return nil, errors.New("没有设置外网IP")
-	}
-	gg.setConfig(ctx, systemOutsideIp)
 
 	if gormClient == nil {
 		gg.gormConfig.stats = false
