@@ -27,14 +27,9 @@ type HertzGorm struct {
 type HertzGormFun func() *HertzGorm
 
 // NewHertzGorm 创建框架实例化
-func NewHertzGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*HertzGorm, error) {
+func NewHertzGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*HertzGorm, error) {
 
 	hg := &HertzGorm{}
-
-	// 配置信息
-	if systemOutsideIp == "" {
-		return nil, errors.New("没有设置外网IP")
-	}
 
 	if gormClient == nil {
 		hg.gormConfig.stats = false
