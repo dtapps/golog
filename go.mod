@@ -9,7 +9,7 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/gojson v1.0.4
-	go.dtapp.net/gorequest v1.0.47
+	go.dtapp.net/gorequest v1.0.48
 	go.dtapp.net/gotime v1.0.7
 	go.dtapp.net/gotrace_id v1.0.8
 	go.dtapp.net/gourl v1.0.0

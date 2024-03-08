@@ -11,8 +11,9 @@ import (
 type ApiGorm struct {
 	gormClient *gorm.DB // 数据库驱动
 	config     struct {
-		GoVersion string // go版本
-		system    struct {
+		GoVersion  string // go版本
+		SdkVersion string // sdk版本
+		system     struct {
 			SystemVersion  string  `json:"system_version"`   // 系统版本
 			SystemOs       string  `json:"system_os"`        // 系统类型
 			SystemArch     string  `json:"system_arch"`      // 系统内核

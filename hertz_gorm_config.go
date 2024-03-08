@@ -9,6 +9,7 @@ import (
 func (hg *HertzGorm) setConfig(ctx context.Context) {
 
 	hg.config.GoVersion = runtime.Version()
+	hg.config.SdkVersion = Version
 
 	info := getSystem()
 	hg.config.system.SystemVersion = info.SystemVersion

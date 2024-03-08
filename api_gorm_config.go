@@ -9,6 +9,7 @@ import (
 func (ag *ApiGorm) setConfig(ctx context.Context) {
 
 	ag.config.GoVersion = runtime.Version()
+	ag.config.SdkVersion = Version
 
 	info := getSystem()
 	ag.config.system.SystemVersion = info.SystemVersion

@@ -9,6 +9,7 @@ import (
 func (gg *GinGorm) setConfig(ctx context.Context) {
 
 	gg.config.GoVersion = runtime.Version()
+	gg.config.SdkVersion = Version
 
 	info := getSystem()
 	gg.config.system.SystemVersion = info.SystemVersion
