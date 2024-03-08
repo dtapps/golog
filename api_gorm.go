@@ -11,28 +11,20 @@ import (
 type ApiGorm struct {
 	gormClient *gorm.DB // 数据库驱动
 	config     struct {
-		systemHostname      string  // 主机名
-		systemOs            string  // 系统类型
-		systemVersion       string  // 系统版本
-		systemKernel        string  // 系统内核
-		systemKernelVersion string  // 系统内核版本
-		systemUpTime        uint64  // 系统运行时间
-		systemBootTime      uint64  // 系统开机时间
-		cpuCores            int     // CPU核数
-		cpuModelName        string  // CPU型号名称
-		cpuMhz              float64 // CPU兆赫
-		systemInsideIP      string  // 内网IP
-		systemOutsideIP     string  // 外网IP
-		goVersion           string  // go版本
-		sdkVersion          string  // sdk版本
+		GoVersion string // go版本
+		system    struct {
+			SystemVersion  string  `json:"system_version"`   // 系统版本
+			SystemOs       string  `json:"system_os"`        // 系统类型
+			SystemArch     string  `json:"system_arch"`      // 系统内核
+			SystemInsideIP string  `json:"system_inside_ip"` // 内网IP
+			SystemCpuModel string  `json:"system_cpu_model"` // CPU型号
+			SystemCpuCores int     `json:"system_cpu_cores"` // CPU核数
+			SystemCpuMhz   float64 `json:"system_cpu_mhz"`   // CPU兆赫
+		}
 	}
 	gormConfig struct {
 		stats     bool   // 状态
 		tableName string // 表名
-	}
-	slog struct {
-		status bool  // 状态
-		client *SLog // 日志服务
 	}
 }
 
@@ -40,15 +32,11 @@ type ApiGorm struct {
 type ApiGormFun func() *ApiGorm
 
 // NewApiGorm 创建接口实例化
-func NewApiGorm(ctx context.Context, systemOutsideIp string, gormClient *gorm.DB, gormTableName string) (*ApiGorm, error) {
+func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*ApiGorm, error) {
 
 	gl := &ApiGorm{}
 
-	// 配置信息
-	if systemOutsideIp == "" {
-		return nil, errors.New("没有设置外网IP")
-	}
-	gl.setConfig(ctx, systemOutsideIp)
+	gl.setConfig(ctx)
 
 	if gormClient == nil {
 		gl.gormConfig.stats = false

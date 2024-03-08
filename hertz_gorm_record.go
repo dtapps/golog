@@ -2,6 +2,7 @@ package golog
 
 import (
 	"context"
+	"go.dtapp.net/gojson"
 	"log"
 )
 
@@ -10,6 +11,8 @@ func (hg *HertzGorm) gormRecord(ctx context.Context, data hertzGormLog) {
 	if hg.gormConfig.stats == false {
 		return
 	}
+	data.GoVersion = hg.config.GoVersion //【程序】GoVersion
+	data.SystemInfo = gojson.JsonEncodeNoError(hg.config.system)
 
 	err := hg.gormClient.WithContext(ctx).
 		Table(hg.gormConfig.tableName).

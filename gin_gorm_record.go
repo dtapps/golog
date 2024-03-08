@@ -16,6 +16,8 @@ func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
 	if gg.gormConfig.stats == false {
 		return
 	}
+	data.GoVersion = gg.config.GoVersion                         //【程序】GoVersion
+	data.SystemInfo = gojson.JsonEncodeNoError(gg.config.system) //【系统】SystemInfo
 
 	err := gg.gormClient.WithContext(ctx).
 		Table(gg.gormConfig.tableName).

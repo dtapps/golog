@@ -6,34 +6,17 @@ import (
 	"runtime"
 )
 
-func (ag *ApiGorm) setConfig(ctx context.Context, systemOutsideIp string) {
+func (ag *ApiGorm) setConfig(ctx context.Context) {
+
+	ag.config.GoVersion = runtime.Version()
 
 	info := getSystem()
+	ag.config.system.SystemVersion = info.SystemVersion
+	ag.config.system.SystemOs = info.SystemOs
+	ag.config.system.SystemArch = info.SystemKernel
+	ag.config.system.SystemInsideIP = gorequest.GetInsideIp(ctx)
+	ag.config.system.SystemCpuModel = info.CpuModelName
+	ag.config.system.SystemCpuCores = info.CpuCores
+	ag.config.system.SystemCpuMhz = info.CpuMhz
 
-	ag.config.systemHostname = info.SystemHostname
-	ag.config.systemOs = info.SystemOs
-	ag.config.systemVersion = info.SystemVersion
-	ag.config.systemKernel = info.SystemKernel
-	ag.config.systemKernelVersion = info.SystemKernelVersion
-	ag.config.systemUpTime = info.SystemUpTime
-	ag.config.systemBootTime = info.SystemBootTime
-	ag.config.cpuCores = info.CpuCores
-	ag.config.cpuModelName = info.CpuModelName
-	ag.config.cpuMhz = info.CpuMhz
-
-	ag.config.systemInsideIP = gorequest.GetInsideIp(ctx)
-	ag.config.systemOutsideIP = systemOutsideIp
-
-	ag.config.goVersion = runtime.Version()
-	ag.config.sdkVersion = Version
-
-}
-
-// ConfigSLogClientFun 日志配置
-func (ag *ApiGorm) ConfigSLogClientFun(sLogFun SLogFun) {
-	sLog := sLogFun()
-	if sLog != nil {
-		ag.slog.client = sLog
-		ag.slog.status = true
-	}
 }

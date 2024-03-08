@@ -15,6 +15,18 @@ import (
 // GinGorm 框架日志
 type GinGorm struct {
 	gormClient *gorm.DB // 数据库驱动
+	config     struct {
+		GoVersion string // go版本
+		system    struct {
+			SystemVersion  string  `json:"system_version"`   // 系统版本
+			SystemOs       string  `json:"system_os"`        // 系统类型
+			SystemArch     string  `json:"system_arch"`      // 系统内核
+			SystemInsideIP string  `json:"system_inside_ip"` // 内网IP
+			SystemCpuModel string  `json:"system_cpu_model"` // CPU型号
+			SystemCpuCores int     `json:"system_cpu_cores"` // CPU核数
+			SystemCpuMhz   float64 `json:"system_cpu_mhz"`   // CPU兆赫
+		}
+	}
 	gormConfig struct {
 		stats     bool   // 状态
 		tableName string // 表名
@@ -28,6 +40,7 @@ type GinGormFun func() *GinGorm
 func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*GinGorm, error) {
 
 	gg := &GinGorm{}
+	gg.setConfig(ctx)
 
 	if gormClient == nil {
 		gg.gormConfig.stats = false

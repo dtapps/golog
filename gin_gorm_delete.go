@@ -7,20 +7,20 @@ import (
 )
 
 // GormDeleteData 删除N小时前数据
-func (ag *ApiGorm) GormDeleteData(ctx context.Context, hour int64) error {
-	return ag.GormDeleteDataCustom(ctx, ag.gormConfig.tableName, hour)
+func (gg *GinGorm) GormDeleteData(ctx context.Context, hour int64) error {
+	return gg.GormDeleteDataCustom(ctx, gg.gormConfig.tableName, hour)
 }
 
 // GormDeleteDataCustom 删除N小时前数据
-func (ag *ApiGorm) GormDeleteDataCustom(ctx context.Context, tableName string, hour int64) error {
-	if ag.gormConfig.stats == false {
+func (gg *GinGorm) GormDeleteDataCustom(ctx context.Context, tableName string, hour int64) error {
+	if gg.gormConfig.stats == false {
 		return errors.New("没有驱动")
 	}
 
 	if tableName == "" {
 		return errors.New("没有设置表名")
 	}
-	return ag.gormClient.WithContext(ctx).
+	return gg.gormClient.WithContext(ctx).
 		Table(tableName).
 		Where("request_time < ?", gotime.Current().BeforeHour(hour).Format()).
 		Delete(&apiGormLog{}).Error

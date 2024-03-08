@@ -2,11 +2,11 @@ package golog
 
 import (
 	"context"
-	"fmt"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
+	"log"
 	"unicode/utf8"
 )
 
@@ -15,36 +15,21 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 	if ag.gormConfig.stats == false {
 		return
 	}
+	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
+	data.SystemInfo = gojson.JsonEncodeNoError(ag.config.system) //【系统】SystemInfo
 
 	if utf8.ValidString(data.ResponseBody) == false {
 		data.ResponseBody = ""
 	}
 
 	data.TraceID = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
-	data.SystemHostName = ag.config.systemHostname   //【系统】主机名
-	data.SystemInsideIP = ag.config.systemInsideIP   //【系统】内网IP
-	data.GoVersion = ag.config.goVersion             //【程序】Go版本
-	data.SdkVersion = ag.config.sdkVersion           //【程序】Sdk版本
-	data.SystemVersion = ag.config.systemVersion     //【程序】System版本
-	data.RequestIP = ag.config.systemOutsideIP       //【请求】请求IP
-	data.SystemOs = ag.config.systemOs               //【系统】类型
-	data.SystemArch = ag.config.systemKernel         //【系统】架构
-	data.SystemUpTime = ag.config.systemUpTime       //【系统】运行时间
-	data.SystemBootTime = ag.config.systemBootTime   //【系统】开机时间
-	data.CpuCores = ag.config.cpuCores               //【CPU】核数
-	data.CpuModelName = ag.config.cpuModelName       //【CPU】型号名称
-	data.CpuMhz = ag.config.cpuMhz                   //【CPU】兆赫
 
 	err := ag.gormClient.WithContext(ctx).
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		if ag.slog.status {
-			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志错误：%s", err))
-		}
-		if ag.slog.status {
-			ag.slog.client.WithTraceId(ctx).Error(fmt.Sprintf("记录接口日志数据：%+v", data))
-		}
+		log.Printf("记录接口日志错误：%s\n", err)
+		log.Printf("记录接口日志数据：%+v\n", data)
 	}
 }
 
