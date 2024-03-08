@@ -24,6 +24,7 @@ type ginGormLog struct {
 	ResponseData  string    `gorm:"comment:【返回】数据" json:"response_data,omitempty"`        //【返回】数据
 	CostTime      int64     `gorm:"comment:【系统】花费时间" json:"cost_time,omitempty"`          //【系统】花费时间
 	GoVersion     string    `gorm:"comment:【程序】GoVersion" json:"go_version,omitempty"`    //【程序】GoVersion
+	SdkVersion    string    `gorm:"comment:【程序】SdkVersion" json:"sdk_version,omitempty"`  //【程序】SdkVersion
 	SystemInfo    string    `gorm:"comment:【系统】SystemInfo" json:"system_info,omitempty"`  //【系统】SystemInfo
 }
 

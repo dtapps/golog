@@ -16,6 +16,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 		return
 	}
 	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
+	data.SdkVersion = ag.config.SdkVersion                       //【程序】SdkVersion
 	data.SystemInfo = gojson.JsonEncodeNoError(ag.config.system) //【系统】SystemInfo
 
 	if utf8.ValidString(data.ResponseBody) == false {

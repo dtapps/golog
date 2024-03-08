@@ -23,6 +23,7 @@ type apiGormLog struct {
 	ResponseBody       string    `gorm:"comment:【返回】数据" json:"response_body,omitempty"`         //【返回】数据
 	ResponseTime       time.Time `gorm:"index;comment:【返回】时间" json:"response_time,omitempty"`   //【返回】时间
 	GoVersion          string    `gorm:"comment:【程序】GoVersion" json:"go_version,omitempty"`     //【程序】GoVersion
+	SdkVersion         string    `gorm:"comment:【程序】SdkVersion" json:"sdk_version,omitempty"`   //【程序】SdkVersion
 	SystemInfo         string    `gorm:"comment:【系统】SystemInfo" json:"system_info,omitempty"`   //【系统】SystemInfo
 }
 

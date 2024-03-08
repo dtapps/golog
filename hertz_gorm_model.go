@@ -26,6 +26,7 @@ type hertzGormLog struct {
 	ResponseStatusCode int       `json:"response_status_code,omitempty"`                           //【响应】StatusCode
 	ResponseBody       string    `json:"response_data,omitempty"`                                  //【响应】Body Json
 	GoVersion          string    `gorm:"comment:【程序】GoVersion" json:"go_version,omitempty"`        //【程序】GoVersion
+	SdkVersion         string    `gorm:"comment:【程序】SdkVersion" json:"sdk_version,omitempty"`      //【程序】SdkVersion
 	SystemInfo         string    `gorm:"comment:【系统】SystemInfo" json:"system_info,omitempty"`      //【系统】SystemInfo
 }
 
