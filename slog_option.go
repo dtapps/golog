@@ -24,3 +24,17 @@ func WithSLogShowLine() SLogOption {
 		sl.option.showLine = true
 	}
 }
+
+// WithSLogSetDefault 设置为默认的实例
+func WithSLogSetDefault() SLogOption {
+	return func(sl *SLog) {
+		sl.option.setDefault = true
+	}
+}
+
+// WithSLogSetDefaultCtx 设置默认上下文
+func WithSLogSetDefaultCtx() SLogOption {
+	return func(sl *SLog) {
+		sl.option.setDefaultCtx = true
+	}
+}
