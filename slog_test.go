@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// 参考 https://www.cnblogs.com/cheyunhua/p/18049634
+
 func TestNewSlog(t *testing.T) {
 	sl := NewSlog(
 		WithSLogLumberjack(lumberjack.Logger{
