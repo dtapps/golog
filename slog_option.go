@@ -11,7 +11,7 @@ type SLogOption func(*SLog)
 // MaxBackups 保留的最大旧文件数量
 // Compress 是否压缩/归档旧文件
 // LocalTime 使用本地时间创建时间戳
-func WithSLogLumberjack(config lumberjack.Logger) SLogOption {
+func WithSLogLumberjack(config *lumberjack.Logger) SLogOption {
 	return func(sl *SLog) {
 		sl.option.lumberjackConfig = config
 		sl.option.lumberjackConfigStatus = true
@@ -36,5 +36,12 @@ func WithSLogSetDefault() SLogOption {
 func WithSLogSetDefaultCtx() SLogOption {
 	return func(sl *SLog) {
 		sl.option.setDefaultCtx = true
+	}
+}
+
+// WithSLogSetJSONFormat 设置JSON格式
+func WithSLogSetJSONFormat() SLogOption {
+	return func(sl *SLog) {
+		sl.option.setJSONFormat = true
 	}
 }
