@@ -3,13 +3,13 @@ module go.dtapp.net/golog
 go 1.22
 
 require (
-	github.com/cloudwego/hertz v0.8.1
+	github.com/cloudwego/hertz v0.9.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/hertz-contrib/requestid v1.1.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/gojson v1.0.4
-	go.dtapp.net/gorequest v1.0.51
-	go.dtapp.net/gotime v1.0.9
+	go.dtapp.net/gorequest v1.0.54
+	go.dtapp.net/gotime v1.0.10
 	go.dtapp.net/gotrace_id v1.0.12
 	go.dtapp.net/gourl v1.0.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -22,7 +22,7 @@ require (
 	github.com/andeya/goutil v1.0.1 // indirect
 	github.com/basgys/goxml2json v1.1.0 // indirect
 	github.com/bytedance/go-tagexpr/v2 v2.9.11 // indirect
-	github.com/bytedance/gopkg v0.0.0-20240507064146-197ded923ae3 // indirect
+	github.com/bytedance/gopkg v0.0.0-20240514070511-01b2cbcf35e1 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

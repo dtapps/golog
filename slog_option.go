@@ -25,10 +25,24 @@ func WithSLogShowLine() SLogOption {
 	}
 }
 
+// WithSLogShowLinePass 显示代码行
+func WithSLogShowLinePass(status bool) SLogOption {
+	return func(sl *SLog) {
+		sl.option.showLine = status
+	}
+}
+
 // WithSLogSetDefault 设置为默认的实例
 func WithSLogSetDefault() SLogOption {
 	return func(sl *SLog) {
 		sl.option.setDefault = true
+	}
+}
+
+// WithSLogSetDefaultPass 设置为默认的实例
+func WithSLogSetDefaultPass(status bool) SLogOption {
+	return func(sl *SLog) {
+		sl.option.setDefault = status
 	}
 }
 
@@ -39,9 +53,23 @@ func WithSLogSetDefaultCtx() SLogOption {
 	}
 }
 
+// WithSLogSetDefaultCtxPass 设置默认上下文
+func WithSLogSetDefaultCtxPass(status bool) SLogOption {
+	return func(sl *SLog) {
+		sl.option.setDefaultCtx = status
+	}
+}
+
 // WithSLogSetJSONFormat 设置JSON格式
 func WithSLogSetJSONFormat() SLogOption {
 	return func(sl *SLog) {
 		sl.option.setJSONFormat = true
+	}
+}
+
+// WithSLogSetJSONFormatPass 设置JSON格式
+func WithSLogSetJSONFormatPass(status bool) SLogOption {
+	return func(sl *SLog) {
+		sl.option.setJSONFormat = status
 	}
 }
