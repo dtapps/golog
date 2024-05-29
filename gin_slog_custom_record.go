@@ -1,6 +1,7 @@
 package golog
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
@@ -21,11 +22,17 @@ func (c *GinSLogCustom) GinRecord(ginCtx *gin.Context) *GinCustomClientGinRecord
 	}
 	operation.data = new(ginSLogCustom)
 	operation.data.TraceID = gotrace_id.GetGinTraceId(ginCtx) // 【系统】跟踪编号
+
+	var buffer bytes.Buffer
 	if ginCtx.Request.TLS == nil {
-		operation.data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+		buffer.WriteString("http://")
 	} else {
-		operation.data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+		buffer.WriteString("https://")
 	}
+	buffer.WriteString(ginCtx.Request.Host)
+	buffer.WriteString(ginCtx.Request.RequestURI)
+	operation.data.RequestUri = buffer.String() //【请求】请求链接
+
 	operation.data.RequestUrl = ginCtx.Request.RequestURI                                    //【请求】请求链接 域名+路径
 	operation.data.RequestApi = gourl.UriFilterExcludeQueryString(ginCtx.Request.RequestURI) //【请求】请求接口 路径
 	operation.data.RequestMethod = ginCtx.Request.Method                                     //【请求】请求方式

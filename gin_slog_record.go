@@ -1,6 +1,7 @@
 package golog
 
 import (
+	"bytes"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
@@ -43,10 +44,16 @@ func (gl *GinSLog) recordJson(ginCtx *gin.Context, requestTime time.Time, reques
 		ResponseData:  responseBody,                                                 //【返回】数据
 		CostTime:      costTime,                                                     //【系统】花费时间
 	}
+
+	var buffer bytes.Buffer
 	if ginCtx.Request.TLS == nil {
-		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+		buffer.WriteString("http://")
 	} else {
-		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】请求链接
+		buffer.WriteString("https://")
 	}
+	buffer.WriteString(ginCtx.Request.Host)
+	buffer.WriteString(ginCtx.Request.RequestURI)
+	data.RequestUri = buffer.String() //【请求】请求链接
+
 	gl.record("json", data)
 }

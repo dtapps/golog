@@ -1,6 +1,7 @@
 package golog
 
 import (
+	"bytes"
 	"context"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
@@ -46,11 +47,16 @@ func (gg *GinGorm) recordJson(ginCtx *gin.Context, requestTime time.Time, reques
 		ResponseData:  responseBody,                                                 //【返回】数据
 		CostTime:      costTime,                                                     //【系统】花费时间
 	}
+
+	var buffer bytes.Buffer
 	if ginCtx.Request.TLS == nil {
-		data.RequestUri = "http://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】链接
+		buffer.WriteString("http://")
 	} else {
-		data.RequestUri = "https://" + ginCtx.Request.Host + ginCtx.Request.RequestURI //【请求】链接
+		buffer.WriteString("https://")
 	}
+	buffer.WriteString(ginCtx.Request.Host)
+	buffer.WriteString(ginCtx.Request.RequestURI)
+	data.RequestUri = buffer.String() //【请求】链接
 
 	gg.gormRecord(ginCtx, data)
 }
