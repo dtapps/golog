@@ -81,7 +81,7 @@ func (sl *SLog) start() {
 			sl.ctxHandler = &ContextHandler{sl.textHandler}
 			sl.logger = slog.New(sl.ctxHandler)
 		} else {
-			sl.logger = slog.New(sl.jsonHandler)
+			sl.logger = slog.New(sl.textHandler)
 		}
 	}
 
