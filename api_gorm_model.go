@@ -2,7 +2,8 @@ package golog
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
 	"time"
 )
 
@@ -37,6 +38,6 @@ func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
 		Table(ag.gormConfig.tableName).
 		AutoMigrate(&apiGormLog{})
 	if err != nil {
-		log.Printf("创建模型：%s\n", err)
+		slog.Error(fmt.Sprintf("创建模型：%s", err))
 	}
 }

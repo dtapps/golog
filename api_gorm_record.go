@@ -2,11 +2,12 @@ package golog
 
 import (
 	"context"
+	"fmt"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
-	"log"
+	"log/slog"
 	"unicode/utf8"
 )
 
@@ -29,8 +30,8 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		log.Printf("记录接口日志错误：%s\n", err)
-		log.Printf("记录接口日志数据：%+v\n", data)
+		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
+		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}
 }
 

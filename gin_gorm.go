@@ -6,10 +6,12 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
-	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
+	"go.dtapp.net/gotrace_id"
+	"go.dtapp.net/gourl"
 	"gorm.io/gorm"
-	"io/ioutil"
+	"net/http"
+	"time"
 )
 
 // GinGorm 框架日志
@@ -65,19 +67,38 @@ func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 	return gg, nil
 }
 
+// 定义一个自定义的 ResponseWriter
 type ginGormBodyWriter struct {
 	gin.ResponseWriter
-	body *bytes.Buffer
+	body    *bytes.Buffer
+	status  int
+	headers http.Header
 }
 
+// 实现 http.ResponseWriter 的 Write 方法
 func (w ginGormBodyWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
 }
 
-func (w ginGormBodyWriter) WriteString(s string) (int, error) {
-	w.body.WriteString(s)
-	return w.ResponseWriter.WriteString(s)
+// WriteString 实现 http.ResponseWriter 的 WriteString 方法
+//func (w ginGormBodyWriter) WriteString(s string) (int, error) {
+//	w.body.WriteString(s)
+//	return w.ResponseWriter.WriteString(s)
+//}
+
+// WriteHeader 实现 http.ResponseWriter 的 WriteHeader 方法
+func (w ginGormBodyWriter) WriteHeader(statusCode int) {
+	w.status = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+// Header 实现 http.ResponseWriter 的 Header 方法
+func (w ginGormBodyWriter) Header() http.Header {
+	if w.headers == nil {
+		w.headers = make(http.Header)
+	}
+	return w.headers
 }
 
 func (gg *GinGorm) jsonUnmarshal(data string) (result any) {
@@ -87,53 +108,81 @@ func (gg *GinGorm) jsonUnmarshal(data string) (result any) {
 
 // Middleware 中间件
 func (gg *GinGorm) Middleware() gin.HandlerFunc {
-	return func(ginCtx *gin.Context) {
+	return func(g *gin.Context) {
 
 		// 开始时间
-		startTime := gotime.Current().TimestampWithMillisecond()
-		requestTime := gotime.Current().Time
+		start := time.Now().UTC()
 
-		// 获取全部内容
-		requestBody := gorequest.NewParams()
-		queryParams := ginCtx.Request.URL.Query() // 请求URL参数
-		for key, values := range queryParams {
-			for _, value := range values {
-				requestBody.Set(key, value)
-			}
-		}
-		var dataMap map[string]any
-		rawData, _ := ginCtx.GetRawData() // 请求内容参数
-		if gojson.IsValidJSON(string(rawData)) {
-			dataMap = gojson.JsonDecodeNoError(string(rawData))
-		} else {
-			dataMap = gojson.ParseQueryString(string(rawData))
-		}
-		for key, value := range dataMap {
-			requestBody.Set(key, value)
-		}
+		// 模型
+		var log = ginGormLog{}
 
-		// 重新赋值
-		ginCtx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(rawData))
+		// 请求时间
+		log.RequestTime = gotime.Current().Time
 
-		blw := &ginGormBodyWriter{body: bytes.NewBufferString(""), ResponseWriter: ginCtx.Writer}
-		ginCtx.Writer = blw
+		// 创建自定义的 ResponseWriter 并替换原有的
+		blw := &ginGormBodyWriter{
+			ResponseWriter: g.Writer,
+			body:           bytes.NewBufferString(""),
+		}
+		g.Writer = blw
 
 		// 处理请求
-		ginCtx.Next()
-
-		// 响应
-		responseCode := ginCtx.Writer.Status()
-		responseBody := blw.body.String()
+		g.Next()
 
 		// 结束时间
-		endTime := gotime.Current().TimestampWithMillisecond()
-		responseTime := gotime.Current().Time
+		end := time.Now().UTC()
+
+		// 请求消耗时长
+		log.RequestCostTime = end.Sub(start).Seconds()
+
+		// 响应时间
+		log.ResponseTime = gotime.Current().Time
+
+		// 请求编号
+		log.RequestID = gotrace_id.GetGinTraceId(g)
+
+		// 请求主机
+		log.RequestHost = g.Request.Host
+
+		// 请求地址
+		log.RequestPath = gourl.UriFilterExcludeQueryString(g.Request.RequestURI)
+
+		// 请求参数
+		log.RequestQuery = gojson.JsonEncodeNoError(gojson.ParseQueryString(string(g.Request.RequestURI)))
+
+		// 请求方式
+		log.RequestMethod = g.Request.Method
+
+		// 请求协议
+		log.RequestScheme = g.Request.Proto
+
+		// 请求类型
+		log.RequestContentType = g.ContentType()
+
+		// 请求IP
+		log.RequestClientIP = g.ClientIP()
+
+		// 请求UA
+		log.RequestUserAgent = g.Request.UserAgent()
+
+		// 请求头
+		log.RequestHeader = gojson.JsonEncodeNoError(g.Request.Header)
+
+		// 响应头
+		log.ResponseHeader = gojson.JsonEncodeNoError(blw.Header)
+
+		// 响应状态
+		log.ResponseStatusCode = g.Writer.Status()
+
+		// 响应内容
+		if gojson.IsValidJSON(blw.body.String()) {
+			log.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(blw.body.String()))
+		} else {
+			log.ResponseBody = blw.body.String()
+		}
 
 		go func() {
-
-			// 记录
-			gg.recordJson(ginCtx, requestTime, requestBody, responseTime, responseCode, responseBody, endTime-startTime, gorequest.ClientIp(ginCtx.Request))
-
+			gg.gormRecord(g, log)
 		}()
 	}
 }
