@@ -71,9 +71,7 @@ func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 // 定义一个自定义的 ResponseWriter
 type ginGormBodyWriter struct {
 	gin.ResponseWriter
-	body    *bytes.Buffer
-	status  int
-	headers http.Header
+	body *bytes.Buffer
 }
 
 // 实现 http.ResponseWriter 的 Write 方法
@@ -90,16 +88,12 @@ func (w ginGormBodyWriter) WriteString(s string) (int, error) {
 
 // WriteHeader 实现 http.ResponseWriter 的 WriteHeader 方法
 func (w ginGormBodyWriter) WriteHeader(statusCode int) {
-	w.status = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
 // Header 实现 http.ResponseWriter 的 Header 方法
 func (w ginGormBodyWriter) Header() http.Header {
-	if w.headers == nil {
-		w.headers = make(http.Header)
-	}
-	return w.headers
+	return w.ResponseWriter.Header()
 }
 
 // Middleware 中间件
@@ -186,8 +180,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 			log.ResponseBody = blw.body.String()
 		}
 
-		go func() {
-			gg.gormRecord(g, log)
-		}()
+		go gg.gormRecord(g, log)
+
 	}
 }

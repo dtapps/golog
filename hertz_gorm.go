@@ -163,9 +163,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			log.ResponseBody = string(h.Response.Body())
 		}
 
-		go func() {
-			hg.gormRecord(c, log)
-		}()
+		go hg.gormRecord(c, log)
 
 	}
 }
