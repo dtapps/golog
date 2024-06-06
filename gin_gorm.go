@@ -10,6 +10,7 @@ import (
 	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
 	"gorm.io/gorm"
+	"io"
 	"net/http"
 	"time"
 )
@@ -118,6 +119,15 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 
 		// 请求时间
 		log.RequestTime = gotime.Current().Time
+
+		// Read the Body content
+		var bodyBytes []byte
+		if g.Request.Body != nil {
+			bodyBytes, _ = io.ReadAll(g.Request.Body)
+		}
+
+		// 将io.ReadCloser恢复到其原始状态
+		g.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		// 创建自定义的 ResponseWriter 并替换原有的
 		blw := &ginGormBodyWriter{
