@@ -83,10 +83,10 @@ func (w ginGormBodyWriter) Write(b []byte) (int, error) {
 }
 
 // WriteString 实现 http.ResponseWriter 的 WriteString 方法
-//func (w ginGormBodyWriter) WriteString(s string) (int, error) {
-//	w.body.WriteString(s)
-//	return w.ResponseWriter.WriteString(s)
-//}
+func (w ginGormBodyWriter) WriteString(s string) (int, error) {
+	w.body.WriteString(s)
+	return w.ResponseWriter.WriteString(s)
+}
 
 // WriteHeader 实现 http.ResponseWriter 的 WriteHeader 方法
 func (w ginGormBodyWriter) WriteHeader(statusCode int) {
@@ -100,11 +100,6 @@ func (w ginGormBodyWriter) Header() http.Header {
 		w.headers = make(http.Header)
 	}
 	return w.headers
-}
-
-func (gg *GinGorm) jsonUnmarshal(data string) (result any) {
-	_ = gojson.Unmarshal([]byte(data), &result)
-	return
 }
 
 // Middleware 中间件
