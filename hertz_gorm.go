@@ -87,7 +87,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		end := time.Now().UTC()
 
 		// 请求消耗时长
-		log.RequestCostTime = end.Sub(start).Seconds()
+		log.RequestCostTime = end.Sub(start).Milliseconds()
 
 		// 响应时间
 		log.ResponseTime = gotime.Current().Time

@@ -133,7 +133,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		end := time.Now().UTC()
 
 		// 请求消耗时长
-		log.RequestCostTime = end.Sub(start).Seconds()
+		log.RequestCostTime = end.Sub(start).Milliseconds()
 
 		// 响应时间
 		log.ResponseTime = gotime.Current().Time
@@ -169,7 +169,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		log.RequestHeader = gojson.JsonEncodeNoError(g.Request.Header)
 
 		// 响应头
-		log.ResponseHeader = gojson.JsonEncodeNoError(blw.Header)
+		log.ResponseHeader = gojson.JsonEncodeNoError(blw.Header())
 
 		// 响应状态
 		log.ResponseStatusCode = g.Writer.Status()

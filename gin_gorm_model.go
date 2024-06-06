@@ -21,7 +21,7 @@ type ginGormLog struct {
 	RequestClientIP    string    `gorm:"comment:请求IP" json:"request_client_ip,omitempty"`    // 请求IP
 	RequestUserAgent   string    `gorm:"comment:请求UA" json:"request_user_agent,omitempty"`   // 请求UA
 	RequestHeader      string    `gorm:"comment:请求头" json:"request_header,omitempty"`        // 请求头
-	RequestCostTime    float64   `gorm:"comment:请求消耗时长" json:"request_cost_time,omitempty"`  // 请求消耗时长
+	RequestCostTime    int64     `gorm:"comment:请求消耗时长" json:"request_cost_time,omitempty"`  // 请求消耗时长
 	ResponseTime       time.Time `gorm:"comment:响应时间" json:"response_time,omitempty"`        // 响应时间
 	ResponseHeader     string    `gorm:"comment:响应头" json:"response_header,omitempty"`       // 响应头
 	ResponseStatusCode int       `gorm:"comment:响应状态" json:"response_status_code,omitempty"` // 响应状态
