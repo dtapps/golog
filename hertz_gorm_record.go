@@ -2,8 +2,9 @@ package golog
 
 import (
 	"context"
+	"fmt"
 	"go.dtapp.net/gojson"
-	"log"
+	"log/slog"
 )
 
 // gormRecord 记录日志
@@ -19,7 +20,7 @@ func (hg *HertzGorm) gormRecord(ctx context.Context, data hertzGormLog) {
 		Table(hg.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		log.Printf("记录接口日志错误：%s", err)
-		log.Printf("记录接口日志数据：%+v", data)
+		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
+		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}
 }
