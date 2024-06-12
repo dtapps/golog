@@ -6,6 +6,7 @@ import (
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gourl"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"unicode/utf8"
@@ -17,8 +18,12 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 		return
 	}
 
-	// OpenTelemetry追踪
-	span := trace.SpanFromContext(ctx)
+	// OpenTelemetry链路追踪
+	if ag.trace {
+		tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
+		ctx, ag.span = tr.Start(ctx, "api")
+		defer ag.span.End()
+	}
 
 	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
 	data.SdkVersion = ag.config.SdkVersion                       //【程序】SdkVersion
@@ -28,8 +33,9 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 		data.ResponseBody = ""
 	}
 
-	if span.SpanContext().IsValid() {
-		data.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+	// OpenTelemetry链路追踪
+	if ag.trace {
+		data.TraceID = ag.span.SpanContext().TraceID().String() // 跟踪编号
 	}
 
 	// 请求编号

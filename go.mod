@@ -9,9 +9,10 @@ require (
 	github.com/hertz-contrib/requestid v1.1.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/gojson v1.0.4
-	go.dtapp.net/gorequest v1.0.61
+	go.dtapp.net/gorequest v1.0.62
 	go.dtapp.net/gotime v1.0.11
 	go.dtapp.net/gourl v1.0.0
+	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.10
@@ -62,7 +63,6 @@ require (
 	go.dtapp.net/gostring v1.0.15 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.52.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.52.0 // indirect
-	go.opentelemetry.io/otel v1.27.0 // indirect
 	go.opentelemetry.io/otel/metric v1.27.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.24.0 // indirect

@@ -9,6 +9,7 @@ import (
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"io"
@@ -36,6 +37,8 @@ type GinGorm struct {
 		stats     bool   // 状态
 		tableName string // 表名
 	}
+	trace bool       // OpenTelemetry链路追踪
+	span  trace.Span // OpenTelemetry链路追踪
 }
 
 // GinGormFun *GinGorm 框架日志驱动
@@ -66,6 +69,7 @@ func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 
 	}
 
+	gg.trace = true
 	return gg, nil
 }
 
@@ -101,8 +105,14 @@ func (w ginGormBodyWriter) Header() http.Header {
 func (gg *GinGorm) Middleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
 
-		// OpenTelemetry追踪
-		span := trace.SpanFromContext(g)
+		// OpenTelemetry链路追踪
+		if gg.trace {
+			tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
+			ctx, span := tr.Start(g, "gin")
+			gg.span = span
+			g.Request = g.Request.WithContext(ctx)
+			defer gg.span.End()
+		}
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -141,8 +151,9 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		// 响应时间
 		log.ResponseTime = gotime.Current().Time
 
-		if span.SpanContext().IsValid() {
-			log.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+		// OpenTelemetry链路追踪
+		if gg.trace {
+			log.TraceID = gg.span.SpanContext().TraceID().String() // 跟踪编号
 		}
 
 		// 请求编号
@@ -155,7 +166,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		log.RequestPath = gourl.UriFilterExcludeQueryString(g.Request.RequestURI)
 
 		// 请求参数
-		log.RequestQuery = gojson.JsonEncodeNoError(gojson.ParseQueryString(string(g.Request.RequestURI)))
+		log.RequestQuery = gojson.JsonEncodeNoError(gojson.ParseQueryString(g.Request.RequestURI))
 
 		// 请求方式
 		log.RequestMethod = g.Request.Method

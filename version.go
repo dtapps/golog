@@ -1,5 +1,5 @@
 package golog
 
 const (
-	Version = "1.0.141"
+	Version = "1.0.142"
 )

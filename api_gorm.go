@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go.dtapp.net/gorequest"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,8 @@ type ApiGorm struct {
 		stats     bool   // 状态
 		tableName string // 表名
 	}
+	trace bool       // OpenTelemetry链路追踪
+	span  trace.Span // OpenTelemetry链路追踪
 }
 
 // ApiGormFun 接口日志驱动
@@ -58,6 +61,7 @@ func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 
 	}
 
+	gl.trace = true
 	return gl, nil
 }
 

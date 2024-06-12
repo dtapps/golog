@@ -9,6 +9,7 @@ import (
 	"github.com/hertz-contrib/requestid"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gotime"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"strings"
@@ -35,6 +36,8 @@ type HertzGorm struct {
 		stats     bool   // 状态
 		tableName string // 表名
 	}
+	trace bool       // OpenTelemetry链路追踪
+	span  trace.Span // OpenTelemetry链路追踪
 }
 
 // HertzGormFun *HertzGorm 框架日志驱动
@@ -65,15 +68,20 @@ func NewHertzGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string
 
 	}
 
+	hg.trace = true
 	return hg, nil
 }
 
 // Middleware 中间件
 func (hg *HertzGorm) Middleware() app.HandlerFunc {
-	return func(c context.Context, h *app.RequestContext) {
+	return func(ctx context.Context, h *app.RequestContext) {
 
-		// OpenTelemetry追踪
-		span := trace.SpanFromContext(c)
+		// OpenTelemetry链路追踪
+		if hg.trace {
+			tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
+			ctx, hg.span = tr.Start(ctx, "hertz")
+			defer hg.span.End()
+		}
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -85,7 +93,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		log.RequestTime = gotime.Current().Time
 
 		// 处理请求
-		h.Next(c)
+		h.Next(ctx)
 
 		// 结束时间
 		end := time.Now().UTC()
@@ -97,7 +105,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		log.ResponseTime = gotime.Current().Time
 
 		// 输出路由日志
-		hlog.CtxTracef(c, "status=%d cost=%d method=%s full_path=%s client_ip=%s host=%s",
+		hlog.CtxTracef(ctx, "status=%d cost=%d method=%s full_path=%s client_ip=%s host=%s",
 			h.Response.StatusCode(),
 			log.RequestCostTime,
 			h.Request.Header.Method(),
@@ -106,8 +114,9 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			h.Request.Host(),
 		)
 
-		if span.SpanContext().IsValid() {
-			log.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+		// OpenTelemetry链路追踪
+		if hg.trace {
+			log.TraceID = hg.span.SpanContext().TraceID().String() // 跟踪编号
 		}
 
 		// 请求编号
@@ -171,7 +180,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			log.ResponseBody = string(h.Response.Body())
 		}
 
-		go hg.gormRecord(c, log)
+		go hg.gormRecord(ctx, log)
 
 	}
 }
