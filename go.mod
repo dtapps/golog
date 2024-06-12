@@ -11,7 +11,6 @@ require (
 	go.dtapp.net/gojson v1.0.4
 	go.dtapp.net/gorequest v1.0.60
 	go.dtapp.net/gotime v1.0.11
-	go.dtapp.net/gotrace_id v1.0.12
 	go.dtapp.net/gourl v1.0.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
