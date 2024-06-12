@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go.dtapp.net/gojson"
+	"go.opentelemetry.io/otel/codes"
 	"log/slog"
 )
 
@@ -20,6 +21,7 @@ func (hg *HertzGorm) gormRecord(ctx context.Context, data GormHertzLogModel) {
 		Table(hg.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
+		hg.TraceSetStatus(codes.Error, err.Error())
 		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
 		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}

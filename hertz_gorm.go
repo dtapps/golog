@@ -9,7 +9,6 @@ import (
 	"github.com/hertz-contrib/requestid"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gotime"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"strings"
@@ -77,11 +76,8 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 	return func(ctx context.Context, h *app.RequestContext) {
 
 		// OpenTelemetry链路追踪
-		if hg.trace {
-			tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
-			ctx, hg.span = tr.Start(ctx, "hertz")
-			defer hg.span.End()
-		}
+		ctx = hg.TraceStartSpan(ctx)
+		defer hg.TraceEndSpan()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -115,9 +111,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		)
 
 		// OpenTelemetry链路追踪
-		if hg.trace {
-			log.TraceID = hg.span.SpanContext().TraceID().String() // 跟踪编号
-		}
+		log.TraceID = hg.TraceGetTraceID() // 跟踪编号
 
 		// 请求编号
 		log.RequestID = requestid.Get(h)

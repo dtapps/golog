@@ -9,7 +9,6 @@ import (
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"io"
@@ -106,13 +105,8 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
 
 		// OpenTelemetry链路追踪
-		if gg.trace {
-			tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
-			ctx, span := tr.Start(g, "gin")
-			gg.span = span
-			g.Request = g.Request.WithContext(ctx)
-			defer gg.span.End()
-		}
+		g.Request = g.Request.WithContext(gg.TraceStartSpan(g))
+		defer gg.TraceEndSpan()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -152,9 +146,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		log.ResponseTime = gotime.Current().Time
 
 		// OpenTelemetry链路追踪
-		if gg.trace {
-			log.TraceID = gg.span.SpanContext().TraceID().String() // 跟踪编号
-		}
+		log.TraceID = gg.TraceGetTraceID() // 跟踪编号
 
 		// 请求编号
 		log.RequestID = gorequest.GetRequestIDContext(g)

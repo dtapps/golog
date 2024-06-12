@@ -6,8 +6,7 @@ import (
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gourl"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/codes"
 	"log/slog"
 	"unicode/utf8"
 )
@@ -16,13 +15,6 @@ import (
 func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	if ag.gormConfig.stats == false {
 		return
-	}
-
-	// OpenTelemetry链路追踪
-	if ag.trace {
-		tr := otel.Tracer("go.dtapp.net/golog", trace.WithInstrumentationVersion(Version))
-		ctx, ag.span = tr.Start(ctx, "api")
-		defer ag.span.End()
 	}
 
 	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
@@ -34,9 +26,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	}
 
 	// OpenTelemetry链路追踪
-	if ag.trace {
-		data.TraceID = ag.span.SpanContext().TraceID().String() // 跟踪编号
-	}
+	data.TraceID = ag.TraceGetTraceID() // 跟踪编号
 
 	// 请求编号
 	data.RequestID = gorequest.GetRequestIDContext(ctx)
@@ -45,6 +35,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
+		ag.TraceSetStatus(codes.Error, err.Error())
 		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
 		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}
