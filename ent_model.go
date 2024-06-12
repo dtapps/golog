@@ -10,7 +10,7 @@ import (
 func EntApiLogFields() []ent.Field {
 	return []ent.Field{
 		field.String("trace_id").Optional().Comment("跟踪编号"),
-		field.Int64("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
+		field.String("id").Optional().StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
 		field.Time("request_time").Optional().Comment("请求时间"),
 		field.String("request_uri").Optional().Comment("请求链接"),
 		field.String("request_url").Optional().Comment("请求链接"),
@@ -47,7 +47,7 @@ func EntApiLogIndexes() []ent.Index {
 func EntGinLogFields() []ent.Field {
 	return []ent.Field{
 		field.String("trace_id").Optional().Comment("跟踪编号"),
-		field.Int64("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
+		field.String("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
 		field.Time("request_time").Optional().Comment("请求时间"),
 		field.String("request_host").Optional().Comment("请求主机"),
 		field.String("request_path").Optional().Comment("请求地址"),
@@ -86,7 +86,7 @@ func EntGinLogIndexes() []ent.Index {
 func EntHertzLogFields() []ent.Field {
 	return []ent.Field{
 		field.String("trace_id").Optional().Comment("跟踪编号"),
-		field.Int64("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
+		field.String("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
 		field.Time("request_time").Optional().Comment("请求时间"),
 		field.String("request_host").Optional().Comment("请求主机"),
 		field.String("request_path").Optional().Comment("请求地址"),
