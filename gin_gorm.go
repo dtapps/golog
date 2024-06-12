@@ -6,9 +6,10 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
+	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
-	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
@@ -100,11 +101,14 @@ func (w ginGormBodyWriter) Header() http.Header {
 func (gg *GinGorm) Middleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
 
+		// OpenTelemetry追踪
+		span := trace.SpanFromContext(g)
+
 		// 开始时间
 		start := time.Now().UTC()
 
 		// 模型
-		var log = ginGormLog{}
+		var log = GormGinLogModel{}
 
 		// 请求时间
 		log.RequestTime = gotime.Current().Time
@@ -137,8 +141,12 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		// 响应时间
 		log.ResponseTime = gotime.Current().Time
 
+		if span.SpanContext().IsValid() {
+			log.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+		}
+
 		// 请求编号
-		log.RequestID = gotrace_id.GetGinTraceId(g)
+		log.RequestID = gorequest.GetRequestIDContext(g)
 
 		// 请求主机
 		log.RequestHost = g.Request.Host

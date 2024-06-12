@@ -8,7 +8,7 @@ import (
 )
 
 // gormRecord 记录日志
-func (gg *GinGorm) gormRecord(ctx context.Context, data ginGormLog) {
+func (gg *GinGorm) gormRecord(ctx context.Context, data GormGinLogModel) {
 	if gg.gormConfig.stats == false {
 		return
 	}

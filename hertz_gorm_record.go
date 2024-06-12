@@ -8,7 +8,7 @@ import (
 )
 
 // gormRecord 记录日志
-func (hg *HertzGorm) gormRecord(ctx context.Context, data hertzGormLog) {
+func (hg *HertzGorm) gormRecord(ctx context.Context, data GormHertzLogModel) {
 	if hg.gormConfig.stats == false {
 		return
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/hertz-contrib/requestid"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gotime"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 	"strings"
 	"time"
@@ -71,11 +72,14 @@ func NewHertzGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string
 func (hg *HertzGorm) Middleware() app.HandlerFunc {
 	return func(c context.Context, h *app.RequestContext) {
 
+		// OpenTelemetry追踪
+		span := trace.SpanFromContext(c)
+
 		// 开始时间
 		start := time.Now().UTC()
 
 		// 模型
-		var log = hertzGormLog{}
+		var log = GormHertzLogModel{}
 
 		// 请求时间
 		log.RequestTime = gotime.Current().Time
@@ -101,6 +105,10 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			h.ClientIP(),
 			h.Request.Host(),
 		)
+
+		if span.SpanContext().IsValid() {
+			log.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+		}
 
 		// 请求编号
 		log.RequestID = requestid.Get(h)

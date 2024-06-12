@@ -5,17 +5,21 @@ import (
 	"fmt"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
-	"go.dtapp.net/gotrace_id"
 	"go.dtapp.net/gourl"
+	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"unicode/utf8"
 )
 
 // 记录日志
-func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
+func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	if ag.gormConfig.stats == false {
 		return
 	}
+
+	// OpenTelemetry追踪
+	span := trace.SpanFromContext(ctx)
+
 	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
 	data.SdkVersion = ag.config.SdkVersion                       //【程序】SdkVersion
 	data.SystemInfo = gojson.JsonEncodeNoError(ag.config.system) //【系统】SystemInfo
@@ -24,7 +28,12 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 		data.ResponseBody = ""
 	}
 
-	data.TraceID = gotrace_id.GetTraceIdContext(ctx) //【记录】跟踪编号
+	if span.SpanContext().IsValid() {
+		data.TraceID = span.SpanContext().TraceID().String() // 跟踪编号
+	}
+
+	// 请求编号
+	data.RequestID = gorequest.GetRequestIDContext(ctx)
 
 	err := ag.gormClient.WithContext(ctx).
 		Table(ag.gormConfig.tableName).
@@ -37,7 +46,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data apiGormLog) {
 
 // 中间件
 func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Response) {
-	data := apiGormLog{
+	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              //【请求】时间
 		RequestUri:         request.RequestUri,                               //【请求】链接
 		RequestUrl:         gourl.UriParse(request.RequestUri).Url,           //【请求】链接
@@ -60,7 +69,7 @@ func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Respons
 
 // 中间件
 func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Response) {
-	data := apiGormLog{
+	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              //【请求】时间
 		RequestUri:         request.RequestUri,                               //【请求】链接
 		RequestUrl:         gourl.UriParse(request.RequestUri).Url,           //【请求】链接
@@ -83,7 +92,7 @@ func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Resp
 
 // 中间件
 func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
-	data := apiGormLog{
+	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              //【请求】时间
 		RequestUri:         request.RequestUri,                               //【请求】链接
 		RequestUrl:         gourl.UriParse(request.RequestUri).Url,           //【请求】链接

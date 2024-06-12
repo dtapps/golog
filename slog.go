@@ -1,9 +1,7 @@
 package golog
 
 import (
-	"context"
 	"go.dtapp.net/gotime"
-	"go.dtapp.net/gotrace_id"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"log/slog"
@@ -104,46 +102,4 @@ func (sl *SLog) WithLogger() (logger *slog.Logger) {
 		}
 	}
 	return logger
-}
-
-// WithTraceId 跟踪编号
-func (sl *SLog) WithTraceId(ctx context.Context) (logger *slog.Logger) {
-	return sl.WithTraceID(ctx)
-}
-
-// WithTraceID 跟踪编号
-func (sl *SLog) WithTraceID(ctx context.Context) (logger *slog.Logger) {
-	if sl.option.setJSONFormat {
-		jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
-			slog.String(gotrace_id.TraceIdKey, gotrace_id.GetTraceIdContext(ctx)),
-		})
-		logger = slog.New(jsonHandler)
-	} else {
-		textHandler := sl.textHandler.WithAttrs([]slog.Attr{
-			slog.String(gotrace_id.TraceIdKey, gotrace_id.GetTraceIdContext(ctx)),
-		})
-		logger = slog.New(textHandler)
-	}
-	return
-}
-
-// WithTraceIdStr 跟踪编号
-func (sl *SLog) WithTraceIdStr(traceID string) (logger *slog.Logger) {
-	return sl.WithTraceIDStr(traceID)
-}
-
-// WithTraceIDStr 跟踪编号
-func (sl *SLog) WithTraceIDStr(traceID string) (logger *slog.Logger) {
-	if sl.option.setJSONFormat {
-		jsonHandler := sl.jsonHandler.WithAttrs([]slog.Attr{
-			slog.String(gotrace_id.TraceIdKey, traceID),
-		})
-		logger = slog.New(jsonHandler)
-	} else {
-		textHandler := sl.textHandler.WithAttrs([]slog.Attr{
-			slog.String(gotrace_id.TraceIdKey, traceID),
-		})
-		logger = slog.New(textHandler)
-	}
-	return
 }
