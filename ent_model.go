@@ -10,7 +10,7 @@ import (
 func EntApiLogFields() []ent.Field {
 	return []ent.Field{
 		field.String("trace_id").Optional().Comment("跟踪编号"),
-		field.String("id").Optional().StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
+		field.String("id").StorageKey("request_id").Comment("请求编号"), // 用 request_id 覆盖 框架的 id
 		field.Time("request_time").Optional().Comment("请求时间"),
 		field.String("request_uri").Optional().Comment("请求链接"),
 		field.String("request_url").Optional().Comment("请求链接"),
