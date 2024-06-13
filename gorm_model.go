@@ -14,6 +14,7 @@ type GormApiLogModel struct {
 	RequestParams      string    `gorm:"comment:请求参数" json:"request_params,omitempty"`        // 请求参数
 	RequestHeader      string    `gorm:"comment:请求头部" json:"request_header,omitempty"`        // 请求头部
 	RequestIP          string    `gorm:"comment:请求请求IP" json:"request_ip,omitempty"`          // 请求请求IP
+	RequestCostTime    int64     `gorm:"comment:请求消耗时长" json:"request_cost_time,omitempty"`   // 请求消耗时长
 	ResponseHeader     string    `gorm:"comment:响应头部" json:"response_header,omitempty"`       // 响应头部
 	ResponseStatusCode int       `gorm:"comment:响应状态码" json:"response_status_code,omitempty"` // 响应状态码
 	ResponseBody       string    `gorm:"comment:响应数据" json:"response_body,omitempty"`         // 响应数据
@@ -42,7 +43,7 @@ type GormGinLogModel struct {
 	ResponseTime       time.Time `gorm:"index;comment:响应时间" json:"response_time,omitempty"`  // 响应时间
 	ResponseHeader     string    `gorm:"comment:响应头" json:"response_header,omitempty"`       // 响应头
 	ResponseStatusCode int       `gorm:"comment:响应状态" json:"response_status_code,omitempty"` // 响应状态
-	ResponseBody       string    `gorm:"comment:响应内容" json:"response_data,omitempty"`        // 响应内容
+	ResponseBody       string    `gorm:"comment:响应内容" json:"response_body,omitempty"`        // 响应内容
 	GoVersion          string    `gorm:"comment:Go版本" json:"go_version,omitempty"`           // Go版本
 	SdkVersion         string    `gorm:"comment:Sdk版本" json:"sdk_version,omitempty"`         // Sdk版本
 	SystemInfo         string    `gorm:"comment:系统信息" json:"system_info,omitempty"`          // 系统信息
@@ -67,7 +68,7 @@ type GormHertzLogModel struct {
 	ResponseTime       time.Time `gorm:"index;comment:响应时间" json:"response_time,omitempty"`  // 响应时间
 	ResponseHeader     string    `gorm:"comment:响应头" json:"response_header,omitempty"`       // 响应头
 	ResponseStatusCode int       `gorm:"comment:响应状态" json:"response_status_code,omitempty"` // 响应状态
-	ResponseBody       string    `gorm:"comment:响应内容" json:"response_data,omitempty"`        // 响应内容
+	ResponseBody       string    `gorm:"comment:响应内容" json:"response_body,omitempty"`        // 响应内容
 	GoVersion          string    `gorm:"comment:Go版本" json:"go_version,omitempty"`           // Go版本
 	SdkVersion         string    `gorm:"comment:Sdk版本" json:"sdk_version,omitempty"`         // Sdk版本
 	SystemInfo         string    `gorm:"comment:系统信息" json:"system_info,omitempty"`          // 系统信息

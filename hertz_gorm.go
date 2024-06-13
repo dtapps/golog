@@ -110,8 +110,8 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			h.Request.Host(),
 		)
 
-		// OpenTelemetry链路追踪
-		log.TraceID = hg.TraceGetTraceID() // 跟踪编号
+		// 跟踪编号
+		log.TraceID = hg.TraceGetTraceID()
 
 		// 请求编号
 		log.RequestID = requestid.Get(h)
