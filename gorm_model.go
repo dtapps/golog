@@ -19,9 +19,6 @@ type GormApiLogModel struct {
 	ResponseStatusCode int       `gorm:"comment:响应状态码" json:"response_status_code,omitempty"` // 响应状态码
 	ResponseBody       string    `gorm:"comment:响应数据" json:"response_body,omitempty"`         // 响应数据
 	ResponseTime       time.Time `gorm:"index;comment:响应时间" json:"response_time,omitempty"`   // 响应时间
-	GoVersion          string    `gorm:"comment:Go版本" json:"go_version,omitempty"`            // Go版本
-	SdkVersion         string    `gorm:"comment:Sdk版本" json:"sdk_version,omitempty"`          // Sdk版本
-	SystemInfo         string    `gorm:"comment:系统信息" json:"system_info,omitempty"`           // 系统信息
 }
 
 // GormGinLogModel Gin框架日志模型
@@ -44,9 +41,6 @@ type GormGinLogModel struct {
 	ResponseHeader     string    `gorm:"comment:响应头" json:"response_header,omitempty"`       // 响应头
 	ResponseStatusCode int       `gorm:"comment:响应状态" json:"response_status_code,omitempty"` // 响应状态
 	ResponseBody       string    `gorm:"comment:响应内容" json:"response_body,omitempty"`        // 响应内容
-	GoVersion          string    `gorm:"comment:Go版本" json:"go_version,omitempty"`           // Go版本
-	SdkVersion         string    `gorm:"comment:Sdk版本" json:"sdk_version,omitempty"`         // Sdk版本
-	SystemInfo         string    `gorm:"comment:系统信息" json:"system_info,omitempty"`          // 系统信息
 }
 
 // GormHertzLogModel Hertz框架日志模型
@@ -69,7 +63,4 @@ type GormHertzLogModel struct {
 	ResponseHeader     string    `gorm:"comment:响应头" json:"response_header,omitempty"`       // 响应头
 	ResponseStatusCode int       `gorm:"comment:响应状态" json:"response_status_code,omitempty"` // 响应状态
 	ResponseBody       string    `gorm:"comment:响应内容" json:"response_body,omitempty"`        // 响应内容
-	GoVersion          string    `gorm:"comment:Go版本" json:"go_version,omitempty"`           // Go版本
-	SdkVersion         string    `gorm:"comment:Sdk版本" json:"sdk_version,omitempty"`         // Sdk版本
-	SystemInfo         string    `gorm:"comment:系统信息" json:"system_info,omitempty"`          // 系统信息
 }

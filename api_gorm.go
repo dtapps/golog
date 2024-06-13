@@ -11,19 +11,6 @@ import (
 // ApiGorm 接口日志
 type ApiGorm struct {
 	gormClient *gorm.DB // 数据库驱动
-	config     struct {
-		GoVersion  string // go版本
-		SdkVersion string // sdk版本
-		system     struct {
-			SystemVersion  string  `json:"system_version"`   // 系统版本
-			SystemOs       string  `json:"system_os"`        // 系统类型
-			SystemArch     string  `json:"system_arch"`      // 系统内核
-			SystemInsideIP string  `json:"system_inside_ip"` // 内网IP
-			SystemCpuModel string  `json:"system_cpu_model"` // CPU型号
-			SystemCpuCores int     `json:"system_cpu_cores"` // CPU核数
-			SystemCpuMhz   float64 `json:"system_cpu_mhz"`   // CPU兆赫
-		}
-	}
 	gormConfig struct {
 		stats     bool   // 状态
 		tableName string // 表名
@@ -37,10 +24,7 @@ type ApiGormFun func() *ApiGorm
 
 // NewApiGorm 创建接口实例化
 func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*ApiGorm, error) {
-
 	gl := &ApiGorm{}
-
-	gl.setConfig(ctx)
 
 	if gormClient == nil {
 		gl.gormConfig.stats = false

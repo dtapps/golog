@@ -3,70 +3,34 @@ package golog
 import (
 	"bytes"
 	"context"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"time"
 )
 
+// GinLogFunc Gin框架日志函数
+type GinLogFunc func(ctx context.Context, response *GormGinLogModel)
+
 // GinGorm 框架日志
 type GinGorm struct {
-	gormClient *gorm.DB // 数据库驱动
-	config     struct {
-		GoVersion  string // go版本
-		SdkVersion string // sdk版本
-		system     struct {
-			SystemVersion  string  `json:"system_version"`   // 系统版本
-			SystemOs       string  `json:"system_os"`        // 系统类型
-			SystemArch     string  `json:"system_arch"`      // 系统内核
-			SystemInsideIP string  `json:"system_inside_ip"` // 内网IP
-			SystemCpuModel string  `json:"system_cpu_model"` // CPU型号
-			SystemCpuCores int     `json:"system_cpu_cores"` // CPU核数
-			SystemCpuMhz   float64 `json:"system_cpu_mhz"`   // CPU兆赫
-		}
-	}
-	gormConfig struct {
-		stats     bool   // 状态
-		tableName string // 表名
-	}
-	trace bool       // OpenTelemetry链路追踪
-	span  trace.Span // OpenTelemetry链路追踪
+	ginLogFunc GinLogFunc // Gin框架日志函数
+	trace      bool       // OpenTelemetry链路追踪
+	span       trace.Span // OpenTelemetry链路追踪
 }
 
 // GinGormFun *GinGorm 框架日志驱动
 type GinGormFun func() *GinGorm
 
-// NewGinGorm 创建框架实例化
-func NewGinGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*GinGorm, error) {
-
+// NewGinGorm 创建Gin框架实例
+func NewGinGorm(ctx context.Context) (*GinGorm, error) {
 	gg := &GinGorm{}
-	gg.setConfig(ctx)
-
-	if gormClient == nil {
-		gg.gormConfig.stats = false
-	} else {
-
-		gg.gormClient = gormClient
-
-		if gormTableName == "" {
-			return nil, errors.New("没有设置表名")
-		} else {
-			gg.gormConfig.tableName = gormTableName
-		}
-
-		gg.gormConfig.stats = true
-
-		// 创建模型
-		gg.gormAutoMigrate(ctx)
-
-	}
 
 	gg.trace = true
 	return gg, nil
@@ -191,7 +155,34 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 			log.ResponseBody = blw.body.String()
 		}
 
-		go gg.gormRecord(g, log)
+		// OpenTelemetry链路追踪
+		gg.TraceSetAttributes(attribute.String("request.id", log.RequestID))
+		gg.TraceSetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
+		gg.TraceSetAttributes(attribute.String("request.host", log.RequestHost))
+		gg.TraceSetAttributes(attribute.String("request.path", log.RequestPath))
+		gg.TraceSetAttributes(attribute.String("request.query", log.RequestQuery))
+		gg.TraceSetAttributes(attribute.String("request.method", log.RequestMethod))
+		gg.TraceSetAttributes(attribute.String("request.scheme", log.RequestScheme))
+		gg.TraceSetAttributes(attribute.String("request.content_type", log.RequestContentType))
+		gg.TraceSetAttributes(attribute.String("request.body", log.RequestBody))
+		gg.TraceSetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
+		gg.TraceSetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
+		gg.TraceSetAttributes(attribute.String("request.header", log.RequestHeader))
+		gg.TraceSetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
+		gg.TraceSetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
+		gg.TraceSetAttributes(attribute.String("response.header", log.ResponseHeader))
+		gg.TraceSetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
+		gg.TraceSetAttributes(attribute.String("response.body", log.ResponseBody))
+
+		// 调用Gin框架日志函数
+		if gg.ginLogFunc != nil {
+			gg.ginLogFunc(g, &log)
+		}
 
 	}
+}
+
+// SetLogFunc 设置日志记录方法
+func (gg *GinGorm) SetLogFunc(ginLogFunc GinLogFunc) {
+	gg.ginLogFunc = ginLogFunc
 }

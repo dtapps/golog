@@ -24,9 +24,6 @@ func EntApiLogFields() []ent.Field {
 		field.Int("response_status_code").Optional().Comment("响应状态码"),
 		field.String("response_body").Optional().Comment("响应数据"),
 		field.Time("response_time").Optional().Comment("响应时间"),
-		field.String("go_version").Optional().Comment("Go版本"),
-		field.String("sdk_version").Optional().Comment("Sdk版本"),
-		field.String("system_info").Optional().Comment("系统信息"),
 	}
 }
 
@@ -65,9 +62,6 @@ func EntGinLogFields() []ent.Field {
 		field.String("response_header").Optional().Comment("响应头"),
 		field.Int("response_status_code").Optional().Comment("响应状态"),
 		field.String("response_body").Optional().Comment("响应内容"),
-		field.String("go_version").Optional().Comment("Go版本"),
-		field.String("sdk_version").Optional().Comment("Sdk版本"),
-		field.String("system_info").Optional().Comment("系统信息"),
 	}
 }
 
@@ -104,9 +98,6 @@ func EntHertzLogFields() []ent.Field {
 		field.String("response_header").Optional().Comment("响应头"),
 		field.Int("response_status_code").Optional().Comment("响应状态"),
 		field.String("response_body").Optional().Comment("响应内容"),
-		field.String("go_version").Optional().Comment("Go版本"),
-		field.String("sdk_version").Optional().Comment("Sdk版本"),
-		field.String("system_info").Optional().Comment("系统信息"),
 	}
 }
 

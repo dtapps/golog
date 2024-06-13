@@ -7,9 +7,8 @@ require (
 	github.com/cloudwego/hertz v0.9.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/hertz-contrib/requestid v1.1.0
-	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.dtapp.net/gojson v1.0.4
-	go.dtapp.net/gorequest v1.0.64
+	go.dtapp.net/gorequest v1.0.65
 	go.dtapp.net/gotime v1.0.11
 	go.dtapp.net/gourl v1.0.0
 	go.opentelemetry.io/otel v1.27.0
@@ -35,7 +34,6 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
@@ -54,11 +52,8 @@ require (
 	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/tklauser/go-sysconf v0.3.14 // indirect
-	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.dtapp.net/gorandom v1.0.3 // indirect
 	go.dtapp.net/gostring v1.0.15 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.52.0 // indirect

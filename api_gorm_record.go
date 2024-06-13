@@ -19,10 +19,6 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 		return
 	}
 
-	data.GoVersion = ag.config.GoVersion                         //【程序】GoVersion
-	data.SdkVersion = ag.config.SdkVersion                       //【程序】SdkVersion
-	data.SystemInfo = gojson.JsonEncodeNoError(ag.config.system) //【系统】SystemInfo
-
 	if utf8.ValidString(data.ResponseBody) == false {
 		data.ResponseBody = ""
 	}
@@ -48,7 +44,6 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	ag.TraceSetAttributes(attribute.Int("response.status_code", data.ResponseStatusCode))
 	ag.TraceSetAttributes(attribute.String("response.body", data.ResponseBody))
 	ag.TraceSetAttributes(attribute.String("response.time", data.ResponseTime.Format(gotime.DateTimeFormat)))
-	ag.TraceSetAttributes(attribute.String("system_info", data.SystemInfo))
 
 	err := ag.gormClient.WithContext(ctx).
 		Table(ag.gormConfig.tableName).

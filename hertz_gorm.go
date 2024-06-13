@@ -2,70 +2,34 @@ package golog
 
 import (
 	"context"
-	"errors"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/requestid"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gotime"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"gorm.io/gorm"
 	"strings"
 	"time"
 )
 
+// HertzLogFunc Hertz框架日志函数
+type HertzLogFunc func(ctx context.Context, response *GormHertzLogModel)
+
 // HertzGorm 框架日志
 type HertzGorm struct {
-	gormClient *gorm.DB // 数据库驱动
-	config     struct {
-		GoVersion  string // go版本
-		SdkVersion string // sdk版本
-		system     struct {
-			SystemVersion  string  `json:"system_version"`   // 系统版本
-			SystemOs       string  `json:"system_os"`        // 系统类型
-			SystemArch     string  `json:"system_arch"`      // 系统内核
-			SystemInsideIP string  `json:"system_inside_ip"` // 内网IP
-			SystemCpuModel string  `json:"system_cpu_model"` // CPU型号
-			SystemCpuCores int     `json:"system_cpu_cores"` // CPU核数
-			SystemCpuMhz   float64 `json:"system_cpu_mhz"`   // CPU兆赫
-		}
-	}
-	gormConfig struct {
-		stats     bool   // 状态
-		tableName string // 表名
-	}
-	trace bool       // OpenTelemetry链路追踪
-	span  trace.Span // OpenTelemetry链路追踪
+	hertzLogFunc HertzLogFunc // Hertz框架日志函数
+	trace        bool         // OpenTelemetry链路追踪
+	span         trace.Span   // OpenTelemetry链路追踪
 }
 
 // HertzGormFun *HertzGorm 框架日志驱动
 type HertzGormFun func() *HertzGorm
 
 // NewHertzGorm 创建框架实例化
-func NewHertzGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) (*HertzGorm, error) {
-
+func NewHertzGorm(ctx context.Context) (*HertzGorm, error) {
 	hg := &HertzGorm{}
-	hg.setConfig(ctx)
-
-	if gormClient == nil {
-		hg.gormConfig.stats = false
-	} else {
-
-		hg.gormClient = gormClient
-
-		if gormTableName == "" {
-			return nil, errors.New("没有设置表名")
-		} else {
-			hg.gormConfig.tableName = gormTableName
-		}
-
-		hg.gormConfig.stats = true
-
-		// 创建模型
-		hg.gormAutoMigrate(ctx)
-
-	}
 
 	hg.trace = true
 	return hg, nil
@@ -174,7 +138,29 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 			log.ResponseBody = string(h.Response.Body())
 		}
 
-		go hg.gormRecord(ctx, log)
+		// OpenTelemetry链路追踪
+		hg.TraceSetAttributes(attribute.String("request.id", log.RequestID))
+		hg.TraceSetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
+		hg.TraceSetAttributes(attribute.String("request.host", log.RequestHost))
+		hg.TraceSetAttributes(attribute.String("request.path", log.RequestPath))
+		hg.TraceSetAttributes(attribute.String("request.query", log.RequestQuery))
+		hg.TraceSetAttributes(attribute.String("request.method", log.RequestMethod))
+		hg.TraceSetAttributes(attribute.String("request.scheme", log.RequestScheme))
+		hg.TraceSetAttributes(attribute.String("request.content_type", log.RequestContentType))
+		hg.TraceSetAttributes(attribute.String("request.body", log.RequestBody))
+		hg.TraceSetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
+		hg.TraceSetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
+		hg.TraceSetAttributes(attribute.String("request.header", log.RequestHeader))
+		hg.TraceSetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
+		hg.TraceSetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
+		hg.TraceSetAttributes(attribute.String("response.header", log.ResponseHeader))
+		hg.TraceSetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
+		hg.TraceSetAttributes(attribute.String("response.body", log.ResponseBody))
+
+		// 调用Hertz框架日志函数
+		if hg.hertzLogFunc != nil {
+			hg.hertzLogFunc(ctx, &log)
+		}
 
 	}
 }
