@@ -43,8 +43,8 @@ func (gg *GinGorm) gormRecord(ctx context.Context, data GormGinLogModel) {
 		Table(gg.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		gg.TraceSetStatus(codes.Error, err.Error())
 		gg.TraceRecordError(err)
+		gg.TraceSetStatus(codes.Error, err.Error())
 		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
 		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}

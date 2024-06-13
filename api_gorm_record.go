@@ -54,8 +54,8 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		ag.TraceSetStatus(codes.Error, err.Error())
 		ag.TraceRecordError(err)
+		ag.TraceSetStatus(codes.Error, err.Error())
 		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
 		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}
