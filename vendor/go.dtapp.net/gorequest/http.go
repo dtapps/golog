@@ -345,6 +345,12 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	}
 
 	// 跟踪编号
+	//traceID := c.TraceGetTraceID()
+	//if traceID != "" {
+	//	httpResponse.RequestHeader.Set(xRequestID, httpResponse.RequestID)
+	//}
+
+	// 请求编号
 	httpResponse.RequestID = GetRequestIDContext(ctx)
 	if httpResponse.RequestID != "" {
 		httpResponse.RequestHeader.Set(xRequestID, httpResponse.RequestID)
@@ -480,9 +486,12 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if gojson.IsValidJSON(string(httpResponse.ResponseBody)) {
 		c.TraceSetAttributes(attribute.String("response.body", gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(httpResponse.ResponseBody)))))
 	} else {
-		c.TraceSetAttributes(attribute.String("response.body", string(httpResponse.ResponseBody)))
+		if httpResponse.HeaderIsImg() {
+		} else if httpResponse.HeaderHtml() {
+		} else {
+			c.TraceSetAttributes(attribute.String("response.body", string(httpResponse.ResponseBody)))
+		}
 	}
-	c.TraceSetAttributes(attribute.Int64("response.content_length", httpResponse.ResponseContentLength))
 
 	// 调用日志记录函数
 	if c.logFunc != nil {

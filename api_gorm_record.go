@@ -2,14 +2,12 @@ package golog
 
 import (
 	"context"
-	"fmt"
 	"go.dtapp.net/gojson"
 	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"log/slog"
 	"unicode/utf8"
 )
 
@@ -51,8 +49,6 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	if err != nil {
 		ag.TraceRecordError(err)
 		ag.TraceSetStatus(codes.Error, err.Error())
-		slog.Error(fmt.Sprintf("记录接口日志错误：%s", err))
-		slog.Error(fmt.Sprintf("记录接口日志数据：%+v", data))
 	}
 }
 
@@ -71,7 +67,7 @@ func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Respons
 		ResponseStatusCode: request.ResponseStatusCode,                       // 响应状态码
 		ResponseTime:       request.ResponseTime,                             // 响应时间
 	}
-	if !request.HeaderIsImg() {
+	if !request.HeaderIsImg() && !request.HeaderHtml() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(request.ResponseBody))) // 响应数据
 		}
@@ -95,7 +91,7 @@ func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Resp
 		ResponseStatusCode: request.ResponseStatusCode,                       // 响应状态码
 		ResponseTime:       request.ResponseTime,                             // 响应时间
 	}
-	if !request.HeaderIsImg() {
+	if !request.HeaderIsImg() && !request.HeaderHtml() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = gojson.XmlEncodeNoError(gojson.XmlDecodeNoError(request.ResponseBody)) // 响应内容
 		}
@@ -119,7 +115,7 @@ func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request
 		ResponseStatusCode: request.ResponseStatusCode,                       // 响应状态码
 		ResponseTime:       request.ResponseTime,                             // 响应时间
 	}
-	if !request.HeaderIsImg() {
+	if !request.HeaderIsImg() && !request.HeaderHtml() {
 		if len(request.ResponseBody) > 0 {
 			data.ResponseBody = gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(request.ResponseBody))) // 响应数据
 		}

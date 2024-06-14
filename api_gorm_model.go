@@ -2,8 +2,7 @@ package golog
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // 创建模型
@@ -16,6 +15,7 @@ func (ag *ApiGorm) gormAutoMigrate(ctx context.Context) {
 		Table(ag.gormConfig.tableName).
 		AutoMigrate(&GormApiLogModel{})
 	if err != nil {
-		slog.Error(fmt.Sprintf("创建模型：%s", err))
+		ag.TraceRecordError(err)
+		ag.TraceSetStatus(codes.Error, err.Error())
 	}
 }
