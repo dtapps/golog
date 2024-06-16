@@ -34,10 +34,10 @@ func NewHertzGorm(ctx context.Context) (*HertzGorm, error) {
 
 // Middleware 中间件
 func (hg *HertzGorm) Middleware() app.HandlerFunc {
-	return func(ctx context.Context, h *app.RequestContext) {
+	return func(c context.Context, h *app.RequestContext) {
 
 		// OpenTelemetry链路追踪
-		ctx, span := hg.TraceStartSpan(ctx)
+		ctx, span := hg.TraceStartSpan(c)
 		defer span.End()
 
 		// 开始时间
@@ -50,7 +50,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		log.RequestTime = gotime.Current().Time
 
 		// 处理请求
-		h.Next(ctx)
+		h.Next(c)
 
 		// 结束时间
 		end := time.Now().UTC()

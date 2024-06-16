@@ -48,7 +48,7 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, span trace.Span, data GormApi
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		span.RecordError(err)
+		span.RecordError(err, trace.WithStackTrace(true))
 		span.SetStatus(codes.Error, err.Error())
 	}
 }
