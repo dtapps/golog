@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"go.dtapp.net/gorequest"
-	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
 
@@ -15,8 +14,6 @@ type ApiGorm struct {
 		stats     bool   // 状态
 		tableName string // 表名
 	}
-	trace bool       // OpenTelemetry链路追踪
-	span  trace.Span // OpenTelemetry链路追踪
 }
 
 // ApiGormFun 接口日志驱动
@@ -40,12 +37,8 @@ func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 
 		gl.gormConfig.stats = true
 
-		// 创建模型
-		gl.gormAutoMigrate(ctx)
-
 	}
 
-	gl.trace = true
 	return gl, nil
 }
 
@@ -53,11 +46,11 @@ func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx = ag.TraceStartSpan(ctx)
-	defer ag.TraceEndSpan()
+	ctx, span := ag.TraceStartSpan(ctx)
+	defer span.End()
 
 	if ag.gormConfig.stats {
-		ag.gormMiddleware(ctx, request)
+		ag.gormMiddleware(ctx, span, request)
 	}
 }
 
@@ -65,11 +58,11 @@ func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
 func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx = ag.TraceStartSpan(ctx)
-	defer ag.TraceEndSpan()
+	ctx, span := ag.TraceStartSpan(ctx)
+	defer span.End()
 
 	if ag.gormConfig.stats {
-		ag.gormMiddlewareXml(ctx, request)
+		ag.gormMiddlewareXml(ctx, span, request)
 	}
 }
 
@@ -77,10 +70,10 @@ func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response
 func (ag *ApiGorm) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx = ag.TraceStartSpan(ctx)
-	defer ag.TraceEndSpan()
+	ctx, span := ag.TraceStartSpan(ctx)
+	defer span.End()
 
 	if ag.gormConfig.stats {
-		ag.gormMiddlewareCustom(ctx, api, request)
+		ag.gormMiddlewareCustom(ctx, span, api, request)
 	}
 }

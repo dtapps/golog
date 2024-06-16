@@ -7,9 +7,9 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/requestid"
 	"go.dtapp.net/gojson"
+	"go.dtapp.net/gorequest"
 	"go.dtapp.net/gotime"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 	"strings"
 	"time"
 )
@@ -20,8 +20,6 @@ type HertzLogFunc func(ctx context.Context, response *GormHertzLogModel)
 // HertzGorm 框架日志
 type HertzGorm struct {
 	hertzLogFunc HertzLogFunc // Hertz框架日志函数
-	trace        bool         // OpenTelemetry链路追踪
-	span         trace.Span   // OpenTelemetry链路追踪
 }
 
 // HertzGormFun *HertzGorm 框架日志驱动
@@ -31,7 +29,6 @@ type HertzGormFun func() *HertzGorm
 func NewHertzGorm(ctx context.Context) (*HertzGorm, error) {
 	hg := &HertzGorm{}
 
-	hg.trace = true
 	return hg, nil
 }
 
@@ -40,8 +37,8 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 	return func(ctx context.Context, h *app.RequestContext) {
 
 		// OpenTelemetry链路追踪
-		ctx = hg.TraceStartSpan(ctx)
-		defer hg.TraceEndSpan()
+		ctx, span := hg.TraceStartSpan(ctx)
+		defer span.End()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -75,7 +72,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		)
 
 		// 跟踪编号
-		log.TraceID = hg.TraceGetTraceID()
+		log.TraceID = gorequest.TraceSpanGetTraceID(span)
 
 		// 请求编号
 		log.RequestID = requestid.Get(h)
@@ -139,23 +136,23 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		}
 
 		// OpenTelemetry链路追踪
-		hg.TraceSetAttributes(attribute.String("request.id", log.RequestID))
-		hg.TraceSetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
-		hg.TraceSetAttributes(attribute.String("request.host", log.RequestHost))
-		hg.TraceSetAttributes(attribute.String("request.path", log.RequestPath))
-		hg.TraceSetAttributes(attribute.String("request.query", log.RequestQuery))
-		hg.TraceSetAttributes(attribute.String("request.method", log.RequestMethod))
-		hg.TraceSetAttributes(attribute.String("request.scheme", log.RequestScheme))
-		hg.TraceSetAttributes(attribute.String("request.content_type", log.RequestContentType))
-		hg.TraceSetAttributes(attribute.String("request.body", log.RequestBody))
-		hg.TraceSetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
-		hg.TraceSetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
-		hg.TraceSetAttributes(attribute.String("request.header", log.RequestHeader))
-		hg.TraceSetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
-		hg.TraceSetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
-		hg.TraceSetAttributes(attribute.String("response.header", log.ResponseHeader))
-		hg.TraceSetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
-		hg.TraceSetAttributes(attribute.String("response.body", log.ResponseBody))
+		span.SetAttributes(attribute.String("request.id", log.RequestID))
+		span.SetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
+		span.SetAttributes(attribute.String("request.host", log.RequestHost))
+		span.SetAttributes(attribute.String("request.path", log.RequestPath))
+		span.SetAttributes(attribute.String("request.query", log.RequestQuery))
+		span.SetAttributes(attribute.String("request.method", log.RequestMethod))
+		span.SetAttributes(attribute.String("request.scheme", log.RequestScheme))
+		span.SetAttributes(attribute.String("request.content_type", log.RequestContentType))
+		span.SetAttributes(attribute.String("request.body", log.RequestBody))
+		span.SetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
+		span.SetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
+		span.SetAttributes(attribute.String("request.header", log.RequestHeader))
+		span.SetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
+		span.SetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
+		span.SetAttributes(attribute.String("response.header", log.ResponseHeader))
+		span.SetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
+		span.SetAttributes(attribute.String("response.body", log.ResponseBody))
 
 		// 调用Hertz框架日志函数
 		if hg.hertzLogFunc != nil {

@@ -5,7 +5,6 @@ import (
 )
 
 type LogResponse struct {
-	SpanID             string    `json:"span_id"`              // 跨度编号
 	TraceID            string    `json:"trace_id"`             // 追踪编号
 	RequestID          string    `json:"request_id"`           // 请求编号
 	RequestTime        time.Time `json:"request_time"`         // 请求时间

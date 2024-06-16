@@ -9,7 +9,6 @@ import (
 	"go.dtapp.net/gotime"
 	"go.dtapp.net/gourl"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 	"io"
 	"net/http"
 	"time"
@@ -21,8 +20,6 @@ type GinLogFunc func(ctx context.Context, response *GormGinLogModel)
 // GinGorm 框架日志
 type GinGorm struct {
 	ginLogFunc GinLogFunc // Gin框架日志函数
-	trace      bool       // OpenTelemetry链路追踪
-	span       trace.Span // OpenTelemetry链路追踪
 }
 
 // GinGormFun *GinGorm 框架日志驱动
@@ -32,7 +29,6 @@ type GinGormFun func() *GinGorm
 func NewGinGorm(ctx context.Context) (*GinGorm, error) {
 	gg := &GinGorm{}
 
-	gg.trace = true
 	return gg, nil
 }
 
@@ -69,8 +65,9 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
 
 		// OpenTelemetry链路追踪
-		g.Request = g.Request.WithContext(gg.TraceStartSpan(g))
-		defer gg.TraceEndSpan()
+		//g.Request = g.Request.WithContext(gg.TraceStartSpan(g))
+		ctx, span := gg.TraceStartSpan(g.Request.Context())
+		defer span.End()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -110,10 +107,10 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		log.ResponseTime = gotime.Current().Time
 
 		// 跟踪编号
-		log.TraceID = gg.TraceGetTraceID()
+		log.TraceID = gorequest.TraceSpanGetTraceID(span)
 
 		// 请求编号
-		log.RequestID = gorequest.GetRequestIDContext(g)
+		log.RequestID = gorequest.GetRequestIDContext(ctx)
 
 		// 请求主机
 		log.RequestHost = g.Request.Host
@@ -156,27 +153,27 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		}
 
 		// OpenTelemetry链路追踪
-		gg.TraceSetAttributes(attribute.String("request.id", log.RequestID))
-		gg.TraceSetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
-		gg.TraceSetAttributes(attribute.String("request.host", log.RequestHost))
-		gg.TraceSetAttributes(attribute.String("request.path", log.RequestPath))
-		gg.TraceSetAttributes(attribute.String("request.query", log.RequestQuery))
-		gg.TraceSetAttributes(attribute.String("request.method", log.RequestMethod))
-		gg.TraceSetAttributes(attribute.String("request.scheme", log.RequestScheme))
-		gg.TraceSetAttributes(attribute.String("request.content_type", log.RequestContentType))
-		gg.TraceSetAttributes(attribute.String("request.body", log.RequestBody))
-		gg.TraceSetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
-		gg.TraceSetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
-		gg.TraceSetAttributes(attribute.String("request.header", log.RequestHeader))
-		gg.TraceSetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
-		gg.TraceSetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
-		gg.TraceSetAttributes(attribute.String("response.header", log.ResponseHeader))
-		gg.TraceSetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
-		gg.TraceSetAttributes(attribute.String("response.body", log.ResponseBody))
+		span.SetAttributes(attribute.String("request.id", log.RequestID))
+		span.SetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
+		span.SetAttributes(attribute.String("request.host", log.RequestHost))
+		span.SetAttributes(attribute.String("request.path", log.RequestPath))
+		span.SetAttributes(attribute.String("request.query", log.RequestQuery))
+		span.SetAttributes(attribute.String("request.method", log.RequestMethod))
+		span.SetAttributes(attribute.String("request.scheme", log.RequestScheme))
+		span.SetAttributes(attribute.String("request.content_type", log.RequestContentType))
+		span.SetAttributes(attribute.String("request.body", log.RequestBody))
+		span.SetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
+		span.SetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
+		span.SetAttributes(attribute.String("request.header", log.RequestHeader))
+		span.SetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
+		span.SetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
+		span.SetAttributes(attribute.String("response.header", log.ResponseHeader))
+		span.SetAttributes(attribute.Int("response.status_code", log.ResponseStatusCode))
+		span.SetAttributes(attribute.String("response.body", log.ResponseBody))
 
 		// 调用Gin框架日志函数
 		if gg.ginLogFunc != nil {
-			gg.ginLogFunc(g, &log)
+			gg.ginLogFunc(ctx, &log)
 		}
 
 	}

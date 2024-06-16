@@ -8,11 +8,12 @@ import (
 	"go.dtapp.net/gourl"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"unicode/utf8"
 )
 
 // 记录日志
-func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
+func (ag *ApiGorm) gormRecord(ctx context.Context, span trace.Span, data GormApiLogModel) {
 	if ag.gormConfig.stats == false {
 		return
 	}
@@ -22,38 +23,38 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, data GormApiLogModel) {
 	}
 
 	// 跟踪编号
-	data.TraceID = ag.TraceGetTraceID()
+	data.TraceID = gorequest.TraceSpanGetTraceID(span)
 
 	// 请求编号
 	data.RequestID = gorequest.GetRequestIDContext(ctx)
 
 	// OpenTelemetry链路追踪
-	ag.TraceSetAttributes(attribute.String("request.id", data.RequestID))
-	ag.TraceSetAttributes(attribute.String("request.time", data.RequestTime.Format(gotime.DateTimeFormat)))
-	ag.TraceSetAttributes(attribute.String("request.uri", data.RequestUri))
-	ag.TraceSetAttributes(attribute.String("request.url", data.RequestUrl))
-	ag.TraceSetAttributes(attribute.String("request.api", data.RequestApi))
-	ag.TraceSetAttributes(attribute.String("request.method", data.RequestMethod))
-	ag.TraceSetAttributes(attribute.String("request.params", data.RequestParams))
-	ag.TraceSetAttributes(attribute.String("request.header", data.RequestHeader))
-	ag.TraceSetAttributes(attribute.String("request.ip", data.RequestIP))
-	ag.TraceSetAttributes(attribute.Int64("request.cost_time", data.RequestCostTime))
-	ag.TraceSetAttributes(attribute.String("response.header", data.ResponseHeader))
-	ag.TraceSetAttributes(attribute.Int("response.status_code", data.ResponseStatusCode))
-	ag.TraceSetAttributes(attribute.String("response.body", data.ResponseBody))
-	ag.TraceSetAttributes(attribute.String("response.time", data.ResponseTime.Format(gotime.DateTimeFormat)))
+	span.SetAttributes(attribute.String("request.id", data.RequestID))
+	span.SetAttributes(attribute.String("request.time", data.RequestTime.Format(gotime.DateTimeFormat)))
+	span.SetAttributes(attribute.String("request.uri", data.RequestUri))
+	span.SetAttributes(attribute.String("request.url", data.RequestUrl))
+	span.SetAttributes(attribute.String("request.api", data.RequestApi))
+	span.SetAttributes(attribute.String("request.method", data.RequestMethod))
+	span.SetAttributes(attribute.String("request.params", data.RequestParams))
+	span.SetAttributes(attribute.String("request.header", data.RequestHeader))
+	span.SetAttributes(attribute.String("request.ip", data.RequestIP))
+	span.SetAttributes(attribute.Int64("request.cost_time", data.RequestCostTime))
+	span.SetAttributes(attribute.String("response.header", data.ResponseHeader))
+	span.SetAttributes(attribute.Int("response.status_code", data.ResponseStatusCode))
+	span.SetAttributes(attribute.String("response.body", data.ResponseBody))
+	span.SetAttributes(attribute.String("response.time", data.ResponseTime.Format(gotime.DateTimeFormat)))
 
 	err := ag.gormClient.WithContext(ctx).
 		Table(ag.gormConfig.tableName).
 		Create(&data).Error
 	if err != nil {
-		ag.TraceRecordError(err)
-		ag.TraceSetStatus(codes.Error, err.Error())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 	}
 }
 
 // 中间件
-func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddleware(ctx context.Context, span trace.Span, request gorequest.Response) {
 	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              // 请求时间
 		RequestUri:         request.RequestUri,                               // 请求链接
@@ -73,11 +74,11 @@ func (ag *ApiGorm) gormMiddleware(ctx context.Context, request gorequest.Respons
 		}
 	}
 
-	ag.gormRecord(ctx, data)
+	ag.gormRecord(ctx, span, data)
 }
 
 // 中间件
-func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, span trace.Span, request gorequest.Response) {
 	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              // 请求时间
 		RequestUri:         request.RequestUri,                               // 请求链接
@@ -97,11 +98,11 @@ func (ag *ApiGorm) gormMiddlewareXml(ctx context.Context, request gorequest.Resp
 		}
 	}
 
-	ag.gormRecord(ctx, data)
+	ag.gormRecord(ctx, span, data)
 }
 
 // 中间件
-func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
+func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, span trace.Span, api string, request gorequest.Response) {
 	data := GormApiLogModel{
 		RequestTime:        request.RequestTime,                              // 请求时间
 		RequestUri:         request.RequestUri,                               // 请求链接
@@ -121,5 +122,5 @@ func (ag *ApiGorm) gormMiddlewareCustom(ctx context.Context, api string, request
 		}
 	}
 
-	ag.gormRecord(ctx, data)
+	ag.gormRecord(ctx, span, data)
 }

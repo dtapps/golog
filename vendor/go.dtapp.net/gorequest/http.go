@@ -61,8 +61,6 @@ type App struct {
 	tlsMinVersion, tlsMaxVersion uint16           // TLS版本
 	clientIP                     string           // 客户端IP
 	logFunc                      LogFunc          // 日志记录函数
-	trace                        bool             // OpenTelemetry链路追踪
-	span                         trace.Span       // OpenTelemetry链路追踪
 }
 
 // NewHttp 实例化
@@ -71,7 +69,6 @@ func NewHttp() *App {
 		httpHeader: NewHeaders(),
 		httpParams: NewParams(),
 	}
-	c.trace = true
 	return c
 }
 
@@ -271,8 +268,8 @@ func (c *App) SetLogFunc(logFunc LogFunc) {
 func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 
 	// OpenTelemetry链路追踪
-	ctx = c.TraceStartSpan(ctx, c.httpMethod)
-	defer c.TraceEndSpan()
+	ctx, span := TraceStartSpan(ctx, c.httpMethod)
+	defer TraceEndSpan(span)
 
 	// 开始时间
 	start := time.Now().UTC()
@@ -291,8 +288,8 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	}
 	if httpResponse.RequestUri == "" {
 		err = errors.New("没有请求地址")
-		c.TraceRecordError(err)
-		c.TraceSetStatus(codes.Error, err.Error())
+		TraceRecordError(ctx, err, trace.WithStackTrace(true))
+		TraceSetStatus(ctx, codes.Error, err.Error())
 		return httpResponse, err
 	}
 
@@ -362,8 +359,8 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if httpResponse.RequestMethod != http.MethodGet && c.httpContentType == httpParamsModeJson {
 		jsonStr, err := gojson.Marshal(httpResponse.RequestParams)
 		if err != nil {
-			c.TraceRecordError(err)
-			c.TraceSetStatus(codes.Error, err.Error())
+			TraceRecordError(ctx, err, trace.WithStackTrace(true))
+			TraceSetStatus(ctx, codes.Error, err.Error())
 			return httpResponse, err
 		}
 		// 赋值
@@ -383,8 +380,8 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if c.httpContentType == httpParamsModeXml {
 		reqBody, err = ToXml(httpResponse.RequestParams)
 		if err != nil {
-			c.TraceRecordError(err)
-			c.TraceSetStatus(codes.Error, err.Error())
+			TraceRecordError(ctx, err, trace.WithStackTrace(true))
+			TraceSetStatus(ctx, codes.Error, err.Error())
 			return httpResponse, err
 		}
 	}
@@ -392,8 +389,8 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	// 创建请求
 	req, err := http.NewRequestWithContext(ctx, httpResponse.RequestMethod, httpResponse.RequestUri, reqBody)
 	if err != nil {
-		c.TraceRecordError(err)
-		c.TraceSetStatus(codes.Error, err.Error())
+		TraceRecordError(ctx, err, trace.WithStackTrace(true))
+		TraceSetStatus(ctx, codes.Error, err.Error())
 		return httpResponse, err
 	}
 
@@ -426,20 +423,20 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	}
 
 	// OpenTelemetry链路追踪
-	c.TraceSetAttributes(attribute.String("request.time", httpResponse.RequestTime.Format(gotime.DateTimeFormat)))
-	c.TraceSetAttributes(attribute.String("request.uri", httpResponse.RequestUri))
-	c.TraceSetAttributes(attribute.String("request.url", gourl.UriParse(httpResponse.RequestUri).Url))
-	c.TraceSetAttributes(attribute.String("request.api", gourl.UriParse(httpResponse.RequestUri).Path))
-	c.TraceSetAttributes(attribute.String("request.method", httpResponse.RequestMethod))
-	c.TraceSetAttributes(attribute.String("request.cookie", httpResponse.RequestCookie))
-	c.TraceSetAttributes(attribute.String("request.header", gojson.JsonEncodeNoError(httpResponse.RequestHeader)))
-	c.TraceSetAttributes(attribute.String("request.params", gojson.JsonEncodeNoError(httpResponse.RequestParams)))
+	TraceSetAttributes(ctx, attribute.String("request.time", httpResponse.RequestTime.Format(gotime.DateTimeFormat)))
+	TraceSetAttributes(ctx, attribute.String("request.uri", httpResponse.RequestUri))
+	TraceSetAttributes(ctx, attribute.String("request.url", gourl.UriParse(httpResponse.RequestUri).Url))
+	TraceSetAttributes(ctx, attribute.String("request.api", gourl.UriParse(httpResponse.RequestUri).Path))
+	TraceSetAttributes(ctx, attribute.String("request.method", httpResponse.RequestMethod))
+	TraceSetAttributes(ctx, attribute.String("request.cookie", httpResponse.RequestCookie))
+	TraceSetAttributes(ctx, attribute.String("request.header", gojson.JsonEncodeNoError(httpResponse.RequestHeader)))
+	TraceSetAttributes(ctx, attribute.String("request.params", gojson.JsonEncodeNoError(httpResponse.RequestParams)))
 
 	// 发送请求
 	resp, err := client.Do(req)
 	if err != nil {
-		c.TraceRecordError(err)
-		c.TraceSetStatus(codes.Error, err.Error())
+		TraceRecordError(ctx, err, trace.WithStackTrace(true))
+		TraceSetStatus(ctx, codes.Error, err.Error())
 		return httpResponse, err
 	}
 	defer resp.Body.Close() // 关闭连接
@@ -464,8 +461,8 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	// 读取内容
 	body, err := io.ReadAll(reader)
 	if err != nil {
-		c.TraceRecordError(err)
-		c.TraceSetStatus(codes.Error, err.Error())
+		TraceRecordError(ctx, err, trace.WithStackTrace(true))
+		TraceSetStatus(ctx, codes.Error, err.Error())
 		return httpResponse, err
 	}
 
@@ -478,26 +475,25 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	httpResponse.ResponseContentLength = resp.ContentLength
 
 	// OpenTelemetry链路追踪
-	c.TraceSetAttributes(attribute.Int64("request.cost_time", httpResponse.RequestCostTime))
-	c.TraceSetAttributes(attribute.String("response.time", httpResponse.ResponseTime.Format(gotime.DateTimeFormat)))
-	c.TraceSetAttributes(attribute.String("response.status", httpResponse.ResponseStatus))
-	c.TraceSetAttributes(attribute.Int("response.status_code", httpResponse.ResponseStatusCode))
-	c.TraceSetAttributes(attribute.String("response.header", gojson.JsonEncodeNoError(httpResponse.ResponseHeader)))
+	TraceSetAttributes(ctx, attribute.Int64("request.cost_time", httpResponse.RequestCostTime))
+	TraceSetAttributes(ctx, attribute.String("response.time", httpResponse.ResponseTime.Format(gotime.DateTimeFormat)))
+	TraceSetAttributes(ctx, attribute.String("response.status", httpResponse.ResponseStatus))
+	TraceSetAttributes(ctx, attribute.Int("response.status_code", httpResponse.ResponseStatusCode))
+	TraceSetAttributes(ctx, attribute.String("response.header", gojson.JsonEncodeNoError(httpResponse.ResponseHeader)))
 	if gojson.IsValidJSON(string(httpResponse.ResponseBody)) {
-		c.TraceSetAttributes(attribute.String("response.body", gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(httpResponse.ResponseBody)))))
+		TraceSetAttributes(ctx, attribute.String("response.body", gojson.JsonEncodeNoError(gojson.JsonDecodeNoError(string(httpResponse.ResponseBody)))))
 	} else {
 		if httpResponse.HeaderIsImg() {
 		} else if httpResponse.HeaderHtml() {
 		} else {
-			c.TraceSetAttributes(attribute.String("response.body", string(httpResponse.ResponseBody)))
+			TraceSetAttributes(ctx, attribute.String("response.body", string(httpResponse.ResponseBody)))
 		}
 	}
 
 	// 调用日志记录函数
 	if c.logFunc != nil {
 		c.logFunc(ctx, &LogResponse{
-			SpanID:             c.TraceGetTraceID(),
-			TraceID:            c.TraceGetSpanID(),
+			TraceID:            TraceGetSpanID(ctx),
 			RequestID:          httpResponse.RequestID,
 			RequestTime:        httpResponse.RequestTime,
 			RequestUri:         httpResponse.RequestUri,
