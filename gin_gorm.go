@@ -163,7 +163,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 		span.SetAttributes(attribute.String("request.content_type", log.RequestContentType))
 		span.SetAttributes(attribute.String("request.body", log.RequestBody))
 		span.SetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
-		span.SetAttributes(attribute.String("request.user_agent", log.RequestClientIP))
+		span.SetAttributes(attribute.String("request.user_agent", log.RequestUserAgent))
 		span.SetAttributes(attribute.String("request.header", log.RequestHeader))
 		span.SetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
 		span.SetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
