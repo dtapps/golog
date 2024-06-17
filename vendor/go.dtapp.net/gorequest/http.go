@@ -269,7 +269,6 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 
 	// OpenTelemetry链路追踪
 	ctx, span := TraceStartSpan(ctx, c.httpMethod)
-	defer TraceEndSpan(span)
 
 	// 开始时间
 	start := time.Now().UTC()
@@ -290,6 +289,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 		err = errors.New("没有请求地址")
 		TraceRecordError(ctx, err, trace.WithStackTrace(true))
 		TraceSetStatus(ctx, codes.Error, err.Error())
+		TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 		return httpResponse, err
 	}
 
@@ -361,6 +361,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 		if err != nil {
 			TraceRecordError(ctx, err, trace.WithStackTrace(true))
 			TraceSetStatus(ctx, codes.Error, err.Error())
+			TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 			return httpResponse, err
 		}
 		// 赋值
@@ -382,6 +383,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 		if err != nil {
 			TraceRecordError(ctx, err, trace.WithStackTrace(true))
 			TraceSetStatus(ctx, codes.Error, err.Error())
+			TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 			return httpResponse, err
 		}
 	}
@@ -391,6 +393,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if err != nil {
 		TraceRecordError(ctx, err, trace.WithStackTrace(true))
 		TraceSetStatus(ctx, codes.Error, err.Error())
+		TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 		return httpResponse, err
 	}
 
@@ -437,6 +440,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if err != nil {
 		TraceRecordError(ctx, err, trace.WithStackTrace(true))
 		TraceSetStatus(ctx, codes.Error, err.Error())
+		TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 		return httpResponse, err
 	}
 	defer resp.Body.Close() // 关闭连接
@@ -463,6 +467,7 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	if err != nil {
 		TraceRecordError(ctx, err, trace.WithStackTrace(true))
 		TraceSetStatus(ctx, codes.Error, err.Error())
+		TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 		return httpResponse, err
 	}
 
@@ -515,5 +520,6 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 		})
 	}
 
+	TraceEndSpan(span) // 结束OpenTelemetry链路追踪
 	return httpResponse, err
 }

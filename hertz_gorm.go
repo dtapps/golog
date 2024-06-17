@@ -38,7 +38,6 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 
 		// OpenTelemetry链路追踪
 		ctx, span := hg.TraceStartSpan(c)
-		defer span.End()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -158,6 +157,8 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		if hg.hertzLogFunc != nil {
 			hg.hertzLogFunc(ctx, &log)
 		}
+
+		span.End() // 结束OpenTelemetry链路追踪
 
 	}
 }
