@@ -342,10 +342,10 @@ func request(c *App, ctx context.Context) (httpResponse Response, err error) {
 	}
 
 	// 跟踪编号
-	//traceID := c.TraceGetTraceID()
-	//if traceID != "" {
-	//	httpResponse.RequestHeader.Set(xRequestID, httpResponse.RequestID)
-	//}
+	traceID := TraceSpanGetTraceID(span)
+	if traceID != "" {
+		httpResponse.RequestHeader.Set(TraceID, traceID)
+	}
 
 	// 请求编号
 	httpResponse.RequestID = GetRequestIDContext(ctx)

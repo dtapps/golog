@@ -66,7 +66,7 @@ func (gg *GinGorm) Middleware() gin.HandlerFunc {
 
 		// OpenTelemetry链路追踪
 		//g.Request = g.Request.WithContext(gg.TraceStartSpan(g))
-		ctx, span := gg.TraceStartSpan(g.Request.Context())
+		ctx, span := TraceStartSpan(g.Request.Context(), "gin")
 
 		// 开始时间
 		start := time.Now().UTC()

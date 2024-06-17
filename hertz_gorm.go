@@ -37,7 +37,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 	return func(c context.Context, h *app.RequestContext) {
 
 		// OpenTelemetry链路追踪
-		ctx, span := hg.TraceStartSpan(c)
+		ctx, span := TraceStartSpan(c, "hertz")
 
 		// 开始时间
 		start := time.Now().UTC()

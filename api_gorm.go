@@ -46,7 +46,7 @@ func NewApiGorm(ctx context.Context, gormClient *gorm.DB, gormTableName string) 
 func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx, span := ag.TraceStartSpan(ctx)
+	ctx, span := TraceStartSpan(ctx, "api")
 
 	if ag.gormConfig.stats {
 		ag.gormMiddleware(ctx, span, request)
@@ -60,7 +60,7 @@ func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
 func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx, span := ag.TraceStartSpan(ctx)
+	ctx, span := TraceStartSpan(ctx, "api.xml")
 
 	if ag.gormConfig.stats {
 		ag.gormMiddlewareXml(ctx, span, request)
@@ -73,7 +73,7 @@ func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response
 func (ag *ApiGorm) MiddlewareCustom(ctx context.Context, api string, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
-	ctx, span := ag.TraceStartSpan(ctx)
+	ctx, span := TraceStartSpan(ctx, "api.custom")
 
 	if ag.gormConfig.stats {
 		ag.gormMiddlewareCustom(ctx, span, api, request)
