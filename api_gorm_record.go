@@ -29,7 +29,6 @@ func (ag *ApiGorm) gormRecord(ctx context.Context, span trace.Span, data GormApi
 	data.RequestID = gorequest.GetRequestIDContext(ctx)
 
 	// OpenTelemetry链路追踪
-	span.SetAttributes(attribute.String("request.id", data.RequestID))
 	span.SetAttributes(attribute.String("request.time", data.RequestTime.Format(gotime.DateTimeFormat)))
 	span.SetAttributes(attribute.String("request.uri", data.RequestUri))
 	span.SetAttributes(attribute.String("request.url", data.RequestUrl))

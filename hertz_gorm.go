@@ -38,6 +38,7 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 
 		// OpenTelemetry链路追踪
 		ctx, span := TraceStartSpan(c, "hertz")
+		defer span.End()
 
 		// 开始时间
 		start := time.Now().UTC()
@@ -135,7 +136,6 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		}
 
 		// OpenTelemetry链路追踪
-		span.SetAttributes(attribute.String("request.id", log.RequestID))
 		span.SetAttributes(attribute.String("request.time", log.RequestTime.Format(gotime.DateTimeFormat)))
 		span.SetAttributes(attribute.String("request.host", log.RequestHost))
 		span.SetAttributes(attribute.String("request.path", log.RequestPath))
@@ -144,8 +144,6 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		span.SetAttributes(attribute.String("request.scheme", log.RequestScheme))
 		span.SetAttributes(attribute.String("request.content_type", log.RequestContentType))
 		span.SetAttributes(attribute.String("request.body", log.RequestBody))
-		span.SetAttributes(attribute.String("request.client_ip", log.RequestClientIP))
-		span.SetAttributes(attribute.String("request.user_agent", log.RequestUserAgent))
 		span.SetAttributes(attribute.String("request.header", log.RequestHeader))
 		span.SetAttributes(attribute.Int64("request.cost_time", log.RequestCostTime))
 		span.SetAttributes(attribute.String("response.time", log.ResponseTime.Format(gotime.DateTimeFormat)))
@@ -157,8 +155,6 @@ func (hg *HertzGorm) Middleware() app.HandlerFunc {
 		if hg.hertzLogFunc != nil {
 			hg.hertzLogFunc(ctx, &log)
 		}
-
-		span.End() // 结束OpenTelemetry链路追踪
 
 	}
 }

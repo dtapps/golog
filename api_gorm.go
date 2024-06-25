@@ -47,12 +47,11 @@ func (ag *ApiGorm) Middleware(ctx context.Context, request gorequest.Response) {
 
 	// OpenTelemetry链路追踪
 	ctx, span := TraceStartSpan(ctx, "api")
+	defer span.End()
 
 	if ag.gormConfig.stats {
 		ag.gormMiddleware(ctx, span, request)
 	}
-
-	span.End() // 结束OpenTelemetry链路追踪
 
 }
 
@@ -61,12 +60,12 @@ func (ag *ApiGorm) MiddlewareXml(ctx context.Context, request gorequest.Response
 
 	// OpenTelemetry链路追踪
 	ctx, span := TraceStartSpan(ctx, "api.xml")
+	defer span.End()
 
 	if ag.gormConfig.stats {
 		ag.gormMiddlewareXml(ctx, span, request)
 	}
 
-	span.End() // 结束OpenTelemetry链路追踪
 }
 
 // MiddlewareCustom 中间件
@@ -74,10 +73,10 @@ func (ag *ApiGorm) MiddlewareCustom(ctx context.Context, api string, request gor
 
 	// OpenTelemetry链路追踪
 	ctx, span := TraceStartSpan(ctx, "api.custom")
+	defer span.End()
 
 	if ag.gormConfig.stats {
 		ag.gormMiddlewareCustom(ctx, span, api, request)
 	}
 
-	span.End() // 结束OpenTelemetry链路追踪
 }
